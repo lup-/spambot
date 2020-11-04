@@ -1,0 +1,33 @@
+version: "3"
+
+services:
+  bot:
+    #image: node
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_tdlib"
+    container_name: 'spambot_bot'
+    ports:
+      - ${BOT_DEBUG_PORT}:9229
+    depends_on:
+      - mongo
+    volumes:
+      - ./bot:/var/www
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=spambot_mongo
+      - MONGO_DB=spambot
+      - BOT_TOKEN=${BOT_TOKEN}
+    command: npm run bot_debug
+
+  mongo:
+    image: mongo
+    container_name: 'spambot_mongo'
+    volumes:
+      - ./database:/data/db
+    ports:
+      - ${MONGO_PORT}:27017
+
+  tdlib:
+    build: https://github.com/alexander-akhmetov/tdlib-docker.git

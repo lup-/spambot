@@ -1,18 +1,17 @@
 const Telegram = require('telegraf/telegram');
-const {getDb} = require('./Database');
-const shortid = require('shortid');
+const {getDb} = require('../modules/Database');
 const moment = require('moment');
 
-let botInstance = null;
-
-function BotManager() {
+module.exports = function () {
     return {
-        async init(telegramToken, settings = {}) {
+        async init(telegramToken) {
             this.telegram = new Telegram(telegramToken);
             this.self = await this.telegram.getMe();
-            this.settings = settings;
 
             return this;
+        },
+        getSelfInfo() {
+            return this.self || false;
         },
         getName() {
             return this.self
@@ -31,33 +30,12 @@ function BotManager() {
 
             return filteredBots;
         },
-        async listMailings(userId) {
-            let filter = {
-                userId,
-                deleted: {$in: [null, false]},
-                dateFinished: {$in: [null, false]},
-                dateStarted: {$gte: moment().unix()}
-            }
-
-            const db = await getDb();
-            const mailings = db.collection('mailings');
-            let filteredMailings = await mailings.find(filter).toArray();
-
-            return filteredMailings;
-        },
         async getBot(botId, userId) {
             const db = await getDb();
             const bots = db.collection('bots');
 
             let bot = await bots.findOne({id: botId, userId});
             return bot;
-        },
-        async getMailing(mailingId, userId) {
-            const db = await getDb();
-            const mailings = db.collection('mailings');
-
-            let mailing = await mailings.findOne({id: mailingId, userId});
-            return mailing;
         },
         async saveBot(botFields, userId) {
             const db = await getDb();
@@ -70,18 +48,6 @@ function BotManager() {
             }
 
             let updateResult = await chats.findOneAndReplace({id}, botFields, {upsert: true, returnOriginal: false});
-            return updateResult.value || false;
-        },
-        async saveMailing(mailingFields) {
-            const db = await getDb();
-            const mailings = db.collection('mailingFields');
-
-            if (!mailingFields.id) {
-                mailingFields.id = shortid.generate();
-            }
-
-            const id = mailingFields.id;
-            let updateResult = await mailings.findOneAndReplace({id}, mailingFields, {upsert: true, returnOriginal: false});
             return updateResult.value || false;
         },
         async deleteBot(botId) {
@@ -111,4 +77,4 @@ function getInstance() {
     return botInstance;
 }
 
-module.exports = getInstance;
+getInstance;

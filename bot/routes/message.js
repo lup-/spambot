@@ -1,7 +1,7 @@
 const {md} = require('../modules/Helpers');
 const {__, __md} = require('../modules/Messages');
 const {getMenu, getCustomButtonsMenu} = require('../menus');
-const getBot = require('../modules/Bot');
+const getBot = require('../managers/Bot');
 
 module.exports = {
     menu(ctx) {

@@ -2,14 +2,15 @@
   "name": "bot",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "bots/admin.js",
   "scripts": {
-    "bot": "node index.js",
-    "bot_debug": "node --inspect=0.0.0.0 index.js"
+    "admin_bot": "node bots/admin.js",
+    "admin_bot_debug": "node --inspect=0.0.0.0 bots/admin.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.21.0",
     "canvas": "^1.6.13",
     "chart.js": "^2.9.4",
     "chartjs-node": "^1.7.1",
@@ -18,6 +19,7 @@
     "mongodb": "^3.6.2",
     "shortid": "^2.2.16",
     "telegraf": "^3.38.0",
-    "telegraf-session-mongo": "github:lup-/telegraf-session-mongo"
+    "telegraf-session-mongo": "github:lup-/telegraf-session-mongo",
+    "xml-js": "^1.6.11"
   }
 }

@@ -2,7 +2,7 @@ const {md} = require('../modules/Helpers');
 const {__, __md} = require('../modules/Messages');
 const moment = require('moment');
 const {getMenu} = require('../menus');
-const getBot = require('../modules/Bot');
+const getBot = require('../managers/Bot');
 const {getManager} = require('../managers');
 
 module.exports = {

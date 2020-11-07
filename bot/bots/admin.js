@@ -1,24 +1,22 @@
 const { Telegraf } = require('telegraf');
 const MongoSession = require('telegraf-session-mongo');
-const {md} = require('./modules/Helpers');
+const {md} = require('../modules/Helpers');
 
-const {__md} = require('./modules/Messages');
-const getBot = require('./modules/Bot');
-const applyRoutes = require('./routes');
-const {getMenu} = require('./menus');
-const {getDb} = require('./modules/Database');
+const {__md} = require('../modules/Messages');
+const applyRoutes = require('../routers/admin');
+const {getMenu} = require('../menus');
+const {getDb} = require('../modules/Database');
 
-const {initManagers} = require('./managers');
+const {initManagers} = require('../managers');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
-
 let app = new Telegraf(BOT_TOKEN);
 
 Promise.all([
-        initManagers(),
+        initManagers(['bot', 'chat', 'stat']),
         getDb()
     ])
-    .then(([{bot, chat}, db]) => {
+    .then(([{chat}, db]) => {
         const session = new MongoSession(db, {});
         session.setup().then(() => {
             app.use(session.middleware);

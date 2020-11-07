@@ -2,10 +2,10 @@ const {__, __md} = require('../modules/Messages');
 const {md} = require('../modules/Helpers');
 const {getMenu} = require('../menus');
 
-let messageRoutes = require('./message');
-let mailingRoutes = require('./mailing');
-let botRoutes = require('./bot');
-let statRoutes = require('./stats');
+let messageRoutes = require('../routes/message');
+let mailingRoutes = require('../routes/mailing');
+let botRoutes = require('../routes/bot');
+let statRoutes = require('../routes/stats');
 
 function homeMenu(ctx) {
     return ctx.reply( __('startMessage'), getMenu('root', ctx.session) );

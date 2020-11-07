@@ -3,7 +3,7 @@ const Telegram = require('telegraf/telegram');
 const {md} = require('../modules/Helpers');
 const {__, __md} = require('../modules/Messages');
 const {getMenu, getYesNoMenu, getCustomButtonsMenu} = require('../menus');
-const getBot = require('../modules/Bot');
+const {getManager, init} = require('../managers');
 
 module.exports = {
     menu(ctx) {
@@ -18,15 +18,15 @@ module.exports = {
         let botToken = message;
 
         ctx.session.botToken = botToken;
-        let newBot = new Telegram(botToken);
+        let newBotManager = await init('bot', {token: botToken});
         let botInfo = {};
 
         try {
-            botInfo = await newBot.getMe();
+            botInfo = newBotManager.getSelfInfo();
         }
         catch (e) {
             await ctx.reply(__md('botError', e), md);
-            return ctx.reply(__md('listenBotName'), md);
+            return ctx.reply(__md('listenBotToken'), md);
         }
 
         ctx.session.botName = botInfo.username;
@@ -38,7 +38,7 @@ module.exports = {
     async confirm(ctx) {
         let bot = ctx.session.bot;
         let userId = ctx.session.userId;
-        let botManager = getBot();
+        let botManager = getManager('bot');
         await botManager.saveBot(bot, userId);
 
         ctx.session.bot = false;
@@ -56,7 +56,7 @@ module.exports = {
         return ctx.reply(__('botReset'), getMenu('bot', ctx.session));
     },
     async list(ctx) {
-        let botManager = getBot();
+        let botManager = getManager('bot');
         let bots = await botManager.listBots(ctx.session.userId);
 
         let list = bots.map(bot => __('botListRow', bot)).join('\n');
@@ -67,7 +67,7 @@ module.exports = {
         return ctx.editMessageText(__('botList', {list}), getMenu('bot', ctx.session));
     },
     async deleteList(ctx) {
-        let bot = getBot();
+        let bot = getManager('bot');
         let bots = await bot.listBots(ctx.session.userId);
 
         let botButtons = (b) => {
@@ -83,7 +83,7 @@ module.exports = {
     },
     delete(ctx) {
         let botId = ctx.match[1] || null;
-        let botManager = getBot();
+        let botManager = getManager('bot');
         let bot = botManager.getBot(botId, ctx.session.userId);
         ctx.session.botToDelete = bot;
 
@@ -91,7 +91,7 @@ module.exports = {
     },
     async deleteConfirm(ctx) {
         let bot = ctx.session.botToDelete;
-        let botManager = getBot();
+        let botManager = getManager('bot');
 
         ctx.session.botToDelete = false;
         await botManager.deleteBot(bot.id);

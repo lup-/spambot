@@ -2,7 +2,7 @@ const {md} = require('../modules/Helpers');
 const {__, __md} = require('../modules/Messages');
 const moment = require('moment');
 const {getMenu, getCustomButtonsMenu} = require('../menus');
-const getBot = require('../modules/Bot');
+const {getManager} = require('../managers');
 
 module.exports = {
     menu(ctx) {
@@ -31,8 +31,8 @@ module.exports = {
         ctx.session.message = false;
         ctx.session.mailingDate = false;
 
-        let botManager = getBot();
-        await botManager.saveMailing(mailing);
+        let mailingManager = getManager('mailing');
+        await mailingManager.saveMailing(mailing);
 
         return ctx.editMessageText( __('mailingStarted'), getMenu('root', ctx.session) );
     },
@@ -57,8 +57,8 @@ module.exports = {
         return ctx.editMessageText(__md('resetDate'), getMenu('mailing', ctx.session), md);
     },
     async list(ctx) {
-        let bot = getBot();
-        let mailings = await bot.listMailings(ctx.session.userId);
+        let mailingManager = getManager('mailing');
+        let mailings = await mailingManager.listMailings(ctx.session.userId);
 
         let mailingButtons = (b) => {
             let buttons = mailings.map(mailing => {
@@ -76,9 +76,9 @@ module.exports = {
     },
     async show(ctx) {
         let mailingId = ctx.match[1] || null;
-        let botManager = getBot();
+        let mailingManager = getManager('mailing');
 
-        let mailing = botManager.getMailing(mailingId, ctx.session.userId);
+        let mailing = mailingManager.getMailing(mailingId, ctx.session.userId);
         for (const dateField of ['dateStarted', 'dateCreated', 'dateFinished']) {
             let date = mailing[dateField] ? moment(mailing[dateField]) : null;
             mailing[dateField + 'Text'] = date && date.isValid() ? date.toISOString() : '-';

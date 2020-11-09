@@ -4,15 +4,25 @@ const moment = require('moment');
 
 module.exports = function () {
     return {
-        async init() {
-            return this;
-        },
         async listMailings(userId) {
             let filter = {
                 userId,
                 deleted: {$in: [null, false]},
                 dateFinished: {$in: [null, false]},
                 dateStarted: {$gte: moment().unix()}
+            }
+
+            const db = await getDb();
+            const mailings = db.collection('mailings');
+            let filteredMailings = await mailings.find(filter).toArray();
+
+            return filteredMailings;
+        },
+        async listActiveMailings(exceptIds = []) {
+            let filter = {
+                id: {$nin: exceptIds},
+                deleted: {$in: [null, false]},
+                dateFinished: {$in: [null, false]},
             }
 
             const db = await getDb();
@@ -30,7 +40,7 @@ module.exports = function () {
         },
         async saveMailing(mailingFields) {
             const db = await getDb();
-            const mailings = db.collection('mailingFields');
+            const mailings = db.collection('mailings');
 
             if (!mailingFields.id) {
                 mailingFields.id = shortid.generate();

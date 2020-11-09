@@ -1,3 +1,4 @@
+//https://apps.timwhitlock.info/emoji/tables/unicode
 module.exports = {
     'startMessage': 'Привет!',
     'error': 'Возникла ошибка: `%description%`',

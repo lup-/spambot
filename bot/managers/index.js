@@ -2,8 +2,10 @@ const getBotManager = require('./Bot');
 const getChatManager = require('./Chat');
 const StatManager = require('./Stat');
 const HoroscopeManager = require('./Horoscope');
+const MailingManager = require('./Mailing');
+const DatingManager = require('./Dating');
 
-let instances = false;
+let instances = {};
 
 function init(manager, params = {}) {
     switch (manager) {
@@ -17,6 +19,10 @@ function init(manager, params = {}) {
             return (new StatManager).init(db);
         case 'horoscope':
             return new HoroscopeManager();
+        case 'mailing':
+            return new MailingManager();
+        case 'dating':
+            return new DatingManager();
         default:
             return null;
     }
@@ -25,7 +31,7 @@ function init(manager, params = {}) {
 module.exports = {
     init,
     getManager: async function (manager) {
-        if (instances) {
+        if (instances && instances[manager]) {
             return instances[manager];
         }
 

@@ -30,11 +30,11 @@ module.exports = function () {
 
             return filteredBots;
         },
-        async getBot(botId, userId) {
+        async getBot(botId) {
             const db = await getDb();
             const bots = db.collection('bots');
 
-            let bot = await bots.findOne({id: botId, userId});
+            let bot = await bots.findOne({id: botId});
             return bot;
         },
         async saveBot(botFields, userId) {

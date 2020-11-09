@@ -38,7 +38,7 @@ module.exports = {
     async confirm(ctx) {
         let bot = ctx.session.bot;
         let userId = ctx.session.userId;
-        let botManager = getManager('bot');
+        let botManager = await getManager('bot');
         await botManager.saveBot(bot, userId);
 
         ctx.session.bot = false;
@@ -56,7 +56,7 @@ module.exports = {
         return ctx.reply(__('botReset'), getMenu('bot', ctx.session));
     },
     async list(ctx) {
-        let botManager = getManager('bot');
+        let botManager = await getManager('bot');
         let bots = await botManager.listBots(ctx.session.userId);
 
         let list = bots.map(bot => __('botListRow', bot)).join('\n');
@@ -67,7 +67,7 @@ module.exports = {
         return ctx.editMessageText(__('botList', {list}), getMenu('bot', ctx.session));
     },
     async deleteList(ctx) {
-        let bot = getManager('bot');
+        let bot = await getManager('bot');
         let bots = await bot.listBots(ctx.session.userId);
 
         let botButtons = (b) => {
@@ -81,9 +81,9 @@ module.exports = {
 
         return ctx.editMessageText(__('botDeleteList'), getCustomButtonsMenu(botButtons));
     },
-    delete(ctx) {
+    async delete(ctx) {
         let botId = ctx.match[1] || null;
-        let botManager = getManager('bot');
+        let botManager = await getManager('bot');
         let bot = botManager.getBot(botId, ctx.session.userId);
         ctx.session.botToDelete = bot;
 
@@ -91,7 +91,7 @@ module.exports = {
     },
     async deleteConfirm(ctx) {
         let bot = ctx.session.botToDelete;
-        let botManager = getManager('bot');
+        let botManager = await getManager('bot');
 
         ctx.session.botToDelete = false;
         await botManager.deleteBot(bot.id);

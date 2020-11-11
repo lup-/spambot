@@ -18,9 +18,19 @@ module.exports = function (datingManager, userFansList = false, telegram) {
 
     scene.enter(async ctx => {
         let currentProfile = ctx.session.profile;
+        if (!currentProfile) {
+            await ctx.reply('Что-то пошло не по плану');
+            return ctx.scene.enter('mainMenu');
+        }
+
         let profileToRate = userFansList
             ? await datingManager.myNextLike(currentProfile)
             : await datingManager.randomProfile(currentProfile);
+
+        if (!profileToRate) {
+            await ctx.reply('Похоже, что тут пусто');
+            return ctx.scene.enter('mainMenu');
+        }
 
         let profileText = datingManager.getProfileText(profileToRate)
 
@@ -31,18 +41,25 @@ module.exports = function (datingManager, userFansList = false, telegram) {
 
     scene.action(/like_(.*)/, async ctx => {
         let targetId = ctx.match[1];
-        ctx.session.profile = await datingManager.like(targetId, ctx.session.profile);
-        let isDoubleLike = await datingManager.isDoubleLike(targetId, ctx.session.profile);
+        let currentProfile = ctx.session.profile;
+        ctx.session.profile = await datingManager.like(targetId, currentProfile);
+        let isDoubleLike = await datingManager.isDoubleLike(targetId, currentProfile);
         let targetProfile = await datingManager.loadProfileById(targetId);
 
         if (isDoubleLike) {
-            let userLink = `[написать](tg://user?id=${targetProfile.userId})`;
-            await ctx.replyWithMarkdown('Симпатия взаимная, можно '+userLink);
+            let chatId = targetProfile.chatId || targetProfile.userId;
+            let remoteProfileText = datingManager.getProfileText(currentProfile);
+            let remoteMessage = `Взаимная симпания!\n\n${remoteProfileText}\n\n<a href="tg://user?id=${currentProfile.userId}">✉ Написать</a>`;
+            await telegram.sendPhoto(chatId, currentProfile.photo.file_id, {caption: remoteMessage, parse_mode: 'html'});
+
+            let userLink = `[✉ Написать](tg://user?id=${targetProfile.userId})`;
+            await ctx.replyWithMarkdown('Взаимная симпатия! ❤\n\n'+userLink);
+            return ctx.reply('Для продолжения работы нажмите /start');
         }
         else {
             let chatId = targetProfile.chatId || targetProfile.userId;
             await telegram.sendMessage(chatId, 'Ваша анкета кому-то понравилась', menu([
-                {code: 'rateFans', text: 'Посмотреть'}
+                {code: 'rateFans', text: 'Оценить лайкнувших'}
             ]));
         }
 

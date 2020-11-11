@@ -2,14 +2,16 @@ const BaseScene = require('telegraf/scenes/base');
 const {menu} = require('../../helpers/wizard');
 
 function mainMenu(ctx) {
-    let seekButton = ctx.session.profile.stopped
+    let seekButton = ctx.session.profile && ctx.session.profile.stopped
         ? {code: 'start', text: '🚀 Начать поиск'}
         : {code: 'stop', text: '🚫 Останосить поиск'};
 
     return menu([
         {code: 'rateProfiles', text: '❤ Оценить других'},
+        {code: 'rateFans', text: '❤❤ Посмотрель лайкнувших'},
         {code: 'profileWizard', text: '✏ Поменять мою анкету'},
         seekButton,
+        {code: 'settings', text: '🎨 Настройки поиска'},
     ], true);
 }
 
@@ -32,7 +34,8 @@ module.exports = function (datingManager) {
         await ctx.reply('Ваша анкета снова в поиске');
         return ctx.scene.reenter();
     });
-
+    scene.action('rateFans', ctx => ctx.scene.enter('rateFans'));
+    scene.action('settings', ctx => ctx.scene.enter('settings'));
     scene.use(ctx => ctx.reply('Выбери что-то из меню', mainMenu(ctx)));
 
     return scene;

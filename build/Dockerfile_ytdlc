@@ -1,0 +1,6 @@
+FROM node:alpine AS nodejs
+
+FROM python:3-alpine
+COPY --from=nodejs ./ .
+RUN  apk add --no-cache ffmpeg && \
+     python -m pip install --upgrade youtube-dlc

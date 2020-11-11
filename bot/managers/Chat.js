@@ -20,7 +20,84 @@ function ChatManager() {
             let updateResult = await chats.findOneAndReplace({id}, chatFields, {upsert: true, returnOriginal: false});
             return updateResult.value || false;
         },
+        isStartCommand(ctx) {
+            return ctx.update && ctx.update.message && ctx.update.message.text && ctx.update.message.text.toLowerCase().indexOf('/start') === 0;
+        },
+        saveRefMiddleware() {
+            return async (ctx, next) => {
+                if (!this.isStartCommand(ctx)) {
+                    return next();
+                }
 
+                let ref =ctx.update.message.text.indexOf(' ') !== -1
+                    ? ctx.update.message.text.replace('/start ', '')
+                    : false;
+                let message = ctx.update.message;
+                let userId = message && message.from
+                    ? message.from.id
+                    : false;
+
+                let hasRef = userId && ref;
+
+                if (!hasRef) {
+                    return next();
+                }
+
+                const db = await getDb();
+                const refs = db.collection('refs');
+
+                let refId = `${userId}:${ref}`;
+
+                let refFields = {
+                    refId,
+                    userId,
+                    ref,
+                    date: moment().unix(),
+                }
+
+                try {
+                    await refs.findOneAndReplace({refId}, refFields, {upsert: true, returnOriginal: false});
+                } finally {
+                }
+
+                return next();
+            }
+        },
+        saveUserMiddleware: function () {
+            return async (ctx, next) => {
+
+                if (!this.isStartCommand(ctx)) {
+                    return next();
+                }
+
+                let message = ctx.update.message;
+                let {from, chat} = message;
+                let id = from.id || chat.id || false;
+
+                if (!id) {
+                    return next();
+                }
+
+                const db = await getDb();
+                const users = db.collection('users');
+
+                try {
+                    let user = await users.findOne({id});
+                    if (user) {
+                        user.user = from;
+                        user.chat = chat;
+                        user.updated = moment().unix();
+                    } else {
+                        user = {id, user: from, chat, registered: moment().unix(), updated: moment().unix()};
+                    }
+
+                    await users.findOneAndReplace({id}, user, {upsert: true, returnOriginal: false});
+                } finally {
+                }
+
+                return next();
+            }
+        }
     }
 }
 

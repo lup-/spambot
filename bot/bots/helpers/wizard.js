@@ -12,6 +12,12 @@ function menu(buttons, column = false) {
     ).extra();
 }
 
+function urlButton(button) {
+    return Markup.inlineKeyboard([
+        Markup.urlButton(button.text, button.url),
+    ]).extra();
+}
+
 function callbackWrapper(callback) {
     let nextStep = (ctx) => {
         ctx.wizard.next();
@@ -41,4 +47,4 @@ function buttonStep(actions = [], events = []) {
     return handler;
 }
 
-module.exports = {menu, buttonStep};
+module.exports = {menu, buttonStep, urlButton};

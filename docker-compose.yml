@@ -35,6 +35,43 @@ services:
       - BOT_TOKEN=${HOROSCOPE_BOT_TOKEN}
     command: npm run horoscope_bot_debug
 
+  orfo_bot:
+    image: node
+    container_name: 'orfo_bot'
+    ports:
+      - ${BOT_DEBUG_PORT}:9229
+    depends_on:
+      - mongo
+    volumes:
+      - ./bot:/var/www
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=spambot_mongo
+      - MONGO_DB=orfo_bot
+      - BOT_TOKEN=${ORFO_BOT_TOKEN}
+    command: npm run orfo_bot_debug
+
+  ytdlc_bot:
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_ytdlc"
+    container_name: 'ytdlc_bot'
+    user: root
+    ports:
+      - ${BOT_DEBUG_PORT}:9229
+    depends_on:
+      - mongo
+    volumes:
+      - ./files:/downloads
+      - ./bot:/var/www
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=spambot_mongo
+      - MONGO_DB=ytdlc_bot
+      - BOT_TOKEN=${YTDLC_BOT_TOKEN}
+    command: npm run ytdlc_bot_debug
 
   mongo:
     image: mongo

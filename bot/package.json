@@ -6,6 +6,11 @@
   "scripts": {
     "horoscope_bot": "node bots/horoscope.js",
     "horoscope_bot_debug": "node --inspect=0.0.0.0 bots/horoscope.js",
+    "orfo_bot": "node bots/orfo.js",
+    "orfo_bot_debug": "node --inspect=0.0.0.0 bots/orfo.js",
+    "ytdlc_bot": "node bots/ytdlc.js",
+    "ytdlc_bot_debug": "node --inspect=0.0.0.0 bots/ytdlc.js",
+
     "admin_bot": "node bots/admin.js",
     "admin_bot_debug": "node --inspect=0.0.0.0 bots/admin.js"
   },
@@ -16,6 +21,7 @@
     "canvas": "^1.6.13",
     "chart.js": "^2.9.4",
     "chartjs-node": "^1.7.1",
+    "languagetool-api": "^1.1.2",
     "lodash.flatten": "^4.4.0",
     "moment": "^2.29.1",
     "mongodb": "^3.6.2",

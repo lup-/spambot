@@ -10,6 +10,7 @@ const store = new Map();
 const getProfileWizard = require('./scenes/dating/profile');
 const getRateProfiles = require('./scenes/dating/rateProfiles');
 const getMainMenu = require('./scenes/dating/main');
+const getSettings = require('./scenes/dating/settings');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 let app = new Telegraf(BOT_TOKEN);
@@ -24,29 +25,22 @@ Promise.all([
         const rateProfiles = getRateProfiles(dating, false, telegram);
         const rateFans = getRateProfiles(dating, true, telegram);
         const mainMenu = getMainMenu(dating);
+        const settings = getSettings(dating);
 
         const stage = new Stage();
         stage.register(profileWizard);
         stage.register(rateProfiles);
         stage.register(rateFans);
+        stage.register(settings);
         stage.register(mainMenu);
 
         app.use(session({store}));
-        app.use(stage.middleware())
+        app.use(dating.initSessionProfileMiddleware());
+        app.use(chat.saveRefMiddleware());
+        app.use(chat.saveUserMiddleware());
+        app.use(stage.middleware());
 
         app.start(async (ctx) => {
-            const chatInfo = ctx.update.message.chat;
-            const fromInfo = ctx.update.message.from;
-            const userId = fromInfo.id;
-            await chat.saveChat(chatInfo);
-
-            ctx.session.userId = userId;
-            ctx.session.chatId = chatInfo.id;
-
-            if (!ctx.session.profile) {
-                ctx.session.profile = await dating.loadProfileByUserId(userId);
-            }
-
             return ctx.session.profile
                 ? ctx.scene.enter('mainMenu')
                 : ctx.scene.enter('profileWizard');
@@ -56,6 +50,12 @@ Promise.all([
             ctx.session = null;
             store.clear();
         });
+
+        app.catch((err, ctx) => {
+            console.log(err);
+            return ctx.reply('Похоже, что-то пошло не по плану.\nПопробуйте начать занвово /start.');
+        });
+
 
         app.action('rateFans', ctx => ctx.scene.enter('rateFans'));
 

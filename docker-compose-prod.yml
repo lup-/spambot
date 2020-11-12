@@ -1,0 +1,81 @@
+version: "3"
+
+services:
+  orfo_bot:
+    image: node
+    container_name: 'orfo_bot'
+    restart: always
+    depends_on:
+      - mongo
+    volumes:
+      - ./bot:/var/www
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - MONGO_DB=orfo_bot
+      - BOT_TOKEN=${ORFO_BOT_TOKEN}
+    command: npm run orfo_bot
+
+  ytdlc_bot:
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_ytdlc"
+    container_name: 'ytdlc_bot'
+    restart: always
+    depends_on:
+      - mongo
+    volumes:
+      - ./files:/downloads
+      - ./bot:/var/www
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - MONGO_DB=ytdlc_bot
+      - BOT_TOKEN=${YTDLC_BOT_TOKEN}
+    command: npm run ytdlc_bot
+
+  ttdlc_bot:
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_ytdlc"
+    container_name: 'ttdlc_bot'
+    restart: always
+    depends_on:
+      - mongo
+    volumes:
+      - ./files:/downloads
+      - ./bot:/var/www
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - MONGO_DB=ytdlc_bot
+      - BOT_TOKEN=${TTDLC_BOT_TOKEN}
+    command: npm run ytdlc_bot
+
+  dating_bot:
+    image: node
+    container_name: 'dating_bot'
+    restart: always
+    depends_on:
+      - mongo
+    volumes:
+      - ./bot:/var/www
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - MONGO_DB=dating_bot
+      - BOT_TOKEN=${DATING_BOT_TOKEN}
+    command: npm run dating_bot
+
+  mongo:
+    image: mongo
+    container_name: 'aquarium_mongo'
+    restart: always
+    volumes:
+      - ./database:/data/db
+    ports:
+      - 127.0.0.1:${MONGO_PORT}:27017

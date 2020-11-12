@@ -52,6 +52,23 @@ services:
       - BOT_TOKEN=${ORFO_BOT_TOKEN}
     command: npm run orfo_bot_debug
 
+  wiki_bot:
+    image: node
+    container_name: 'wiki_bot'
+    ports:
+      - ${BOT_DEBUG_PORT}:9229
+    depends_on:
+      - mongo
+    volumes:
+      - ./bot:/var/www
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=spambot_mongo
+      - MONGO_DB=dating_bot
+      - BOT_TOKEN=${DATING_BOT_TOKEN}
+    command: npm run wiki_bot_debug
+
   ytdlc_bot:
     build:
       context: "."
@@ -81,21 +98,23 @@ services:
     ports:
       - ${MONGO_PORT}:27017
 
-  tdlib:
+  tglib:
     build:
       context: "."
       dockerfile: "./build/Dockerfile_tdlib"
-    container_name: 'spambot_bot'
+    container_name: 'tglib'
     ports:
       - ${BOT_DEBUG_PORT}:9229
     depends_on:
       - mongo
     volumes:
-      - ./bot:/var/www
-    working_dir: /var/www
+      - ./bot:/var/app
+    working_dir: /var/app
     environment:
       - NODE_ENV=development
       - MONGO_HOST=spambot_mongo
       - MONGO_DB=spambot
-      - BOT_TOKEN=${BOT_TOKEN}
-    command: npm run admin_bot
+      - TOKEN=${BOT_TOKEN}
+      - API_ID=${API_ID}
+      - API_HASH=${API_HASH}
+    command: npm run tglib

@@ -20,7 +20,7 @@ RUN cmake --build .
 RUN make install
 
 
-FROM node:lts-alpine
+FROM node:10-alpine
 
 COPY --from=builder /usr/local/lib/libtd* /usr/local/lib/
 

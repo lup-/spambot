@@ -10,9 +10,13 @@
     "orfo_bot_debug": "node --inspect=0.0.0.0 bots/orfo.js",
     "ytdlc_bot": "node bots/ytdlc.js",
     "ytdlc_bot_debug": "node --inspect=0.0.0.0 bots/ytdlc.js",
-
+    "dating_bot": "node bots/dating.js",
+    "dating_bot_debug": "node --inspect=0.0.0.0 bots/dating.js",
+    "wiki_bot": "node bots/wikipedia.js",
+    "wiki_bot_debug": "node --inspect=0.0.0.0 bots/wikipedia.js",
     "admin_bot": "node bots/admin.js",
-    "admin_bot_debug": "node --inspect=0.0.0.0 bots/admin.js"
+    "admin_bot_debug": "node --inspect=0.0.0.0 bots/admin.js",
+    "tglib": "node --inspect=0.0.0.0 tglib.js"
   },
   "author": "",
   "license": "ISC",
@@ -28,6 +32,8 @@
     "shortid": "^2.2.16",
     "telegraf": "^3.38.0",
     "telegraf-session-mongo": "github:lup-/telegraf-session-mongo",
+    "tglib": "^3.0.5",
+    "wikijs": "^6.0.1",
     "xml-js": "^1.6.11"
   }
 }

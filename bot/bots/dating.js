@@ -51,9 +51,15 @@ Promise.all([
             store.clear();
         });
 
-        app.catch((err, ctx) => {
+        app.catch(async (err, ctx) => {
             console.log(err);
-            return ctx.reply('Похоже, что-то пошло не по плану.\nПопробуйте начать занвово /start.');
+            try {
+                await ctx.reply('Похоже, что-то пошло не по плану.\nПопробуйте начать занвово /start.');
+            }
+            catch (e) {
+            }
+
+            return;
         });
 
         app.action('rateFans', ctx => ctx.scene.enter('rateFans'));

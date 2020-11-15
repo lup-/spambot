@@ -9,7 +9,9 @@ module.exports = function () {
                 age: 'approx',
             }
 
-            return  Object.assign(defaultSettings, currentUserProfile.settings || {});
+            let currentSettings = currentUserProfile ? currentUserProfile.settings || {} : {};
+
+            return  Object.assign(defaultSettings, currentSettings);
         },
 
         async randomProfile(currentUserProfile) {

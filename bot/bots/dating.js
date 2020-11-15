@@ -54,7 +54,7 @@ Promise.all([
         app.catch(async (err, ctx) => {
             console.log(err);
             try {
-                await ctx.reply('Похоже, что-то пошло не по плану.\nПопробуйте начать занвово /start.');
+                await ctx.reply('Похоже, что-то пошло не по плану.\nПопробуйте начать заново /start.');
             }
             catch (e) {
             }

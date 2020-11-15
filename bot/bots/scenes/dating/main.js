@@ -22,20 +22,38 @@ module.exports = function (datingManager) {
         return ctx.reply('Что дальше?', mainMenu(ctx));
     });
 
-    scene.action('rateProfiles', ctx => ctx.scene.enter('rateProfiles'));
-    scene.action('profileWizard', ctx => ctx.scene.enter('profileWizard'));
+    scene.action('rateProfiles', ctx => ctx.session && ctx.session.profile
+        ? ctx.scene.enter('rateProfiles')
+        : ctx.scene.enter('mainMenu'));
+    scene.action('profileWizard', ctx => ctx.session && ctx.session.profile
+        ? ctx.scene.enter('profileWizard')
+        : ctx.scene.enter('mainMenu'));
     scene.action('stop', async ctx => {
+        let hasProfile = ctx.session && ctx.session.profile;
+        if (!hasProfile) {
+            return ctx.scene.enter('mainMenu');
+        }
+
         ctx.session.profile = await datingManager.stopSeeking(ctx.session.profile);
         await ctx.reply('Ваша анкета скрыта из поиска');
         return ctx.scene.reenter();
     });
     scene.action('start', async ctx => {
+        let hasProfile = ctx.session && ctx.session.profile;
+        if (!hasProfile) {
+            return ctx.scene.enter('mainMenu');
+        }
+
         ctx.session.profile = await datingManager.startSeeking(ctx.session.profile);
         await ctx.reply('Ваша анкета снова в поиске');
         return ctx.scene.reenter();
     });
-    scene.action('rateFans', ctx => ctx.scene.enter('rateFans'));
-    scene.action('settings', ctx => ctx.scene.enter('settings'));
+    scene.action('rateFans', ctx => ctx.session && ctx.session.profile
+        ? ctx.scene.enter('rateFans')
+        : ctx.scene.enter('mainMenu'));
+    scene.action('settings', ctx => ctx.session && ctx.session.profile
+        ? ctx.scene.enter('settings')
+        : ctx.scene.enter('mainMenu'));
     scene.use(ctx => ctx.reply('Выбери что-то из меню', mainMenu(ctx)));
 
     return scene;

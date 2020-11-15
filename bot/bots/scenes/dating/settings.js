@@ -32,6 +32,9 @@ module.exports = function (datingManager) {
     });
 
     scene.action(/city_(.*)/, async ctx => {
+        if (!ctx.session) {
+            return ctx.scene.enter('mainMenu');
+        }
         let newValue = ctx.match[1] === 'yes';
         let currentProfile = ctx.session.profile;
         let settings = datingManager.settings(currentProfile);
@@ -41,6 +44,9 @@ module.exports = function (datingManager) {
     });
 
     scene.action(/age_(.*)/, async ctx => {
+        if (!ctx.session) {
+            return ctx.scene.enter('mainMenu');
+        }
         let newValue = ctx.match[1] === 'disable' ? false : ctx.match[1];
         let currentProfile = ctx.session.profile;
         let settings = datingManager.settings(currentProfile);

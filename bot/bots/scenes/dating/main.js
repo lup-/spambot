@@ -4,7 +4,7 @@ const {menu} = require('../../helpers/wizard');
 function mainMenu(ctx) {
     let seekButton = ctx.session.profile && ctx.session.profile.stopped
         ? {code: 'start', text: '🚀 Начать поиск'}
-        : {code: 'stop', text: '🚫 Останосить поиск'};
+        : {code: 'stop', text: '🚫 Остановить поиск'};
 
     return menu([
         {code: 'rateProfiles', text: '❤ Оценить других'},

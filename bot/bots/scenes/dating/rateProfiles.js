@@ -5,6 +5,7 @@ function rateMenu(ctx, profile) {
     return menu([
         {code: 'like_'+profile.id, text: '❤'},
         {code: 'skip_'+profile.id, text: '⏩'},
+        {code: 'complain_'+profile.id, text: '😡'},
         {code: 'back', text: '↩ Меню'},
     ]);
 }
@@ -50,7 +51,19 @@ module.exports = function (datingManager, userFansList = false, telegram) {
             let chatId = targetProfile.chatId || targetProfile.userId;
             let remoteProfileText = datingManager.getProfileText(currentProfile);
             let remoteMessage = `Взаимная симпания!\n\n${remoteProfileText}\n\n<a href="tg://user?id=${currentProfile.userId}">✉ Написать</a>`;
-            await telegram.sendPhoto(chatId, currentProfile.photo.file_id, {caption: remoteMessage, parse_mode: 'html'});
+            try {
+                await telegram.sendPhoto(chatId, currentProfile.photo.file_id, {
+                    caption: remoteMessage,
+                    parse_mode: 'html'
+                });
+            }
+            catch (e) {
+                if (e && e.code === 403) {
+                    await datingManager.stopSeeking(targetProfile);
+                }
+
+                return ctx.scene.reenter();
+            }
 
             let userLink = `[✉ Написать](tg://user?id=${targetProfile.userId})`;
             await ctx.replyWithMarkdown('Взаимная симпатия! ❤\n\n'+userLink);
@@ -58,9 +71,16 @@ module.exports = function (datingManager, userFansList = false, telegram) {
         }
         else {
             let chatId = targetProfile.chatId || targetProfile.userId;
-            await telegram.sendMessage(chatId, 'Ваша анкета кому-то понравилась', menu([
-                {code: 'rateFans', text: 'Оценить лайкнувших'}
-            ]));
+            try {
+                await telegram.sendMessage(chatId, 'Ваша анкета кому-то понравилась', menu([
+                    {code: 'rateFans', text: 'Оценить лайкнувших'}
+                ]));
+            }
+            catch (e) {
+                if (e && e.code === 403) {
+                    await datingManager.stopSeeking(targetProfile);
+                }
+            }
         }
 
         return ctx.scene.reenter();
@@ -69,6 +89,16 @@ module.exports = function (datingManager, userFansList = false, telegram) {
     scene.action(/skip_(.*)/, async ctx => {
         let targetId = ctx.match[1];
         ctx.session.profile = await datingManager.skip(targetId, ctx.session.profile);
+        return ctx.scene.reenter();
+    });
+
+    scene.action(/complain_(.*)/, async ctx => {
+        let targetId = ctx.match[1];
+        let targetProfile = await datingManager.loadProfileById(targetId);
+
+        await datingManager.skip(targetId, ctx.session.profile);
+        await datingManager.complain(targetProfile, ctx.session.profile.id);
+        ctx.reply('Мы приняли жалобу, спасибо за бдительность!');
         return ctx.scene.reenter();
     });
 

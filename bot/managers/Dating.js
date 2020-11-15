@@ -26,6 +26,7 @@ module.exports = function () {
                 sex: currentUserProfile.lookingFor,
                 lookingFor: currentUserProfile.sex,
                 stopped: {$in: [null, false]},
+                complain: {$in: [null, false]},
             }
 
             if (settings.city && currentUserProfile.city) {
@@ -83,6 +84,20 @@ module.exports = function () {
         },
         async stopSeeking(profile) {
             profile.stopped = true;
+            return this.saveProfile(profile);
+        },
+        async complain(profile, byUser) {
+            if (!profile.complainsBy) {
+                profile.complainsBy = [];
+            }
+
+            if (profile.complainsBy.indexOf(byUser) === -1) {
+                profile.complainsBy.push(byUser);
+            }
+
+            if (profile.complainsBy.length >= 3) {
+                profile.complain = true;
+            }
             return this.saveProfile(profile);
         },
         async like(targetId, profile) {

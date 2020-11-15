@@ -28,7 +28,7 @@ module.exports = function (datingManager) {
             return ctx.wizard.next();
         },
         (ctx) => {
-            let age = parseInt(ctx.message.text) || false;
+            let age = ctx.message && ctx.message.text ? parseInt(ctx.message.text) || false : false;
             let validAge = age && age > 0 && age < 120;
 
             if (!validAge) {
@@ -76,6 +76,11 @@ module.exports = function (datingManager) {
             return ctx.wizard.next();
         },
         (ctx) => {
+            let isValid = ctx.message && ctx.message.text;
+            if (!isValid) {
+                ctx.reply('Пожалуйста, напиши свой город');
+                return;
+            }
             ctx.wizard.state.profile.city = ctx.message.text.trim();
 
             ctx.reply('Как мне тебя называть?');
@@ -105,7 +110,7 @@ module.exports = function (datingManager) {
             return ctx.wizard.next();
         },
         async (ctx) => {
-            let hasPhoto = ctx.message.photo && ctx.message.photo.length > 0;
+            let hasPhoto = ctx.message && ctx.message.photo && ctx.message.photo.length > 0;
 
             if (!hasPhoto) {
                 ctx.reply('Пожалуйста, пришли фото');

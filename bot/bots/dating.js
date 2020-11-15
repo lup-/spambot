@@ -56,8 +56,9 @@ Promise.all([
             return ctx.reply('Похоже, что-то пошло не по плану.\nПопробуйте начать занвово /start.');
         });
 
-
         app.action('rateFans', ctx => ctx.scene.enter('rateFans'));
+        app.action(/.*/, ctx => ctx.scene.enter('mainMenu'));
+        app.on('message', ctx => ctx.scene.enter('mainMenu'));
 
         app.launch();
     });

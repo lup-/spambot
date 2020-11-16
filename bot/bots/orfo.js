@@ -2,6 +2,7 @@ const { Telegraf } = require('telegraf');
 const {initManagers} = require('../managers');
 const axios = require('axios');
 const qs = require('qs');
+const {catchErrors} = require('./helpers/common');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const API_URL = process.env.LANGTOOL_API_URL;
@@ -109,10 +110,7 @@ initManagers(['chat']).then(async ({chat}) => {
         return next();
     });
 
-    app.catch((err, ctx) => {
-        console.log(err);
-        return ctx.reply('Похоже, что-то пошло не по плану.\nПопробуйте начать занвово /start.');
-    });
+    app.catch(catchErrors);
 
     app.launch();
 });

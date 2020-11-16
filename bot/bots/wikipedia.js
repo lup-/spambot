@@ -2,6 +2,7 @@ const { Telegraf } = require('telegraf');
 const {initManagers} = require('../managers');
 const wiki = require('wikijs').default;
 const moment = require('moment');
+const {catchErrors} = require('./helpers/common');
 
 const apiUrl = "https://ru.wikipedia.org/w/api.php";
 const BOT_TOKEN = process.env.BOT_TOKEN;
@@ -82,10 +83,7 @@ initManagers(['chat']).then(async ({chat}) => {
 
     });
 
-    app.catch((err, ctx) => {
-        console.log(err);
-        return ctx.reply('Похоже, что-то пошло не по плану.\nПопробуйте начать занвово /start.');
-    });
+    app.catch(catchErrors);
 
     app.launch();
 });

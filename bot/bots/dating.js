@@ -12,6 +12,8 @@ const getRateProfiles = require('./scenes/dating/rateProfiles');
 const getMainMenu = require('./scenes/dating/main');
 const getSettings = require('./scenes/dating/settings');
 
+const {catchErrors} = require('./helpers/common');
+
 const BOT_TOKEN = process.env.BOT_TOKEN;
 let app = new Telegraf(BOT_TOKEN);
 let telegram = new Telegram(BOT_TOKEN);
@@ -51,16 +53,7 @@ Promise.all([
             store.clear();
         });
 
-        app.catch(async (err, ctx) => {
-            console.log(err);
-            try {
-                await ctx.reply('Похоже, что-то пошло не по плану.\nПопробуйте начать заново /start.');
-            }
-            catch (e) {
-            }
-
-            return;
-        });
+        app.catch(catchErrors);
 
         app.action('rateFans', ctx => ctx.scene.enter('rateFans'));
         app.action(/.*/, ctx => ctx.scene.enter('mainMenu'));

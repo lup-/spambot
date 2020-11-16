@@ -3,6 +3,7 @@ const fs = require('fs');
 const { Telegraf } = require('telegraf');
 const {initManagers} = require('../managers');
 const {wait} = require('../modules/Helpers');
+const {catchErrors} = require('./helpers/common');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 let app = new Telegraf(BOT_TOKEN);
@@ -164,10 +165,7 @@ initManagers(['chat']).then(async ({chat}) => {
         }
     });
 
-    app.catch((err, ctx) => {
-        console.log(err);
-        return ctx.reply('Похоже, что-то пошло не по плану.\nПопробуйте начать занвово /start.');
-    });
+    app.catch(catchErrors);
 
     app.launch();
 });

@@ -78,6 +78,7 @@ services:
       context: "."
       dockerfile: "./build/Dockerfile_languagetool"
     container_name: 'languagetool'
+    restart: always
     working_dir: /LanguageTool-5.1
     command: "java -cp languagetool-server.jar  org.languagetool.server.HTTPServer --port 8010 --public --allow-origin '*'"
 

@@ -75,6 +75,8 @@ function correctedText(text, errors) {
 }
 
 initManagers(['chat']).then(async ({chat}) => {
+    app.catch(catchErrors);
+
     app.use(chat.saveRefMiddleware());
     app.use(chat.saveUserMiddleware());
 
@@ -109,8 +111,6 @@ initManagers(['chat']).then(async ({chat}) => {
 
         return next();
     });
-
-    app.catch(catchErrors);
 
     app.launch();
 });

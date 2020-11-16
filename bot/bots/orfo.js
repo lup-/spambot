@@ -85,7 +85,6 @@ initManagers(['chat']).then(async ({chat}) => {
             return ctx.reply('Пришлите любой текст');
         }
         catch (e) {}
-        return;
     });
 
     app.on('message', async (ctx, next) => {
@@ -110,10 +109,7 @@ initManagers(['chat']).then(async ({chat}) => {
         }
         catch (e) {
             console.log(e);
-            ctx.reply(e.toString());
         }
-
-        return next();
     });
 
     app.launch();

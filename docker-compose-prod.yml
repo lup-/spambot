@@ -7,6 +7,7 @@ services:
     restart: always
     depends_on:
       - mongo
+      - languagetool
     volumes:
       - ./bot:/var/www
     working_dir: /var/www
@@ -15,6 +16,7 @@ services:
       - MONGO_HOST=aquarium_mongo
       - MONGO_DB=orfo_bot
       - BOT_TOKEN=${ORFO_BOT_TOKEN}
+      - LANGTOOL_API_URL= http://languagetool:8010/
     command: npm run orfo_bot
 
   ytdlc_bot:
@@ -70,6 +72,14 @@ services:
       - MONGO_DB=dating_bot
       - BOT_TOKEN=${DATING_BOT_TOKEN}
     command: npm run dating_bot
+
+  languagetool:
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_languagetool"
+    container_name: 'languagetool'
+    working_dir: /LanguageTool-5.1
+    command: "java -cp languagetool-server.jar  org.languagetool.server.HTTPServer --port 8010 --public --allow-origin '*'"
 
   mongo:
     image: mongo

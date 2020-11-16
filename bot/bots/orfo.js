@@ -1,21 +1,16 @@
 const { Telegraf } = require('telegraf');
 const {initManagers} = require('../managers');
-const languagetool = require("languagetool-api");
+const axios = require('axios');
+const qs = require('qs');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
+const API_URL = process.env.LANGTOOL_API_URL;
+const CHECK_URL = API_URL+'v2/check';
 let app = new Telegraf(BOT_TOKEN);
 
-function check(language, text) {
-    return new Promise((resolve, reject) => {
-        languagetool.check({language, text}, (err, res) => {
-            if (err) {
-                reject(err);
-            }
-            else {
-                resolve(res);
-            }
-        });
-    });
+async function check(language, text) {
+    let response = await axios.post(CHECK_URL, qs.stringify({language, text}));
+    return response.data;
 }
 function highlightErrors(text, errors) {
     let leftOffset = 0;
@@ -31,6 +26,11 @@ function highlightErrors(text, errors) {
         highlightedText += `${beforeErrorText}<b>${errorText} (${errorNum})</b>`;
     }
 
+    if (leftOffset < text.length) {
+        let lastPart = text.substr(leftOffset, text.length-leftOffset);
+        highlightedText += lastPart;
+    }
+
     return highlightedText;
 }
 function errorsList(text, errors) {
@@ -40,7 +40,7 @@ function errorsList(text, errors) {
         let error = errors[errorIndex];
 
         let errorText = text.substr(error.offset, error.length);
-        errorsList += `${errorNum}. <b>${errorText}</b>: ${error.shortMessage}\n`;
+        errorsList += `${errorNum}. <b>${errorText}</b>: ${error.shortMessage || error.message}\n`;
     }
 
     return errorsList;
@@ -64,6 +64,12 @@ function correctedText(text, errors) {
             : beforeErrorText+'<b>'+errorText+'</b>';
 
     }
+
+    if (leftOffset < text.length) {
+        let lastPart = text.substr(leftOffset, text.length-leftOffset);
+        correctedText += lastPart;
+    }
+
     return 'Исправленный текст:\n\n'+correctedText;
 }
 

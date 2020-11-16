@@ -26,6 +26,7 @@
     "lodash.flatten": "^4.4.0",
     "moment": "^2.29.1",
     "mongodb": "^3.6.2",
+    "qs": "^6.9.4",
     "shortid": "^2.2.16",
     "telegraf": "^3.38.0",
     "telegraf-session-mongo": "github:lup-/telegraf-session-mongo",

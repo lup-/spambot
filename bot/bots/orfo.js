@@ -81,7 +81,11 @@ initManagers(['chat']).then(async ({chat}) => {
     app.use(chat.saveUserMiddleware());
 
     app.start(async (ctx) => {
-        return ctx.reply('Пришлите любой текст');
+        try {
+            return ctx.reply('Пришлите любой текст');
+        }
+        catch (e) {}
+        return;
     });
 
     app.on('message', async (ctx, next) => {

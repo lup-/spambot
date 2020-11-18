@@ -1,15 +1,37 @@
 const Markup = require('telegraf/markup');
 const Composer = require('telegraf/composer');
 
-function menu(buttons, column = false) {
-    return Markup.inlineKeyboard(
-        buttons.map(button => {
-            let btn = Markup.callbackButton(button.text, button.code);
-            return column
-                ? [btn]
-                : btn;
-        })
-    ).extra();
+function menu(buttons, columns = false) {
+    if (columns === true) {
+        columns = 1;
+    }
+
+    let markupButtons = buttons.map(button => {
+        return Markup.callbackButton(button.text, button.code);
+    });
+
+    let columnButtons = [];
+    if (columns !== false) {
+        let row = [];
+        for (const button of markupButtons) {
+
+            if (row.length === columns) {
+                columnButtons.push(row);
+                row = [];
+            }
+
+            row.push(button);
+        }
+
+        if (row.length > 0) {
+            columnButtons.push(row);
+        }
+    }
+    else {
+        columnButtons = markupButtons;
+    }
+
+    return Markup.inlineKeyboard(columnButtons).extra();
 }
 
 function urlButton(button) {

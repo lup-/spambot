@@ -4,6 +4,7 @@ const StatManager = require('./Stat');
 const HoroscopeManager = require('./Horoscope');
 const MailingManager = require('./Mailing');
 const DatingManager = require('./Dating');
+const FilmManager = require('./Film');
 
 let instances = {};
 
@@ -23,6 +24,8 @@ function init(manager, params = {}) {
             return new MailingManager();
         case 'dating':
             return new DatingManager();
+        case 'film':
+            return new FilmManager();
         default:
             return null;
     }

@@ -130,11 +130,14 @@ module.exports = function () {
             let response = await discoverFn(args);
             let pageResults = response.data;
             let film = pageResults.results[pageIndex];
+            if (!film) {
+                return false;
+            }
 
-            film.genre = film.genre_ids.map( genreId => {
+            film.genre = film.genre_ids ? film.genre_ids.map( genreId => {
                 let genre = genres.find( item => item.id === genreId );
-                return genre.name;
-            });
+                return genre ? genre.name : false;
+            }).filter(name => name !== false) : [];
 
             let pageFilms = pageResults.results;
             let totalFilms = pageResults.total_results;

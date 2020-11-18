@@ -1,9 +1,10 @@
 const BaseScene = require('telegraf/scenes/base');
 const {menu} = require('../../helpers/wizard');
+const {truncateString} = require('../../../modules/Helpers');
 
 const EMPTY_FILE_ID = 'AgACAgIAAxkDAAIF3V-0xDwAAZxgtMPCLuAv-dYMDWkVvAACZbAxG68woEnFDINlmSGWEGdyGZguAAMBAAMCAANtAAMFLQMAAR4E';
 
-function filmMenu({film, hasPrev, hasNext}) {
+function filmMenu({hasPrev, hasNext, totalFilms}) {
     let buttons = [];
     if (hasPrev) {
         buttons.push({code: 'go_prev', text: '◀' });
@@ -15,11 +16,18 @@ function filmMenu({film, hasPrev, hasNext}) {
         buttons.push({code: 'go_next', text: '▶' });
     }
 
-    buttons.push({code: 'random', text: '🎲'});
+    if (totalFilms > 1) {
+        buttons.push({code: 'random', text: '🎲'});
+    }
+
     buttons.push({code: 'settings', text: '🔧'});
     buttons.push({code: 'menu', text: '↩'});
 
     return menu(buttons, 3);
+}
+
+function noFilmsMenu() {
+    return menu([{code: 'settings', text: '🔧'}, {code: 'menu', text: '↩'}]);
 }
 
 function filmDescription(film) {
@@ -27,12 +35,15 @@ function filmDescription(film) {
     let vote = film.vote_average;
     let overview = film.overview;
     let genres = film.genre.join(', ');
+    const MAX_LEN = 1024;
 
-    return `<b>${title}</b>
+    let descr = `<b>${title}</b>
 Рейтинг: ${vote}/10
 Жанры: ${genres}
 
 ${overview}`;
+
+    return truncateString(descr, MAX_LEN);
 }
 
 async function replyWithFilm(ctx, filmManager, showNewMessage) {
@@ -41,13 +52,20 @@ async function replyWithFilm(ctx, filmManager, showNewMessage) {
     let genreIds = filmManager.getSessionGenres(ctx.session);
 
     let results = await filmManager.discoverAtIndex(searchType, genreIds, currentIndex);
+    if (!results) {
+        ctx.session.index = 0;
+        if (currentIndex === 0) {
+            let emptyExtra = noFilmsMenu();
+            emptyExtra.caption = `Ничего не нашлось, попробуйте указать другие жанры`;
+            return ctx.replyWithPhoto(EMPTY_FILE_ID, emptyExtra)
+        }
+        else {
+            return ctx.scene.reenter();
+        }
+    }
+
     ctx.session.hasNext = results.hasNext;
     ctx.session.totalFilms = results.totalFilms;
-
-    let editMessage = ctx.update && ctx.update.callback_query
-        ? ctx.update.callback_query.message || false
-        : false;
-    let messageHasPhoto = Boolean(editMessage.photo);
 
     let imageUrl = results.film && results.film.poster_path
         ? 'https://image.tmdb.org/t/p/w500/'+results.film.poster_path
@@ -105,7 +123,7 @@ module.exports = function (filmManager) {
     });
 
     scene.action('random', ctx => {
-        let maxNum = ctx.session.totalFilms;
+        let maxNum = ctx.session.totalFilms-1;
 
         let index = ctx.session.index || 0;
         let randomIndex = false;
@@ -114,11 +132,16 @@ module.exports = function (filmManager) {
             randomIndex = maxNum
                 ? Math.floor(Math.random() * maxNum)
                 : 0;
-        } while (index === randomIndex)
+        } while (maxNum > 0 && index === randomIndex)
 
-        ctx.session.index = randomIndex;
-        ctx.session.nav = true;
-        return ctx.scene.reenter();
+        if (ctx.session.index === randomIndex) {
+            return;
+        }
+        else {
+            ctx.session.index = randomIndex;
+            ctx.session.nav = true;
+            return ctx.scene.reenter();
+        }
     });
 
     scene.action('menu', ctx => {

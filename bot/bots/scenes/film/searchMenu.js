@@ -5,6 +5,7 @@ module.exports = function (filmManager) {
     const scene = new BaseScene('searchMenu');
 
     scene.enter(async ctx => {
+        ctx.session.nav = false;
         return ctx.reply('Что ищем?', menu([
             {code: 'type_tv', text: 'Сериальчик'},
             {code: 'type_movie', text: 'Киношку'},

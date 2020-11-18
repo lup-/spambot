@@ -12,10 +12,19 @@ function trimHTML(html) {
     return html.replace(/\<\/*[a-z]+.*?>/ig, '').replace(/ +/, ' ').trim();
 }
 
+function truncateString(str, len) {
+    if (str.length > len) {
+        return str.substring(0, len-3)+'...';
+    }
+
+    return str;
+}
+
 module.exports = {
     md: Telegraf.Extra.markdown(),
     html: Telegraf.Extra.HTML(),
     wait,
     capitalize,
-    trimHTML
+    trimHTML,
+    truncateString
 }

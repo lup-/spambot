@@ -33,6 +33,8 @@ initManagers(['chat', 'film']).then(async ({chat, film}) => {
         }
         catch (e) {}
     });
+    app.action(/.*/, ctx => ctx.scene.enter('searchMenu'));
+    app.on('message', ctx => ctx.scene.enter('searchMenu'));
 
     app.launch();
 });

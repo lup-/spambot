@@ -1,5 +1,6 @@
 const BaseScene = require('telegraf/scenes/base');
 const {menu} = require('../../helpers/wizard');
+const {capitalize} = require('../../../modules/Helpers');
 
 const genresText = 'Жанры для поиска. Если одновременно выбраны "семейный" и "комедия", то в поиске будут все "семейные комедии"';
 
@@ -9,7 +10,7 @@ function genresMenu(selectedGenreIds, allGenres) {
 
         return {
             code: 'genre_'+genre.id,
-            text: isSelected ? '☑ ' + genre.name : genre.name,
+            text: isSelected ? '☑ ' + capitalize(genre.name) : capitalize(genre.name),
         }
     });
 

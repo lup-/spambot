@@ -139,6 +139,30 @@ module.exports = function () {
             }
 
             return horoscope;
+        },
+        async hasSubscription(chatId, typeCode, signCode) {
+            const db = await getDb();
+            const subscriptions = db.collection('subscriptions');
+            let subscription = await subscriptions.findOne({chatId, typeCode, signCode});
+
+            return Boolean(subscription && subscription._id);
+        },
+        async subscribe(chatId, typeCode, signCode) {
+            const db = await getDb();
+            const subscriptions = db.collection('subscriptions');
+            let nextDate = moment().add(1, 'd').set('hour', 9).startOf('hour');
+
+            return subscriptions.insertOne({chatId, typeCode, signCode, next: nextDate.unix(), last: null, type: 'daily'});
+        },
+        async unsubscribe(chatId, typeCode, signCode) {
+            const db = await getDb();
+            const subscriptions = db.collection('subscriptions');
+            return subscriptions.deleteOne({chatId, typeCode, signCode});
+        },
+        async saveStat(chatId, typeCode, signCode, date, birthday = null) {
+            const db = await getDb();
+            const requests = db.collection('requests');
+            return requests.insertOne({chatId, typeCode, signCode, date, birthday});
         }
     }
 }

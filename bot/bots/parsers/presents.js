@@ -8,6 +8,8 @@ const BASE_URL = 'https://www.pichshop.ru';
 getDb().then(async () => {
     const db = await getDb();
     const presentsCollection = db.collection('presents');
+    const categoriesCollection = db.collection('categories');
+
     let savedPresents = await presentsCollection.find({}).toArray();
     const addedIds = savedPresents.map(record => record.id);
 
@@ -26,6 +28,8 @@ getDb().then(async () => {
             return categories;
         }
     });
+
+    await categoriesCollection.insertMany(categories);
 
     let startFromCategory = '14 февраля';
     let categoryIndex = categories.findIndex(item => item.title === startFromCategory);

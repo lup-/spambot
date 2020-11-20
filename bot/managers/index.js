@@ -6,6 +6,7 @@ const MailingManager = require('./Mailing');
 const DatingManager = require('./Dating');
 const FilmManager = require('./Film');
 const PddManager = require('./Pdd');
+const PresentManager = require('./Present');
 
 let instances = {};
 
@@ -29,6 +30,8 @@ function init(manager, params = {}) {
             return new FilmManager();
         case 'pdd':
             return new PddManager();
+        case 'present':
+            return new PresentManager();
         default:
             return null;
     }

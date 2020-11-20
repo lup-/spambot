@@ -27,19 +27,11 @@ initManagers(['horoscope', 'chat']).then(async ({horoscope, chat}) => {
     app.use(stage.middleware());
 
     app.start(async ctx => {
-        if (ctx.session.sign && ctx.session.type ) {
-            return ctx.scene.enter('viewHoroscope');
-        }
-        else if (ctx.session.sign) {
-            return ctx.scene.enter('typesMenu');
-        }
-        else {
-            return ctx.scene.enter('signsMenu');
-        }
+        return ctx.scene.enter('viewHoroscope');
     });
 
-    app.action(/.*/, ctx => ctx.scene.enter('signsMenu'));
-    app.on('message', ctx => ctx.scene.enter('signsMenu'));
+    app.action(/.*/, ctx => ctx.scene.enter('viewHoroscope'));
+    app.on('message', ctx => ctx.scene.enter('viewHoroscope'));
 
     app.launch();
 

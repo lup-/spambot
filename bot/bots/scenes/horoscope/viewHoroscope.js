@@ -1,19 +1,27 @@
 const BaseScene = require('telegraf/scenes/base');
 const {menu} = require('../../helpers/wizard');
+const moment = require('moment');
 
-function horoscopeMenu(isSubscribed) {
-    let subscribeButton = isSubscribed
-        ? {code: 'unsubscribe', text: 'Отписаться'}
-        : {code: 'subscribe', text: 'Подписаться'}
-
+function mainMenu(hasSettings) {
     return menu([
-        {code: 'newSign', text: 'Другой знак'},
-        {code: 'newType', text: 'Другой тип'},
-        subscribeButton,
+        {code: 'signs', text: hasSettings ? 'Настройка' : 'По знаку Зодиака'},
+        {code: 'today', text: 'Что на сегодня?'},
     ], 1);
 }
 
-function getHoroscopeText(horoscope, sign, type) {
+function getGeneralHoroscopeText(horoscope) {
+    return `<b>Общий гороскоп на ${horoscope.date}</b>
+
+${horoscope.text}
+
+<b>Благоприятно</b>
+${horoscope.moonGood}
+
+<b>Неблагоприятно</b>
+${horoscope.moonBad}`;
+}
+
+function getSignHoroscopeText(horoscope, sign, type) {
     return `<b>${sign.title}, ${type.title}, ${horoscope.date}</b>
 
 ${horoscope.text}`;
@@ -23,40 +31,44 @@ module.exports = function (horoscopeManager) {
     const scene = new BaseScene('viewHoroscope');
 
     scene.enter(async ctx => {
-        let hasData = ctx && ctx.session && ctx.session.sign && ctx.session.type;
-        if (!hasData) {
-            return ctx.scene.enter('signsMenu');
+        let todayStamp = moment().startOf('day').unix();
+        let generalIsShown = ctx && ctx.session && ctx.session.generalShown && ctx.session.generalShown === todayStamp;
+        let showGeneral = !generalIsShown;
+
+        let horoscope = await horoscopeManager.loadDailyForEveryone();
+        let horoscopeText = getGeneralHoroscopeText(horoscope);
+
+        let hasData = ctx && ctx.session && ctx.session.signs && ctx.session.type;
+        if (hasData) {
+            let signHoroscopePromises = ctx.session.signs.map(signCode => horoscopeManager.getTodayHoroscope(ctx.session.type, signCode))
+            let signHoroscopes = await Promise.all(signHoroscopePromises);
+
+            let signHoroscopeTexts = signHoroscopes.map(horoscope => {
+                let type = horoscopeManager.getType(horoscope.type);
+                let sign = horoscopeManager.getSignByCode(horoscope.sign);
+                return getSignHoroscopeText(horoscope, sign, type);
+            });
+
+            horoscopeText = showGeneral
+                ? horoscopeText + '\n\n' + signHoroscopeTexts.join('\n\n')
+                : signHoroscopeTexts.join('\n\n');
         }
 
-        let isSubscribed = await horoscopeManager.hasSubscription(ctx.session.chatId, ctx.session.type, ctx.session.sign);
-        let horoscope = await horoscopeManager.getTodayHoroscope(ctx.session.type, ctx.session.sign);
         await horoscopeManager.saveStat(
             ctx.session.chatId,
             ctx.session.type,
-            ctx.session.sign,
+            ctx.session.signs,
             horoscope.date,
             ctx.session.birthday || null
         );
 
-        let type = await horoscopeManager.getType(ctx.session.type);
-        let sign = await horoscopeManager.getSignByCode(ctx.session.sign);
-        let horoscopeText = getHoroscopeText(horoscope, sign, type);
+        ctx.session.generalShown = todayStamp;
 
-        return ctx.replyWithHTML( horoscopeText, horoscopeMenu(isSubscribed) );
+        return ctx.replyWithHTML( horoscopeText, mainMenu(hasData) );
     });
 
-    scene.action('newSign', ctx => ctx.scene.enter('signsMenu'));
-    scene.action('newType', ctx => ctx.scene.enter('typesMenu'))
-
-    scene.action('subscribe', async ctx => {
-        await horoscopeManager.subscribe(ctx.session.chatId, ctx.session.type, ctx.session.sign);
-        return ctx.reply('Вы подписались на ежедевную рассылку этого гороскопа', menu([{code: 'newSign', text: 'Посмотреть другой'}]));
-    });
-
-    scene.action('unsubscribe', async ctx => {
-        await horoscopeManager.unsubscribe(ctx.session.chatId, ctx.session.type, ctx.session.sign);
-        return ctx.reply('Вы отписались от ежедневной рассылки этого гороскопа', menu([{code: 'newSign', text: 'Посмотреть другой'}]));
-    });
+    scene.action('signs', ctx => ctx.scene.enter('signsMenu'));
+    scene.action('today', ctx => ctx.scene.reenter())
 
     return scene;
 }

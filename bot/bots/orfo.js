@@ -73,6 +73,22 @@ function correctedText(text, errors) {
 
     return 'Исправленный текст:\n\n'+correctedText;
 }
+function analyticsText(text) {
+    text = text.trim();
+    let totalChars = text.length;
+    let wordsOnly = text.replace(/[^a-zа-я0-9]/ig, ' ').replace(/ +/g, ' ').trim()
+    let notSpaces = wordsOnly.replace(/ +/g, '').trim().length;
+    let totalWords = text.split(' ').length;
+    let sentencesCount = text.replace(/[^\.]+/g, '').length;
+    let paragraphsCount = text.replace(/\n+/g, '\n').replace(/[^\n]+/g, '').length + 1;
+    return `<b>Анализ текста</b>
+
+Символов (с пробелами): ${totalChars}
+Символов (без пробелов): ${notSpaces}
+Слов: ${totalWords}
+Предложений: ${sentencesCount}
+Абзацев: ${paragraphsCount}`;
+}
 
 initManagers(['chat']).then(async ({chat}) => {
     app.catch(catchErrors);
@@ -100,10 +116,12 @@ initManagers(['chat']).then(async ({chat}) => {
                 await ctx.replyWithHTML( highlightErrors(text, results.matches) );
                 await ctx.replyWithHTML( errorsList(text, results.matches) );
                 await ctx.replyWithHTML( correctedText(text, results.matches) );
+                await ctx.replyWithHTML( analyticsText( text ) );
                 return ctx.reply('Проверка окончена. Пришлите новый текст');
             }
             else {
-                return ctx.reply('Ошибок не найдено');
+                await ctx.reply('Ошибок не найдено');
+                return ctx.replyWithHTML( analyticsText( text ) );
             }
 
         }

@@ -2,9 +2,12 @@ const moment = require('moment');
 const axios = require('axios');
 const convert = require('xml-js');
 const {getDb} = require('../modules/Database');
+const {trimHTML} = require('../modules/Helpers');
+const {parseUrl} = require('../bots/helpers/parser');
 
 module.exports = function () {
     let DAILY_URL_BASE = "https://ignio.com/r/export/utf/xml/daily/";
+    let COMMON_DAILY_URL = "https://horo.mail.ru/prediction/today/";
 
     return {
         listTypes() {
@@ -102,6 +105,50 @@ module.exports = function () {
             }
             return horoscopes;
         },
+        async fetchCommonDaily() {
+            const db = await getDb();
+            const horoscopes = db.collection('horoscopes');
+
+            let today = moment().startOf('d');
+
+            let parsed = await parseUrl(COMMON_DAILY_URL, {
+                text: '.p-prediction .article__item_html',
+                moonText: '.p-item_moon .text',
+                moonGood: '.p-forecast .p-forecast__item:first-child .p-forecast__item__text',
+                moonBad: '.p-forecast .p-forecast__item:last-child .p-forecast__item__text',
+            });
+
+            let commonHoro = {
+                date: today.format('DD.MM.YYYY'),
+                sign: 'any',
+                period: 'daily',
+                type: 'general',
+                dateStamp: today.unix(),
+                text: trimHTML(parsed.text),
+                moonText: trimHTML(parsed.moonText),
+                moonGood: trimHTML(parsed.moonGood),
+                moonBad: trimHTML(parsed.moonBad),
+            }
+
+            return horoscopes.insertOne(commonHoro);
+        },
+        async loadDailyForEveryone() {
+            let filter = {
+                sign: 'any',
+                period: 'daily',
+                date: moment().format('DD.MM.YYYY'),
+            }
+
+            const db = await getDb();
+            const horoscopes = db.collection('horoscopes');
+            let horoscope = await horoscopes.findOne(filter);
+
+            if (!horoscope) {
+                horoscope = await this.fetchCommonDaily();
+            }
+
+            return horoscope || false;
+        },
         async loadDaily(typeCode, signCode, date) {
             let filter = {
                 sign: signCode,
@@ -159,10 +206,10 @@ module.exports = function () {
             const subscriptions = db.collection('subscriptions');
             return subscriptions.deleteOne({chatId, typeCode, signCode});
         },
-        async saveStat(chatId, typeCode, signCode, date, birthday = null) {
+        async saveStat(chatId, typeCode, signCodes, date, birthday = null) {
             const db = await getDb();
             const requests = db.collection('requests');
-            return requests.insertOne({chatId, typeCode, signCode, date, birthday});
+            return requests.insertOne({chatId, typeCode, signCodes, date, birthday});
         }
     }
 }

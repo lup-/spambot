@@ -18,6 +18,8 @@
     "wiki_bot_debug": "node --inspect=0.0.0.0 bots/wikipedia.js",
     "pdd_bot": "node bots/pdd.js",
     "pdd_bot_debug": "node --inspect=0.0.0.0 bots/pdd.js",
+    "present_bot": "node bots/present.js",
+    "present_bot_debug": "node --inspect=0.0.0.0 bots/present.js",
     "film_bot": "node bots/film.js",
     "film_bot_debug": "node --inspect=0.0.0.0 bots/film.js",
     "admin_bot": "node bots/admin.js",

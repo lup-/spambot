@@ -130,7 +130,8 @@ module.exports = function () {
                 moonBad: trimHTML(parsed.moonBad),
             }
 
-            return horoscopes.insertOne(commonHoro);
+            let result = await horoscopes.insertOne(commonHoro);
+            return result.ops && result.ops[0] ? result.ops[0] || false : false;
         },
         async loadDailyForEveryone() {
             let filter = {

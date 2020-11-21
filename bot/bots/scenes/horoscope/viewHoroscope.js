@@ -36,7 +36,7 @@ module.exports = function (horoscopeManager) {
         let showGeneral = !generalIsShown;
 
         let horoscope = await horoscopeManager.loadDailyForEveryone();
-        let horoscopeText = getGeneralHoroscopeText(horoscope);
+        let horoscopeText = horoscope ? getGeneralHoroscopeText(horoscope) : '';
 
         let hasData = ctx && ctx.session && ctx.session.signs && ctx.session.type;
         if (hasData) {

@@ -7,6 +7,8 @@ const DatingManager = require('./Dating');
 const FilmManager = require('./Film');
 const PddManager = require('./Pdd');
 const PresentManager = require('./Present');
+const PeriodicManager = require('./Periodic');
+const ProfileManager = require('./Profile');
 
 let instances = {};
 
@@ -32,6 +34,10 @@ function init(manager, params = {}) {
             return new PddManager();
         case 'present':
             return new PresentManager();
+        case 'periodic':
+            return new PeriodicManager();
+        case 'profile':
+            return new ProfileManager();
         default:
             return null;
     }

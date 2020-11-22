@@ -19,6 +19,24 @@ services:
       - LANGTOOL_API_URL= http://languagetool:8010/
     command: npm run orfo_bot
 
+  grammar_bot:
+    image: node
+    container_name: 'grammar_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - languagetool
+    volumes:
+      - ./bot:/var/www
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - MONGO_DB=grammar_bot
+      - BOT_TOKEN=${ORFO_BOT_TOKEN}
+      - LANGTOOL_API_URL= http://languagetool:8010/
+    command: npm run orfo_bot
+
   ytdlc_bot:
     build:
       context: "."

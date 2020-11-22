@@ -7,7 +7,12 @@ function menu(buttons, columns = false) {
     }
 
     let markupButtons = buttons.map(button => {
-        return Markup.callbackButton(button.text, button.code);
+        let btn = Markup.callbackButton(button.text, button.code);
+        if (button.type === 'location') {
+            btn = Markup.locationRequestButton(button.text);
+        }
+
+        return btn;
     });
 
     let columnButtons = [];
@@ -32,6 +37,13 @@ function menu(buttons, columns = false) {
     }
 
     return Markup.inlineKeyboard(columnButtons).extra();
+}
+
+function yesNoMenu() {
+    return menu([
+        {code: 'menu_yes', text: 'Да'},
+        {code: 'menu_no', text: 'Нет'},
+    ]);
 }
 
 function urlButton(button) {
@@ -69,4 +81,4 @@ function buttonStep(actions = [], events = []) {
     return handler;
 }
 
-module.exports = {menu, buttonStep, urlButton};
+module.exports = {menu, yesNoMenu, buttonStep, urlButton};

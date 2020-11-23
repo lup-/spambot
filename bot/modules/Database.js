@@ -48,7 +48,7 @@ async function getDb (dbName = false) {
         return dbInstance[dbName];
     }
 
-    dbInstance[dbName] = await newDb();
+    dbInstance[dbName] = await newDb(dbName);
     return dbInstance[dbName];
 }
 

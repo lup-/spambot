@@ -19,6 +19,7 @@ initManagers(['chat', 'present']).then(async ({chat, present}) => {
     stage.register(getDiscover(present));
 
     app.use(session({store}));
+    app.use(chat.initIdsMiddleware());
     app.use(chat.saveRefMiddleware());
     app.use(chat.saveUserMiddleware());
     app.use(stage.middleware());

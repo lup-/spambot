@@ -33,7 +33,7 @@ services:
       - NODE_ENV=development
       - MONGO_HOST=aquarium_mongo
       - MONGO_DB=grammar_bot
-      - BOT_TOKEN=${ORFO_BOT_TOKEN}
+      - BOT_TOKEN=${GRAMMAR_BOT_TOKEN}
       - LANGTOOL_API_URL= http://languagetool:8010/
     command: npm run orfo_bot
 

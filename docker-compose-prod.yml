@@ -221,6 +221,6 @@ services:
     working_dir: /var/www
     environment:
       - NODE_ENV=development
-      - MONGO_HOST=spambot_mongo
+      - MONGO_HOST=aquarium_mongo
       - MONGO_DB=botofarmer
     command: npm run debug

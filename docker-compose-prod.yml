@@ -172,6 +172,22 @@ services:
       - BOT_TOKEN=${PRESENT_BOT_TOKEN}
     command: npm run present_bot
 
+  symptoms_bot:
+    image: node
+    container_name: 'symptoms_bot'
+    restart: always
+    depends_on:
+      - mongo
+    volumes:
+      - ./bot:/var/www
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - MONGO_DB=symptoms_bot
+      - BOT_TOKEN=${SYMPTOMS_BOT_TOKEN}
+    command: npm run symptoms_bot
+
   languagetool:
     build:
       context: "."

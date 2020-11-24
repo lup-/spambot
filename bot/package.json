@@ -22,6 +22,8 @@
     "present_bot_debug": "node --inspect=0.0.0.0 bots/present.js",
     "film_bot": "node bots/film.js",
     "film_bot_debug": "node --inspect=0.0.0.0 bots/film.js",
+    "symptoms_bot": "node bots/symptoms.js",
+    "symptoms_bot_debug": "node --inspect=0.0.0.0 bots/symptoms.js",
     "admin_bot": "node bots/admin.js",
     "admin_bot_debug": "node --inspect=0.0.0.0 bots/admin.js",
     "tglib": "node --inspect=0.0.0.0 tglib.js"
@@ -31,8 +33,10 @@
   "dependencies": {
     "axios": "^0.21.0",
     "countries-list": "^2.5.6",
+    "form-data": "^3.0.0",
     "geo-tz": "^6.0.1",
     "got": "^11.8.0",
+    "he": "^1.2.0",
     "iconv": "^3.0.0",
     "jsdom": "^16.4.0",
     "languagetool-api": "^1.1.2",
@@ -46,6 +50,7 @@
     "telegraf": "^3.38.0",
     "telegraf-session-mongo": "github:lup-/telegraf-session-mongo",
     "tglib": "^3.0.5",
+    "tough-cookie": "^4.0.0",
     "wikijs": "^6.0.1",
     "xml-js": "^1.6.11"
   }

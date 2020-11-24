@@ -1,4 +1,5 @@
 const { Telegraf } = require('telegraf');
+const he = require('he');
 
 function wait(msec) {
     return new Promise(resolve => setTimeout(resolve, msec));
@@ -9,7 +10,7 @@ function capitalize(str) {
 }
 
 function trimHTML(html) {
-    return html.replace(/\<\/*[a-z]+.*?>/ig, '').replace(/ +/, ' ').trim();
+    return he.decode(html.replace(/\<\/*[a-z]+.*?>/ig, '').replace(/ +/, ' ')).trim();
 }
 
 function truncateString(str, len) {

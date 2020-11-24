@@ -9,6 +9,7 @@ const PddManager = require('./Pdd');
 const PresentManager = require('./Present');
 const PeriodicManager = require('./Periodic');
 const ProfileManager = require('./Profile');
+const DiseasesManager = require('./Diseases');
 
 let instances = {};
 
@@ -36,6 +37,8 @@ function init(manager, params = {}) {
             return new PresentManager();
         case 'periodic':
             return new PeriodicManager();
+        case 'diseases':
+            return new DiseasesManager();
         case 'profile':
             return new ProfileManager();
         default:

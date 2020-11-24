@@ -1,6 +1,12 @@
 const { Telegraf } = require('telegraf');
+const Stage = require('telegraf/stage');
+
+const session = require('telegraf/session');
+const store = new Map();
 const {initManagers} = require('../managers');
 const {catchErrors} = require('./helpers/common');
+
+const getCategoryMenu = require('./scenes/present/categoryMenu');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 let app = new Telegraf(BOT_TOKEN);
@@ -8,8 +14,13 @@ let app = new Telegraf(BOT_TOKEN);
 initManagers(['chat']).then(async ({chat}) => {
     app.catch(catchErrors);
 
+    const stage = new Stage();
+    stage.register(getCategoryMenu(chat));
+
+    app.use(chat.initIdsMiddleware());
     app.use(chat.saveRefMiddleware());
     app.use(chat.saveUserMiddleware());
+    app.use(stage.middleware());
 
     app.start(async (ctx) => {
         try {
@@ -26,6 +37,9 @@ initManagers(['chat']).then(async ({chat}) => {
             console.log(e);
         }
     });
+
+    app.action(/.*/, ctx => ctx.scene.enter('categoryMenu'));
+    app.on('message', ctx => ctx.scene.enter('categoryMenu'));
 
     app.launch();
 });

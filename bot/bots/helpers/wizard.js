@@ -1,7 +1,7 @@
 const Markup = require('telegraf/markup');
 const Composer = require('telegraf/composer');
 
-function menu(buttons, columns = false) {
+function menu(buttons, columns = false, oneTime = false) {
     if (columns === true) {
         columns = 1;
     }
@@ -36,7 +36,13 @@ function menu(buttons, columns = false) {
         columnButtons = markupButtons;
     }
 
-    return Markup.inlineKeyboard(columnButtons).extra();
+    let keyboard = Markup.inlineKeyboard(columnButtons);
+
+    if (oneTime) {
+        keyboard = keyboard.oneTime(true);
+    }
+
+    return keyboard.extra();
 }
 
 function yesNoMenu() {

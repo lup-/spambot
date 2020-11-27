@@ -63,7 +63,11 @@ function getMessage(code, data = {}) {
     return message;
 }
 
+function getExtendedMessage(message, tags) {
+    return message;
+}
+
 module.exports = {
-    __: getMessage,
+    __: getExtendedMessage,
     __md: (code, data = {}) => escapeMarkdown(getMessage(code, data)),
 }

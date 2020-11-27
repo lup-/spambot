@@ -19,7 +19,7 @@ module.exports = function (datingManager) {
     const scene = new BaseScene('mainMenu');
 
     scene.enter(ctx => {
-        return ctx.reply('Что дальше?', mainMenu(ctx));
+        return ctx.safeReply(ctx => ctx.reply('Что дальше?', mainMenu(ctx)), null, ctx);
     });
 
     scene.action('rateProfiles', ctx => ctx.session && ctx.session.profile

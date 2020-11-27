@@ -40,7 +40,10 @@ module.exports = function (datingManager) {
         let settings = datingManager.settings(currentProfile);
         settings.city = newValue;
         ctx.session.profile.settings = settings;
-        ctx.editMessageText('Учитывать город?', cityMenu(settings))
+
+        return ctx.safeReply( ctx => {
+            return ctx.editMessageText('Учитывать город?', cityMenu(settings))
+        }, null, ctx);
     });
 
     scene.action(/age_(.*)/, async ctx => {
@@ -52,7 +55,10 @@ module.exports = function (datingManager) {
         let settings = datingManager.settings(currentProfile);
         settings.age = newValue;
         ctx.session.profile.settings = settings;
-        ctx.editMessageText('Возраст?', ageMenu(settings))
+
+        return ctx.safeReply( ctx => {
+            return ctx.editMessageText('Возраст?', ageMenu(settings))
+        }, null, ctx);
     });
 
     scene.action('ready', async ctx => {

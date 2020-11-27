@@ -12,11 +12,14 @@ const getRateProfiles = require('./scenes/dating/rateProfiles');
 const getMainMenu = require('./scenes/dating/main');
 const getSettings = require('./scenes/dating/settings');
 
+const SafeReplyMiddleware = require('../modules/SafeReplyMiddleware');
+
 const {catchErrors} = require('./helpers/common');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 let app = new Telegraf(BOT_TOKEN);
 let telegram = new Telegram(BOT_TOKEN);
+
 
 Promise.all([
     initManagers(['dating', 'chat']),
@@ -36,6 +39,18 @@ Promise.all([
         stage.register(settings);
         stage.register(mainMenu);
 
+        let safeReply = new SafeReplyMiddleware();
+        safeReply.setBlockedHandler(async (ctx, next, e) => {
+            let chatId = e && e.on && e.on.payload && e.on.payload.chat_id;
+
+            if (chatId) {
+                let targetProfile = await dating.loadProfileByUserId(chatId);
+                await dating.blockUser(targetProfile);
+            }
+        });
+        safeReply.setDefaultFallback(catchErrors);
+
+        app.use(safeReply.getMiddleware());
         app.use(session({store}));
         app.use(dating.initSessionProfileMiddleware());
         app.use(chat.saveRefMiddleware());

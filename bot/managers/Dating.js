@@ -28,6 +28,7 @@ module.exports = function () {
                 sex: currentUserProfile.lookingFor,
                 lookingFor: currentUserProfile.sex,
                 stopped: {$in: [null, false]},
+                blocked: {$in: [null, false]},
                 complain: {$in: [null, false]},
             }
 
@@ -81,7 +82,14 @@ module.exports = function () {
             return profile;
         },
         async startSeeking(profile) {
+            if (profile.blocked) {
+                profile.blocked = false;
+            }
             profile.stopped = false;
+            return this.saveProfile(profile);
+        },
+        async blockUser(profile) {
+            profile.blocked = true;
             return this.saveProfile(profile);
         },
         async stopSeeking(profile) {

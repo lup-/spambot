@@ -82,10 +82,14 @@ async function replyWithFilm(ctx, filmManager, showNewMessage) {
         ? {url: imageUrl}
         : EMPTY_FILE_ID;
 
-    return showNewMessage
-        ? ctx.replyWithPhoto(media, photoExtra)
-        : ctx.editMessageMedia({type: 'photo', media, caption: filmDescription(results.film)}, photoExtra);
-
+    return ctx.safeReply(
+        ctx => {
+            return showNewMessage
+                ? ctx.replyWithPhoto(media, photoExtra)
+                : ctx.editMessageMedia({type: 'photo', media, caption: filmDescription(results.film)}, photoExtra);
+        },
+        ctx => ctx.replyWithPhoto(EMPTY_FILE_ID, {caption: 'Ошибка загрузки данных'}, filmMenu(results)),
+        ctx);
 }
 
 module.exports = function (filmManager) {
@@ -127,12 +131,16 @@ module.exports = function (filmManager) {
 
         let index = ctx.session.index || 0;
         let randomIndex = false;
+        let retries = 0;
+        let maxRetries = 5;
 
         do {
+            retries++;
             randomIndex = maxNum
                 ? Math.floor(Math.random() * maxNum)
                 : 0;
-        } while (maxNum > 0 && index === randomIndex)
+        }
+        while (maxNum > 0 && index === randomIndex && retries < maxRetries)
 
         if (ctx.session.index === randomIndex) {
             return;

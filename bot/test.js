@@ -118,6 +118,19 @@ initManagers(['test', 'chat']).then( async  ({test, chat}) => {
         }
     });
 
+    tbot.on('message', (msg) => {
+        const chatId = msg.chat.id;
+        bot.sendPhoto(chatId, 'keks.png');
+    });
+
+    tbot.message_handler(content_types=["text"])
+        def default_test(message):
+        keyboard = types.InlineKeyboardMarkup()
+        url_button = types.InlineKeyboardButton(text="Перейти на версию", url="/")
+        keyboard.add(url_button)
+        bot.send_message(message.chat.id, "версия", reply_markup=keyboard)
+
+
     tbot.launch();
 
 })

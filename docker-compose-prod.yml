@@ -157,6 +157,7 @@ services:
     environment:
       - NODE_ENV=development
       - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
       - MONGO_DB=pdd_bot
       - BOT_NAME=pdd_bot
       - BOT_TOKEN=${PDD_BOT_TOKEN}

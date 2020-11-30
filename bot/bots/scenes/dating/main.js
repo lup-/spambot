@@ -9,7 +9,7 @@ function mainMenu(ctx) {
 
     return menu([
         {code: 'rateProfiles', text: '❤ Оценить других'},
-        {code: 'rateFans', text: '❤❤ Посмотрель лайкнувших'},
+        {code: 'rateFans', text: '❤❤ Посмотреть лайкнувших'},
         {code: 'profileWizard', text: '✏ Поменять мою анкету'},
         seekButton,
         {code: 'settings', text: '🎨 Настройки поиска'},

@@ -14,7 +14,7 @@ const questionStage = require('./scenes/pdd/question');
 const BOT_TOKEN = process.env.BOT_TOKEN;
 let app = new Telegraf(BOT_TOKEN);
 
-initManagers(['chat', 'pdd']).then(async ({chat, pdd}) => {
+initManagers(['chat', 'pdd', 'bus']).then(async ({chat, pdd, bus}) => {
     app.catch(catchErrors);
 
     const stage = new Stage();
@@ -39,4 +39,5 @@ initManagers(['chat', 'pdd']).then(async ({chat, pdd}) => {
     app.on('message', ctx => ctx.scene.enter('main'));
 
     app.launch();
+    bus.listenCommands();
 });

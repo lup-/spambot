@@ -1,5 +1,6 @@
 const BaseScene = require('telegraf/scenes/base');
 const {menu} = require('../../helpers/wizard');
+const {__} = require('../../../modules/Messages');
 
 module.exports = function (presentManager) {
     const scene = new BaseScene('categoryMenu');
@@ -7,11 +8,14 @@ module.exports = function (presentManager) {
     scene.enter(async ctx => {
         ctx.session.nav = false;
         let categories = await presentManager.categoriesList();
-        return ctx.reply('Какой подарочек ищем?', menu(
-            categories.map((category, index) => {
-                return {code: 'category_'+index, text: category.title};
-            }), 2
-        ));
+        return ctx.reply(
+            __('Какой подарочек ищем?', ['menu', 'main', 'settings']),
+            menu(
+                categories.map((category, index) => {
+                    return {code: 'category_'+index, text: category.title};
+                }), 2
+            )
+        );
     });
 
     scene.action(/category_(.*)/, async ctx => {

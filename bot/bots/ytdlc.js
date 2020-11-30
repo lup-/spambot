@@ -4,6 +4,7 @@ const { Telegraf } = require('telegraf');
 const {initManagers} = require('../managers');
 const {wait} = require('../modules/Helpers');
 const {catchErrors} = require('./helpers/common');
+const {__} = require('../modules/Messages');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 let app = new Telegraf(BOT_TOKEN);
@@ -93,12 +94,14 @@ async function waitForFile(path, maxTimeoutMs = 1000) {
     });
 }
 
-initManagers(['chat']).then(async ({chat}) => {
+initManagers(['chat', 'bus']).then(async ({chat, bus}) => {
     app.use(chat.saveRefMiddleware());
     app.use(chat.saveUserMiddleware());
 
     app.start(async (ctx) => {
-        return ctx.reply('Пришлите ссылку на видео. Максимальный размер файла для бота в Telegram 50Мб.\nБудет загружено видео максимального качества с учетом этого органичения.');
+        return ctx.reply(
+            __('Пришлите ссылку на видео. Максимальный размер файла для бота в Telegram 50Мб.\nБудет загружено видео максимального качества с учетом этого органичения.', ['main', 'start'])
+        );
     });
 
     app.on('message', async ctx => {
@@ -140,6 +143,10 @@ initManagers(['chat']).then(async ({chat}) => {
             filePath = `/downloads/${filename}`;
             await waitForFile(filePath, 5000);
             await ctx.replyWithVideo({source: filePath});
+            let adText = __('', ['content', 'video', 'success']);
+            if (adText) {
+                await ctx.reply(adText);
+            }
             fs.unlinkSync(filePath);
         }
         catch (e) {
@@ -168,4 +175,5 @@ initManagers(['chat']).then(async ({chat}) => {
     app.catch(catchErrors);
 
     app.launch();
+    bus.listenCommands();
 });

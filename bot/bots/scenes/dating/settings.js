@@ -1,5 +1,6 @@
 const BaseScene = require('telegraf/scenes/base');
 const {menu} = require('../../helpers/wizard');
+const {__} = require('../../../modules/Messages');
 
 function cityMenu(settings) {
     return menu([
@@ -28,7 +29,10 @@ module.exports = function (datingManager) {
         await ctx.reply('Задайте настройки поиска');
         await ctx.reply('Учитывать город?', cityMenu(settings));
         await ctx.reply('Возраст?', ageMenu(settings));
-        return ctx.reply('После настройки нажмите', menu([{code: 'ready', text: 'Готово'}]));
+        return ctx.reply(
+            __('После настройки нажмите', ['settings', 'save']),
+            menu([{code: 'ready', text: 'Готово'}])
+        );
     });
 
     scene.action(/city_(.*)/, async ctx => {

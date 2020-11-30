@@ -5,15 +5,23 @@ import routes from "@/routes";
 import vuetify from './plugins/vuetify';
 import store from "@/store";
 
+let vueInstance;
 const router = new VueRouter({
   routes
 });
 
 Vue.config.productionTip = false;
+Vue.config.errorHandler = function (err) {
+  if (vueInstance) {
+    vueInstance.$store.commit('setAppError', err);
+  }
+  let c = console;
+  c.error(err);
+};
 
 Vue.use(VueRouter);
 
-new Vue({
+vueInstance = new Vue({
   store,
   router,
   vuetify,

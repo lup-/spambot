@@ -13,7 +13,7 @@ const viewHoroscope = require('./scenes/horoscope/viewHoroscope');
 const BOT_TOKEN = process.env.BOT_TOKEN;
 let app = new Telegraf(BOT_TOKEN);
 
-initManagers(['horoscope', 'chat']).then(async ({horoscope, chat}) => {
+initManagers(['horoscope', 'chat', 'bus']).then(async ({horoscope, chat, bus}) => {
     const stage = new Stage();
     stage.register(signsMenu(horoscope));
     stage.register(typesMenu(horoscope));
@@ -34,5 +34,5 @@ initManagers(['horoscope', 'chat']).then(async ({horoscope, chat}) => {
     app.on('message', ctx => ctx.scene.enter('viewHoroscope'));
 
     app.launch();
-
+    bus.listenCommands();
 });

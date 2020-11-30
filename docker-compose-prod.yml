@@ -7,6 +7,7 @@ services:
     restart: always
     depends_on:
       - mongo
+      - redis
       - languagetool
     volumes:
       - ./bot:/var/www
@@ -14,8 +15,10 @@ services:
     environment:
       - NODE_ENV=development
       - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
       - MONGO_DB=orfo_bot
       - BOT_TOKEN=${ORFO_BOT_TOKEN}
+      - BOT_NAME=orfo_bot
       - LANGTOOL_API_URL= http://languagetool:8010/
     command: npm run orfo_bot
 
@@ -25,6 +28,7 @@ services:
     restart: always
     depends_on:
       - mongo
+      - redis
       - languagetool
     volumes:
       - ./bot:/var/www
@@ -32,8 +36,10 @@ services:
     environment:
       - NODE_ENV=development
       - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
       - MONGO_DB=grammar_bot
       - BOT_TOKEN=${GRAMMAR_BOT_TOKEN}
+      - BOT_NAME=grammar_bot
       - LANGTOOL_API_URL= http://languagetool:8010/
     command: npm run orfo_bot
 
@@ -45,6 +51,7 @@ services:
     restart: always
     depends_on:
       - mongo
+      - redis
     volumes:
       - ./files:/downloads
       - ./bot:/var/www
@@ -52,7 +59,9 @@ services:
     environment:
       - NODE_ENV=development
       - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
       - MONGO_DB=ytdlc_bot
+      - BOT_NAME=ytdlc_bot
       - BOT_TOKEN=${YTDLC_BOT_TOKEN}
     command: npm run ytdlc_bot
 
@@ -64,6 +73,7 @@ services:
     restart: always
     depends_on:
       - mongo
+      - redis
     volumes:
       - ./files:/downloads
       - ./bot:/var/www
@@ -71,7 +81,9 @@ services:
     environment:
       - NODE_ENV=development
       - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
       - MONGO_DB=ttdlc_bot
+      - BOT_NAME=ttdlc_bot
       - BOT_TOKEN=${TTDLC_BOT_TOKEN}
     command: npm run ttdlc_bot
 
@@ -81,13 +93,16 @@ services:
     restart: always
     depends_on:
       - mongo
+      - redis
     volumes:
       - ./bot:/var/www
     working_dir: /var/www
     environment:
       - NODE_ENV=development
       - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
       - MONGO_DB=dating_bot
+      - BOT_NAME=dating_bot
       - BOT_TOKEN=${DATING_BOT_TOKEN}
     command: npm run dating_bot
 
@@ -97,13 +112,16 @@ services:
     restart: always
     depends_on:
       - mongo
+      - redis
     volumes:
       - ./bot:/var/www
     working_dir: /var/www
     environment:
       - NODE_ENV=development
       - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
       - MONGO_DB=wiki_bot
+      - BOT_NAME=wiki_bot
       - BOT_TOKEN=${WIKI_BOT_TOKEN}
     command: npm run wiki_bot
 
@@ -113,13 +131,16 @@ services:
     restart: always
     depends_on:
       - mongo
+      - redis
     volumes:
       - ./bot:/var/www
     working_dir: /var/www
     environment:
       - NODE_ENV=development
       - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
       - MONGO_DB=horoscope_bot
+      - BOT_NAME=horoscope_bot
       - BOT_TOKEN=${HOROSCOPE_BOT_TOKEN}
     command: npm run horoscope_bot
 
@@ -129,6 +150,7 @@ services:
     restart: always
     depends_on:
       - mongo
+      - redis
     volumes:
       - ./bot:/var/www
     working_dir: /var/www
@@ -136,6 +158,7 @@ services:
       - NODE_ENV=development
       - MONGO_HOST=aquarium_mongo
       - MONGO_DB=pdd_bot
+      - BOT_NAME=pdd_bot
       - BOT_TOKEN=${PDD_BOT_TOKEN}
     command: npm run pdd_bot
 
@@ -145,14 +168,18 @@ services:
     restart: always
     depends_on:
       - mongo
+      - redis
     volumes:
       - ./bot:/var/www
     working_dir: /var/www
     environment:
       - NODE_ENV=development
+      - REDIS_HOST=redis
       - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
       - MONGO_DB=film_bot
       - BOT_TOKEN=${FILM_BOT_TOKEN}
+      - BOT_NAME=film_bot
       - TMDB_KEY=${TMDB_V3_KEY}
     command: npm run film_bot
 
@@ -162,14 +189,17 @@ services:
     restart: always
     depends_on:
       - mongo
+      - redis
     volumes:
       - ./bot:/var/www
     working_dir: /var/www
     environment:
       - NODE_ENV=development
       - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
       - MONGO_DB=present_bot
       - BOT_TOKEN=${PRESENT_BOT_TOKEN}
+      - BOT_NAME=present_bot
     command: npm run present_bot
 
   symptoms_bot:
@@ -178,14 +208,17 @@ services:
     restart: always
     depends_on:
       - mongo
+      - redis
     volumes:
       - ./bot:/var/www
     working_dir: /var/www
     environment:
       - NODE_ENV=development
       - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
       - MONGO_DB=symptoms_bot
       - BOT_TOKEN=${SYMPTOMS_BOT_TOKEN}
+      - BOT_NAME=symptoms_bot
     command: npm run symptoms_bot
 
   languagetool:
@@ -206,6 +239,10 @@ services:
     ports:
       - 127.0.0.1:${MONGO_PORT}:27017
 
+  redis:
+    image: redis
+    container_name: 'aquarium_redis'
+
   admin:
     image: nginx
     container_name: 'bots_nginx'
@@ -225,6 +262,7 @@ services:
       - ${BACKEND_DEBUG_PORT}:9229
     depends_on:
       - mongo
+      - redis
     volumes:
       - ./bot:/var/bot
       - ./backend:/var/www
@@ -239,4 +277,5 @@ services:
       - NODE_ENV=development
       - MONGO_HOST=aquarium_mongo
       - MONGO_DB=botofarmer
+      - REDIS_HOST=aquarium_redis
     command: npm run debug

@@ -22,10 +22,10 @@ let telegram = new Telegram(BOT_TOKEN);
 
 
 Promise.all([
-    initManagers(['dating', 'chat']),
+    initManagers(['dating', 'chat', 'bus']),
     getDb()
 ])
-    .then(([{dating, chat}, db]) => {
+    .then(([{dating, chat, bus}, db]) => {
         const profileWizard = getProfileWizard(dating);
         const rateProfiles = getRateProfiles(dating, false, telegram);
         const rateFans = getRateProfiles(dating, true, telegram);
@@ -75,4 +75,5 @@ Promise.all([
         app.on('message', ctx => ctx.scene.enter('mainMenu'));
 
         app.launch();
+        bus.listenCommands();
     });

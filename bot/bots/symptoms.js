@@ -3,6 +3,7 @@ const {initManagers} = require('../managers');
 const {catchErrors} = require('./helpers/common');
 const {menu} = require('./helpers/wizard');
 const {trimHTML} = require('../modules/Helpers');
+const {__} = require('../modules/Messages');
 
 const session = require('telegraf/session');
 const store = new Map();
@@ -21,7 +22,10 @@ function limbsMenu(diseases) {
 async function startDialog(ctx, diseases) {
     try {
         ctx.session.started = true;
-        return ctx.reply('Здравствуйте! На что жалуетесь?', limbsMenu(diseases));
+        return ctx.reply(
+            __('Здравствуйте! На что жалуетесь?', ['menu', 'main', 'start']),
+            limbsMenu(diseases)
+        );
     }
     catch (e) {}
 }
@@ -34,10 +38,11 @@ function rateMenu() {
 }
 
 function replyWithRestart(text, ctx) {
+    text = __(text, ['menu', 'restart']);
     return ctx.reply(text, menu([{code: 'restart', text: 'Главное меню'}]));
 }
 
-initManagers(['chat', 'diseases']).then(async ({chat, diseases}) => {
+initManagers(['chat', 'diseases', 'bus']).then(async ({chat, diseases, bus}) => {
     app.catch(catchErrors);
 
     app.use(session({store}));
@@ -46,11 +51,14 @@ initManagers(['chat', 'diseases']).then(async ({chat, diseases}) => {
     app.use(chat.saveUserMiddleware());
 
     app.start(ctx => {
-        return ctx.reply(`Этот бот несет строго ознакомительный характер и не является руководством к действию/лечению.
+        return ctx.reply(
+            __(`Этот бот несет строго ознакомительный характер и не является руководством к действию/лечению.
 
-Точную информацию можно получить только при консультации у врача.`, menu([
-            {code: 'accept', text: 'Понятно'}
-        ]))
+Точную информацию можно получить только при консультации у врача.`, ['content', 'start', 'disclaimer']),
+            menu([
+                {code: 'accept', text: 'Понятно'}
+            ])
+        )
     })
 
     app.action('accept', ctx => startDialog(ctx, diseases))
@@ -106,7 +114,10 @@ initManagers(['chat', 'diseases']).then(async ({chat, diseases}) => {
             ctx.session.diagnosis = complain;
             let text = trimHTML(complain.text.replace(/\<\/p\>/g, '</p>\n'));
             let diagnosis = `<b>${complain.title}</b>\n\n${text}`;
-            await ctx.replyWithHTML(diagnosis, rateMenu());
+            await ctx.replyWithHTML(
+                __(diagnosis, ['content', 'diagnosis', 'info']),
+                rateMenu()
+            );
             return replyWithRestart('Еще раз?', ctx);
         }
     });
@@ -126,4 +137,5 @@ initManagers(['chat', 'diseases']).then(async ({chat, diseases}) => {
     app.on('message', ctx => startDialog(ctx, diseases));
 
     app.launch();
+    bus.listenCommands();
 });

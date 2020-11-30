@@ -13,7 +13,7 @@ const getDiscover = require('./scenes/present/discover');
 const BOT_TOKEN = process.env.BOT_TOKEN;
 let app = new Telegraf(BOT_TOKEN);
 
-initManagers(['chat', 'present']).then(async ({chat, present}) => {
+initManagers(['chat', 'present', 'bus']).then(async ({chat, present, bus}) => {
     const stage = new Stage();
     stage.register(getCategoryMenu(present));
     stage.register(getDiscover(present));
@@ -35,4 +35,5 @@ initManagers(['chat', 'present']).then(async ({chat, present}) => {
     app.on('message', ctx => ctx.scene.enter('categoryMenu'));
 
     app.launch();
+    bus.listenCommands();
 });

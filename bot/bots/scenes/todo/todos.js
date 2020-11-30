@@ -1,6 +1,7 @@
 const BaseScene = require('telegraf/scenes/base');
 const {menu} = require('../../helpers/wizard');
 const {postpone, complete} = require('../../helpers/postpone');
+const {__} = require('../../../modules/Messages');
 
 const moment = require('moment-timezone');
 
@@ -125,7 +126,10 @@ module.exports = function (periodic) {
         try {
             let updatedTask = await periodic.setTaskTime(taskId, newTime);
             let taskTime = moment.unix(updatedTask.nextRemind).tz(ctx.session.profile.zone).format('DD.MM.YYYY');
-            return ctx.reply('Хорошо. Напомню ' + taskTime, timeMenu(taskId));
+            return ctx.reply(
+                __('Хорошо. Напомню ' + taskTime, ['content', 'success', 'task']),
+                timeMenu(taskId)
+            );
         }
         catch (e) {
             console.log(e);
@@ -148,7 +152,9 @@ module.exports = function (periodic) {
 
         let updatedTask = await periodic.setTaskTime(taskId, newTime);
         let taskTime = moment.unix(updatedTask.nextRemind).tz(ctx.session.profile.zone).format('DD.MM.YYYY в HH:mm');
-        await ctx.reply('Хорошо. Напомню ' + taskTime);
+        await ctx.reply(
+            __('Хорошо. Напомню ' + taskTime, ['content', 'success', 'task', 'time'])
+        );
         return ctx.scene.reenter();
     });
 

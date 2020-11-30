@@ -3,6 +3,7 @@ const {initManagers} = require('../managers');
 const wiki = require('wikijs').default;
 const moment = require('moment');
 const {catchErrors} = require('./helpers/common');
+const {__} = require('../modules/Messages');
 
 const apiUrl = "https://ru.wikipedia.org/w/api.php";
 const BOT_TOKEN = process.env.BOT_TOKEN;
@@ -28,12 +29,14 @@ async function loadSearchResults(titles) {
     return Promise.all( titles.map(loadPage) );
 }
 
-initManagers(['chat']).then(async ({chat}) => {
+initManagers(['chat', 'bus']).then(async ({chat, bus}) => {
     app.use(chat.saveRefMiddleware());
     app.use(chat.saveUserMiddleware());
 
     app.start(async (ctx) => {
-        return ctx.reply('Пришлите любой запрос и я поищу его в Википедии');
+        return ctx.reply(
+            __('Пришлите любой запрос и я поищу его в Википедии', ['main', 'start'])
+        );
     });
 
     app.on('inline_query', async ({ inlineQuery, answerInlineQuery }) => {
@@ -75,7 +78,9 @@ initManagers(['chat']).then(async ({chat}) => {
         const page = await loadPage(search.results[0]);
         
         if (page) {
-            return ctx.replyWithHTML( page.message );
+            return ctx.replyWithHTML(
+                __(page.message, ['content', 'info'])
+            );
         }
         else {
             return ctx.reply('Ошибка загрузки. Попробуйте еще раз');
@@ -86,4 +91,5 @@ initManagers(['chat']).then(async ({chat}) => {
     app.catch(catchErrors);
 
     app.launch();
+    bus.listenCommands();
 });

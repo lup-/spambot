@@ -35,10 +35,11 @@ module.exports = {
                 let tokenVar = botEnv['BOT_TOKEN'].replace(/[$\{\}]/g,'');
                 let containerName = botConfig.container_name;
                 let dbName = botEnv['MONGO_DB'];
+                let botName = botEnv['BOT_NAME'];
                 let token = envVars[tokenVar];
 
                 bots.push({
-                    id, containerName, dbName, token
+                    id, containerName, dbName, botName, token
                 });
             }
         }

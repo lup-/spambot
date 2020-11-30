@@ -1,6 +1,7 @@
 const BaseScene = require('telegraf/scenes/base');
 const {menu} = require('../../helpers/wizard');
 const {truncateString} = require('../../../modules/Helpers');
+const {__} = require('../../../modules/Messages');
 
 const EMPTY_FILE_ID = 'AgACAgIAAxkDAAIF3V-0xDwAAZxgtMPCLuAv-dYMDWkVvAACZbAxG68woEnFDINlmSGWEGdyGZguAAMBAAMCAANtAAMFLQMAAR4E';
 
@@ -39,10 +40,10 @@ function presentDescription(present) {
 
     const MAX_LEN = 1024;
 
-    let descr = `<b>${title}</b>
+    let descr = __(`<b>${title}</b>
 Примерная цена: ${approxPrice} руб
 
-${overview}`;
+${overview}`, ['content', 'info', 'goods'], 'photo');
 
     return truncateString(descr, MAX_LEN);
 }

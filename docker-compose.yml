@@ -92,6 +92,26 @@ services:
       - BOT_TOKEN=${YTDLC_BOT_TOKEN}
     command: npm run ytdlc_bot_debug
 
+  film_bot:
+    image: node
+    container_name: 'film_bot'
+    ports:
+      - ${BOT_DEBUG_PORT}:9229
+    depends_on:
+      - mongo
+      - redis
+    volumes:
+      - ./bot:/var/www
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=spambot_mongo
+      - REDIS_HOST=spambot_redis
+      - MONGO_DB=film_bot
+      - BOT_NAME=film_bot
+      - BOT_TOKEN=${FILM_BOT_TOKEN}
+    command: npm run film_bot_debug
+
   mongo:
     image: mongo
     container_name: 'spambot_mongo'
@@ -109,6 +129,10 @@ services:
       - ${LANGUAGETOOL_PORT}:8010
     working_dir: /LanguageTool-5.1
     command: "java -cp languagetool-server.jar  org.languagetool.server.HTTPServer --port 8010 --public --allow-origin '*'"
+
+  redis:
+    image: redis
+    container_name: 'spambot_redis'
 
   tglib:
     build:
@@ -150,6 +174,7 @@ services:
       - ${BACKEND_DEBUG_PORT}:9229
     depends_on:
       - mongo
+      - redis
     volumes:
       - ./bot:/var/bot
       - ./backend:/var/www
@@ -164,4 +189,5 @@ services:
       - NODE_ENV=development
       - MONGO_HOST=spambot_mongo
       - MONGO_DB=botofarmer
+      - REDIS_HOST=spambot_redis
     command: npm run debug

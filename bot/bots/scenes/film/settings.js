@@ -1,6 +1,7 @@
 const BaseScene = require('telegraf/scenes/base');
 const {menu} = require('../../helpers/wizard');
 const {capitalize} = require('../../../modules/Helpers');
+const {__} = require('../../../modules/Messages');
 
 const genresText = 'Жанры для поиска. Если одновременно выбраны "семейный" и "комедия", то в поиске будут все "семейные комедии"';
 
@@ -27,7 +28,10 @@ module.exports = function (filmManager) {
         let allGenres = await filmManager.genresList(searchType);
 
         await ctx.reply(genresText, genresMenu(genreIds, allGenres));
-        return ctx.reply('После настройки нажмите', menu([{code: 'ready', text: 'Готово'}]));
+        return ctx.reply(
+            __('После настройки нажмите', ['settings', 'save']),
+            menu([{code: 'ready', text: 'Готово'}])
+        );
     });
 
     scene.action(/genre_(.*)/, async ctx => {

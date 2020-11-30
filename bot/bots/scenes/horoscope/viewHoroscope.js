@@ -1,5 +1,6 @@
 const BaseScene = require('telegraf/scenes/base');
 const {menu} = require('../../helpers/wizard');
+const {__} = require('../../../modules/Messages');
 const moment = require('moment');
 
 function mainMenu(hasSettings) {
@@ -52,6 +53,8 @@ module.exports = function (horoscopeManager) {
             horoscopeText = showGeneral
                 ? horoscopeText + '\n\n' + signHoroscopeTexts.join('\n\n')
                 : signHoroscopeTexts.join('\n\n');
+
+            horoscopeText = __(horoscopeText, ['content']);
         }
 
         await horoscopeManager.saveStat(

@@ -11,7 +11,7 @@ const getCategoryMenu = require('./scenes/present/categoryMenu');
 const BOT_TOKEN = process.env.BOT_TOKEN;
 let app = new Telegraf(BOT_TOKEN);
 
-initManagers(['chat']).then(async ({chat}) => {
+initManagers(['chat', 'bus']).then(async ({chat, bus}) => {
     app.catch(catchErrors);
 
     const stage = new Stage();
@@ -42,4 +42,5 @@ initManagers(['chat']).then(async ({chat}) => {
     app.on('message', ctx => ctx.scene.enter('categoryMenu'));
 
     app.launch();
+    bus.listenCommands();
 });

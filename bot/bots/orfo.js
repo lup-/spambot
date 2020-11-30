@@ -3,6 +3,7 @@ const {initManagers} = require('../managers');
 const axios = require('axios');
 const qs = require('qs');
 const {catchErrors} = require('./helpers/common');
+const {__} = require('../modules/Messages');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const API_URL = process.env.LANGTOOL_API_URL;
@@ -90,7 +91,7 @@ function analyticsText(text) {
 Абзацев: ${paragraphsCount}`;
 }
 
-initManagers(['chat']).then(async ({chat}) => {
+initManagers(['chat', 'bus']).then(async ({chat, bus}) => {
     app.catch(catchErrors);
 
     app.use(chat.saveRefMiddleware());
@@ -116,7 +117,9 @@ initManagers(['chat']).then(async ({chat}) => {
                 await ctx.replyWithHTML( highlightErrors(text, results.matches) );
                 await ctx.replyWithHTML( errorsList(text, results.matches) );
                 await ctx.replyWithHTML( correctedText(text, results.matches) );
-                await ctx.replyWithHTML( analyticsText( text ) );
+                await ctx.replyWithHTML(
+                    __(analyticsText( text ), ['content', 'stats'])
+                );
                 return ctx.reply('Проверка окончена. Пришлите новый текст');
             }
             else {
@@ -131,4 +134,5 @@ initManagers(['chat']).then(async ({chat}) => {
     });
 
     app.launch();
+    bus.listenCommands();
 });

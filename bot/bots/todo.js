@@ -10,10 +10,12 @@ const todoStage = require('./scenes/todo/todos');
 const tzStage = require('./scenes/todo/tzsetup');
 const {postpone, complete, postponeMenu} = require('./helpers/postpone');
 
+const {__} = require('../modules/Messages');
+
 const BOT_TOKEN = process.env.BOT_TOKEN;
 let app = new Telegraf(BOT_TOKEN);
 
-initManagers(['chat', 'periodic', 'profile']).then(async ({chat, periodic, profile}) => {
+initManagers(['chat', 'periodic', 'profile', 'bus']).then(async ({chat, periodic, profile, bus}) => {
     const stage = new Stage();
     stage.register(todoStage(periodic));
     stage.register(tzStage(periodic, profile));
@@ -46,7 +48,8 @@ initManagers(['chat', 'periodic', 'profile']).then(async ({chat, periodic, profi
 
     periodic.setTaskRunner(async task => {
         try {
-            let message = await app.telegram.sendMessage(task.chatId, task.text, postponeMenu(task.taskId));
+            let taskText = __(task.text, ['content', 'remind']);
+            let message = await app.telegram.sendMessage(task.chatId, taskText, postponeMenu(task.taskId));
             if (message && message.message_id) {
                 await periodic.setTaskRemindSuccess(task.taskId);
             }
@@ -59,4 +62,5 @@ initManagers(['chat', 'periodic', 'profile']).then(async ({chat, periodic, profi
     });
 
     periodic.launch();
+    bus.listenCommands();
 });

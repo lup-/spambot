@@ -1,6 +1,7 @@
 const {menu} = require('./wizard');
 const START_HOUR = 9;
 const moment = require('moment-timezone');
+const {__} = require('../../modules/Messages');
 
 function postponeMenu(taskId) {
     return menu([
@@ -15,7 +16,9 @@ function postponeMenu(taskId) {
 async function complete(ctx, periodic) {
     let [, taskId] = ctx.match;
     let task = await periodic.setTaskComplete(taskId);
-    ctx.reply(`${task.text}\n\nТак держать! 👍`);
+    ctx.reply(
+        __(`${task.text}\n\nТак держать! 👍`, ['content', 'success'])
+    );
 }
 
 async function postpone(ctx, periodic) {
@@ -47,7 +50,9 @@ async function postpone(ctx, periodic) {
     }
     catch (e) {}
 
-    return ctx.reply(`${task.text}\n\nХорошо. Напомню ${taskTime}`);
+    return ctx.reply(
+        __(`${task.text}\n\nХорошо. Напомню ${taskTime}`, ['content', 'postpone'])
+    );
 }
 
 module.exports = {postpone, complete, postponeMenu}

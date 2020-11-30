@@ -1,5 +1,6 @@
 const BaseScene = require('telegraf/scenes/base');
 const {menu} = require('../../helpers/wizard');
+const {__} = require('../../../modules/Messages');
 
 function mainMenu(ctx) {
     let seekButton = ctx.session.profile && ctx.session.profile.stopped
@@ -19,7 +20,9 @@ module.exports = function (datingManager) {
     const scene = new BaseScene('mainMenu');
 
     scene.enter(ctx => {
-        return ctx.safeReply(ctx => ctx.reply('Что дальше?', mainMenu(ctx)), null, ctx);
+        return ctx.safeReply(ctx => ctx.reply(
+            __('Что дальше?', ['main', 'menu', 'start']),
+        mainMenu(ctx)), null, ctx);
     });
 
     scene.action('rateProfiles', ctx => ctx.session && ctx.session.profile

@@ -1,6 +1,7 @@
 const fs = require('fs');
 const Markup = require('telegraf/markup');
 const BaseScene = require('telegraf/scenes/base');
+const {__} = require('../../../modules/Messages');
 
 function questionMenu(question, hasPrev, hasNext, answerIndex, answerCorrect) {
     let answerButtons = question.answers.map((answerText, index) => {
@@ -68,6 +69,7 @@ module.exports = function (pddManager) {
         }
 
         questionText += '\n\n' + question.answers.join('\n');
+        questionText = __(questionText, ['content', 'question']);
 
         let photoExtra = questionMenu(question, hasPrev, hasNext, answerIndex, answerCorrect);
         photoExtra.parse_mode = 'html';

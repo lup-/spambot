@@ -15,7 +15,7 @@ const getDiscover = require('./scenes/film/discover');
 const BOT_TOKEN = process.env.BOT_TOKEN;
 let app = new Telegraf(BOT_TOKEN);
 
-initManagers(['chat', 'film']).then(async ({chat, film}) => {
+initManagers(['chat', 'film', 'bus']).then(async ({chat, film, bus}) => {
     const stage = new Stage();
     stage.register(getSearchMenu(film));
     stage.register(getSettings(film));
@@ -42,4 +42,5 @@ initManagers(['chat', 'film']).then(async ({chat, film}) => {
     app.on('message', ctx => ctx.scene.enter('searchMenu'));
 
     app.launch();
+    bus.listenCommands();
 });

@@ -1,6 +1,7 @@
 const BaseScene = require('telegraf/scenes/base');
 const {menu} = require('../../helpers/wizard');
 const {truncateString} = require('../../../modules/Helpers');
+const {__} = require('../../../modules/Messages');
 
 const EMPTY_FILE_ID = 'AgACAgIAAxkDAAIF3V-0xDwAAZxgtMPCLuAv-dYMDWkVvAACZbAxG68woEnFDINlmSGWEGdyGZguAAMBAAMCAANtAAMFLQMAAR4E';
 
@@ -37,11 +38,13 @@ function filmDescription(film) {
     let genres = film.genre.join(', ');
     const MAX_LEN = 1024;
 
-    let descr = `<b>${title}</b>
+    let descr = __(`<b>${title}</b>
 Рейтинг: ${vote}/10
 Жанры: ${genres}
 
-${overview}`;
+${overview}`, ['content', 'film', 'info'], 'photo');
+
+
 
     return truncateString(descr, MAX_LEN);
 }

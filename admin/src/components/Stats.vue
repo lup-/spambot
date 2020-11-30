@@ -1,17 +1,18 @@
 <template>
     <v-container class="fill-height" :class="{'align-start': !isEmpty && !isLoading}">
-        <v-row :align="isEmpty || isLoading ? 'center' : 'start'" :justify="isEmpty || isLoading ? 'center' : 'start'">
-            <v-progress-circular v-if="isLoading"
-                :size="70"
-                :width="7"
-                indeterminate
-            ></v-progress-circular>
-
-            <v-col cols="12" class="text-center" v-if="isEmpty && !isLoading">Статистики нет</v-col>
-            <v-col cols="12" md="6" lg="4" v-for="stat in stats" :key="'stats'+stat.botId">
-                <stat-card :stats="stat"></stat-card>
-            </v-col>
-        </v-row>
+        <v-data-iterator
+                :items="stats"
+                :loading="isLoading"
+                locale="ru"
+        >
+            <template v-slot:default="{ items }">
+                <v-row>
+                    <v-col cols="12" sm="6" lg="4" v-for="stat in items" :key="'stats'+stat.botId">
+                        <stat-card :stats="stat"></stat-card>
+                    </v-col>
+                </v-row>
+            </template>
+        </v-data-iterator>
     </v-container>
 </template>
 

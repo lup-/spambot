@@ -10,6 +10,7 @@ const PresentManager = require('./Present');
 const PeriodicManager = require('./Periodic');
 const ProfileManager = require('./Profile');
 const DiseasesManager = require('./Diseases');
+const MessageBus = require('./MessageBus');
 
 let instances = {};
 
@@ -41,6 +42,9 @@ function init(manager, params = {}) {
             return new DiseasesManager();
         case 'profile':
             return new ProfileManager();
+        case 'bus':
+            return new MessageBus();
+
         default:
             return null;
     }

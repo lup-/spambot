@@ -1,5 +1,6 @@
 const BaseScene = require('telegraf/scenes/base');
 const {menu} = require('../../helpers/wizard');
+const {__} = require('../../../modules/Messages');
 
 function rateMenu(ctx, profile) {
     return menu([
@@ -29,14 +30,16 @@ module.exports = function (datingManager, userFansList = false, telegram) {
             : await datingManager.randomProfile(currentProfile);
 
         if (!profileToRate) {
-            await ctx.reply('Похоже, что тут пусто');
+            await ctx.reply(
+                __('Похоже, что тут пусто', ['content', 'empty'])
+            );
             return ctx.scene.enter('mainMenu');
         }
 
         let profileText = datingManager.getProfileText(profileToRate)
 
         let extra = rateMenu(ctx, profileToRate);
-        extra.caption = profileText;
+        extra.caption = __(profileText, ['content', 'profile'], 'photo');
 
         return ctx.safeReply(async ctx => {
             return ctx.replyWithPhoto(profileToRate.photo.file_id, extra);
@@ -63,7 +66,9 @@ module.exports = function (datingManager, userFansList = false, telegram) {
 
                 let userLink = `[✉ Написать](tg://user?id=${targetProfile.userId})`;
                 await ctx.replyWithMarkdown('Взаимная симпатия! ❤\n\n'+userLink);
-                return ctx.reply('Для продолжения работы нажмите /start');
+                return ctx.reply(
+                    __('Для продолжения работы нажмите /start', ['menu', 'restart'])
+                );
             }, ctx => ctx.scene.reenter(), ctx);
         }
         else {

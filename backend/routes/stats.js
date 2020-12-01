@@ -61,7 +61,7 @@ module.exports = {
             const db = await getPg(bot.dbName);
             const countRes = await db.query(queries.userCount);
             const refRes = queries.refs ? await db.query(queries.refs) : false;
-            db.end();
+            await db.end();
 
             let usersStat = countRes && countRes.rows ? countRes.rows[0] : false;
             let refsStat = refRes.rows;

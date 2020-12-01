@@ -190,4 +190,8 @@ services:
       - MONGO_HOST=spambot_mongo
       - MONGO_DB=botofarmer
       - REDIS_HOST=spambot_redis
+      - PG_HOST=${PG_HOST}
+      - PG_PORT=${PG_PORT}
+      - PG_USER=${PG_USER}
+      - PG_PASS=${PG_PASS}
     command: npm run debug

@@ -48,5 +48,41 @@ module.exports = {
         }
 
         return bots;
+    },
+    externalBotsList() {
+        return [
+            {
+                id: 'book_bot',
+                containerName: false,
+                dbName: 'bookdb',
+                botName: 'book_bot',
+                token: false,
+                external: true,
+            },
+            {
+                id: 'music_bot',
+                containerName: false,
+                dbName: 'music_bot',
+                botName: 'music_bot',
+                token: false,
+                external: true,
+            },
+            {
+                id: 'promo_bot',
+                containerName: false,
+                dbName: 'promo-bot-db',
+                botName: 'promo_bot',
+                token: false,
+                external: true,
+            },
+            {
+                id: 'remotework_bot',
+                containerName: false,
+                dbName: 'remoteworkdb',
+                botName: 'remotework_bot',
+                token: false,
+                external: true,
+            },
+        ];
     }
 }

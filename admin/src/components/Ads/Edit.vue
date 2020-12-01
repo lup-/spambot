@@ -71,6 +71,11 @@
                 adTypes: [{text: 'Приписка', value: 'small'}]
             }
         },
+        created() {
+            if (this.adId) {
+                this.$store.dispatch('setCurrentAd', this.adId);
+            }
+        },
         watch: {
             adId() {
                 this.$store.dispatch('setCurrentAd', this.adId);

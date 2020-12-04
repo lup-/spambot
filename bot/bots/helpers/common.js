@@ -8,5 +8,18 @@ async function catchErrors(err, ctx) {
 
     return;
 }
+function getDomain(link) {
+    if (link.indexOf('http') !== 0) {
+        link = 'https://'+link;
+    }
 
-module.exports = {catchErrors}
+    try {
+        let url = new URL(link);
+        return url.hostname.toLowerCase() || false;
+    }
+    catch (e) {
+        return  false;
+    }
+}
+
+module.exports = {catchErrors, getDomain}

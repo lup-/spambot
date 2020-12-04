@@ -42,6 +42,7 @@ services:
       - ${BOT_DEBUG_PORT}:9229
     depends_on:
       - mongo
+      - redis
       - languagetool
     volumes:
       - ./bot:/var/www
@@ -49,7 +50,9 @@ services:
     environment:
       - NODE_ENV=development
       - MONGO_HOST=spambot_mongo
+      - REDIS_HOST=spambot_redis
       - MONGO_DB=orfo_bot
+      - BOT_NAME=orfo_bot
       - BOT_TOKEN=${ORFO_BOT_TOKEN}
       - LANGTOOL_API_URL= http://languagetool:8010/
     command: npm run orfo_bot_debug

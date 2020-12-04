@@ -3,6 +3,8 @@ const {initManagers} = require('../managers');
 const axios = require('axios');
 const qs = require('qs');
 const {catchErrors} = require('./helpers/common');
+const {getDb} = require('../modules/Database');
+const checkSubscriptionMiddleware = require('../modules/CheckSubscriptionMiddleware');
 const {__} = require('../modules/Messages');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
@@ -74,21 +76,36 @@ function correctedText(text, errors) {
 
     return 'Исправленный текст:\n\n'+correctedText;
 }
+function getAnalytics(text) {
+    text = text.trim();
+    let wordsOnly = text.replace(/[^a-zа-я0-9]/ig, ' ').replace(/ +/g, ' ').trim()
+    return {
+        totalChars: text.length,
+        notSpaces: wordsOnly.replace(/ +/g, '').trim().length,
+        totalWords: text.split(' ').length,
+        sentencesCount: text.replace(/[^\.]+/g, '').length,
+        paragraphsCount: text.replace(/\n+/g, '\n').replace(/[^\n]+/g, '').length + 1,
+    };
+}
 function analyticsText(text) {
     text = text.trim();
-    let totalChars = text.length;
-    let wordsOnly = text.replace(/[^a-zа-я0-9]/ig, ' ').replace(/ +/g, ' ').trim()
-    let notSpaces = wordsOnly.replace(/ +/g, '').trim().length;
-    let totalWords = text.split(' ').length;
-    let sentencesCount = text.replace(/[^\.]+/g, '').length;
-    let paragraphsCount = text.replace(/\n+/g, '\n').replace(/[^\n]+/g, '').length + 1;
+    let analytics = getAnalytics(text);
     return `<b>Анализ текста</b>
 
-Символов (с пробелами): ${totalChars}
-Символов (без пробелов): ${notSpaces}
-Слов: ${totalWords}
-Предложений: ${sentencesCount}
-Абзацев: ${paragraphsCount}`;
+Символов (с пробелами): ${analytics.totalChars}
+Символов (без пробелов): ${analytics.notSpaces}
+Слов: ${analytics.totalWords}
+Предложений: ${analytics.sentencesCount}
+Абзацев: ${analytics.paragraphsCount}`;
+}
+
+async function saveUserStat(userId, text) {
+    let db = await getDb();
+    let stats = db.collection('stats');
+    let analytics = getAnalytics(text);
+    analytics.userId = userId;
+
+    return stats.insertOne(analytics);
 }
 
 initManagers(['chat', 'bus']).then(async ({chat, bus}) => {
@@ -96,6 +113,7 @@ initManagers(['chat', 'bus']).then(async ({chat, bus}) => {
 
     app.use(chat.saveRefMiddleware());
     app.use(chat.saveUserMiddleware());
+    app.use(checkSubscriptionMiddleware);
 
     app.start(async (ctx) => {
         try {
@@ -113,6 +131,7 @@ initManagers(['chat', 'bus']).then(async ({chat, bus}) => {
             let results = await check(language, text);
             let hasErrors = results.matches && results.matches.length > 0;
 
+            await saveUserStat(ctx.from.id, text);
             if (hasErrors) {
                 await ctx.replyWithHTML( highlightErrors(text, results.matches) );
                 await ctx.replyWithHTML( errorsList(text, results.matches) );

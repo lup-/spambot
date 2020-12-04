@@ -1,6 +1,11 @@
 const {getDb} = require('./Database');
 
 module.exports = async (ctx, next) => {
+    let skipThisUpdate = ctx.chat.type !== 'private';
+    if (skipThisUpdate) {
+        return next();
+    }
+
     if (ctx && ctx.session && ctx.session.subscribtionSuccess) {
         return next();
     }
@@ -28,7 +33,12 @@ module.exports = async (ctx, next) => {
         }
 
         if (!isSubscriber) {
-            return ctx.reply('Сначала необходимо подписаться на '+chatUsername);
+            try {
+                return ctx.reply('Сначала необходимо подписаться на '+chatUsername);
+            }
+            catch (e) {
+                return;
+            }
         }
     }
 

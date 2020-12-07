@@ -33,6 +33,7 @@
   "dependencies": {
     "axios": "^0.21.0",
     "countries-list": "^2.5.6",
+    "debugging-aid": "git+https://github.com/naugtur/debugging-aid.git",
     "form-data": "^3.0.0",
     "geo-tz": "^6.0.1",
     "got": "^11.8.0",

@@ -1,6 +1,7 @@
 const axios = require('axios');
 const {getDb} = require('../modules/Database');
 const {getCache} = require('../modules/Cache');
+const {parseUrl} = require('../bots/helpers/parser');
 
 const getParser = require('../bots/parsers/sound');
 const {getDomain} = require('../bots/helpers/common');
@@ -8,8 +9,11 @@ const {getDomain} = require('../bots/helpers/common');
 const LIST_URL = 'https://api.rating.mave.digital/v1/podcasts';
 
 const supported = [
-    {code: 'yandex', domains: ['music.yandex.ru', 'music.yandex.by'], list: true, download: true},
-    {code: 'soundcloud', domains: ['soundcloud.com'], list: true, download: true},
+    {code: 'yandex', domains: ['music.yandex.ru', 'music.yandex.by'], list: true, download: true, priority: 3},
+    {code: 'soundcloud', domains: ['soundcloud.com'], list: true, download: true, priority: 2},
+    {code: 'apple', domains: ['podcasts.apple.com', 'apple.co'], list: true, download: true, priority: 1 },
+    {code: 'wefo', domains: ['we.fo'], isProxy: true},
+    {code: 'bandlink', domains: ['band.link'], isProxy: true},
 ]
 
 module.exports = function () {
@@ -52,20 +56,68 @@ module.exports = function () {
             categoryNames.sort();
             return categoryNames.map((title, id) => ({id, title}));
         },
-        getPlatform(podcast) {
+        async getFinalPodcastLink(baseUrl) {
+            let cache = await getCache();
+
+            return cache.getPermanent('podcast_final_link_'+baseUrl, async () => {
+                let {allLinks} = await parseUrl(baseUrl, {
+                    allLinks(document) {
+                        let linkEls = document.querySelectorAll('a[href]');
+                        let links = [];
+                        linkEls.forEach(el => links.push(el.getAttribute('href').trim().toLowerCase()));
+
+                        return links;
+                    }
+                });
+
+                let externalLinks = allLinks.filter(link => link.indexOf('http') === 0);
+                let directPlatforms = supported.filter(platform => !platform.isProxy);
+                let supportedDomains = directPlatforms.reduce((domains, platform) => domains.concat(platform.domains), []);
+                let supportedLinks = externalLinks.filter(link => supportedDomains.indexOf(getDomain(link)) !== -1);
+                if (supportedLinks.length === 0) {
+                    return false;
+                }
+
+                let platforms = supportedLinks.map(link => supported.find(item => item.domains.indexOf(getDomain(link)) !== -1));
+
+                let sortedPlatforms = platforms.slice();
+                sortedPlatforms.sort((a, b) => a.priority - b.priority);
+                let selectedPlatform = sortedPlatforms[0];
+
+                let selectedIndex = platforms.findIndex(platform => platform.code === selectedPlatform.code);
+
+                return selectedIndex !== -1
+                    ? supportedLinks[selectedIndex]
+                    : false;
+            });
+        },
+        async getFinalPlatformByUrl(baseUrl) {
+            let finalUrl = await this.getFinalPodcastLink(baseUrl);
+            return finalUrl ? this.getPlatformByUrl(finalUrl) : false;
+        },
+        async getPlatformByUrl(url, final = true) {
+            let domain = getDomain(url);
+            let platform = supported.find(item => item.domains.indexOf(domain) !== -1);
+
+            if (platform && platform.isProxy && final) {
+                return this.getFinalPlatformByUrl(url);
+            }
+
+            return platform || false;
+        },
+        async getPlatform(podcast, final = true) {
             if (!podcast) {
                 return false;
             }
-            let domain = getDomain(podcast.link);
-            let platform = supported.find(item => item.domains.indexOf(domain) !== -1);
-            return platform || false;
+
+            return this.getPlatformByUrl(podcast.link, final);
         },
-        isListSupported(podcast) {
-            let platform = this.getPlatform(podcast);
+        async isListSupported(podcast) {
+            let platform = await this.getPlatform(podcast);
             return platform ? platform.list : false;
         },
-        isDownloadSupported(podcast) {
-            let platform = this.getPlatform(podcast);
+        async isDownloadSupported(podcast) {
+            let platform = await this.getPlatform(podcast);
             return platform ? platform.download : false;
         },
         async getPodcastByIndex(index, categoryIds) {
@@ -83,12 +135,17 @@ module.exports = function () {
         },
 
         async getVolumesByPodcast(podcast) {
-            let parser = getParser(podcast.link);
+            let platform = await this.getPlatform(podcast, false);
+            let url = platform.isProxy
+                ? await this.getFinalPodcastLink(podcast.link)
+                : podcast.link;
+
+            let parser = getParser(url);
             if (parser) {
                 let cache = await getCache();
 
                 return cache.getPermanent('podcast_volumes_'+podcast.id, async () => {
-                    return parser.parseVolumes(podcast.link);
+                    return parser.parseVolumes(url);
                 });
             }
 

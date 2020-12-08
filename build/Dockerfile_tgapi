@@ -1,0 +1,20 @@
+FROM alpine:3.9 as builder
+
+RUN apk add --no-cache \
+    gperf \
+    alpine-sdk \
+    openssl-dev \
+    git \
+    cmake \
+    zlib-dev
+
+WORKDIR /tmp/_build_tgapi/
+
+RUN git clone --recursive https://github.com/tdlib/telegram-bot-api.git
+
+WORKDIR /tmp/_build_tgapi/telegram-bot-api/
+RUN mkdir build
+WORKDIR /tmp/_build_tgapi/telegram-bot-api/build/
+
+RUN cmake -DCMAKE_BUILD_TYPE=Release ..
+RUN cmake --build . --target install

@@ -65,7 +65,7 @@ module.exports = function (podcastManager) {
 
         let categoryIds = podcastManager.getSavedCategories(ctx);
         let {podcast} = await podcastManager.getPodcastByIndex(podcastIndex, categoryIds);
-        let hasVolumes = podcastManager.isListSupported(podcast);
+        let hasVolumes = await podcastManager.isListSupported(podcast);
 
         if (!hasVolumes) {
             await podcastManager.saveListen(ctx.session.userId, podcast);
@@ -121,7 +121,7 @@ module.exports = function (podcastManager) {
 
         await podcastManager.saveListen(ctx.session.userId, podcast, volume);
 
-        let canDownload = podcastManager.isDownloadSupported(podcast);
+        let canDownload = await podcastManager.isDownloadSupported(podcast);
         if  (!canDownload) {
             return replyWithListenLink(volume.pageUrl, ctx);
         }

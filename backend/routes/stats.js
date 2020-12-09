@@ -1,18 +1,19 @@
 const {getDb} = require('../../bot/modules/Database');
 const {getPg} = require('../modules/pgdb');
+const moment = require('moment');
 const config = require('../config');
 
 module.exports = {
     async botList(ctx) {
-        ctx.body = {bots: config.botList()}
+        ctx.body = {bots: await config.botList()}
     },
-    async list(ctx) {
+    async general(ctx) {
         let botstats = [];
         let filter = ctx.request.body && ctx.request.body.filter
             ? ctx.request.body.filter || {}
             : {};
 
-        let bots = config.botList();
+        let bots = await config.botList();
         for (const bot of bots) {
             let db = await getDb(bot.dbName);
             let users = db.collection('users');
@@ -71,4 +72,65 @@ module.exports = {
 
         ctx.body = {stats: botstats};
     },
+    async details(ctx) {
+        let botIds = ctx.request.body && ctx.request.body.botIds
+            ? ctx.request.body.botIds || []
+            : [];
+
+        let defaultRange = {start: moment().startOf('d').unix(), end: moment().endOf('d').unix()};
+        let range = ctx.request.body && ctx.request.body.range
+            ? ctx.request.body.range || defaultRange
+            : defaultRange;
+
+        let defaultScale = 'H';
+        let scale = ctx.request.body && ctx.request.body.scale
+            ? ctx.request.body.scale || defaultScale
+            : defaultScale;
+
+        let formats = [
+            {scale: 'Y', slot: '%Y"', tag: '%Y', momentTag: 'YYYY', step: 'y'},
+            {scale: 'M', slot: '%Y%m', tag: '%m.%Y', momentTag: 'MM.YYYY', step: 'month'},
+            {scale: 'D', slot: '%Y%m%d', tag: '%d.%m.%Y', momentTag: 'DD.MM.YYYY', step: 'd'},
+            {scale: 'H', slot: '%Y%m%d%H', tag: '%H:00, %d.%m.%Y', momentTag: 'HH:00, DD.MM.YYYY', step: 'h'},
+        ];
+
+        let format = formats.find(item => item.scale === scale) || formats[3];
+
+        let start = moment.unix(range.start);
+        let tagsCount = moment.unix(range.end).diff(moment.unix(range.start), format.step);
+        let tags = Array(tagsCount).fill(0).map(() => start.add(1, format.step).format(format.momentTag));
+
+        let allBots = await config.botList();
+        let bots = botIds && botIds.length > 0
+            ? allBots.filter(bot => botIds.indexOf(bot.id) !== -1)
+            : allBots;
+
+        let botstats = [];
+        for (const bot of bots) {
+            let db = await getDb(bot.dbName);
+            let users = db.collection('users');
+
+            let usersResult = await users.aggregate([
+                {$match: {$and: [{registered: {$gte: range.start}}, {registered: {$lt: range.end}}]}},
+                {$set: {registered_date: {$toDate: {$multiply: ["$registered", 1000]}}}},
+                {$set: {
+                        timeslot: { $dateToString: {date: "$registered_date", format: format.slot} },
+                        tag: {$dateToString: {date: {$min: "$registered_date"}, format: format.tag} }
+                    }
+                },
+                {$group: {"_id": "$timeslot", "count": {$sum: 1}, "tag": {$first: "$tag"}}},
+                {$sort: {"tag": 1}}
+            ]).toArray();
+
+            let stats = tags.map(tag => {
+                let userCount = usersResult.find(item => item.tag === tag);
+                let count = userCount && userCount['count'] ? userCount['count'] : 0;
+                return {tag, count};
+            });
+
+            botstats.push({botId: bot.id, stats});
+        }
+
+        ctx.body = {stats: botstats};
+    }
 }

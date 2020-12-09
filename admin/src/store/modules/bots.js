@@ -7,6 +7,12 @@ export default {
     getters: {
         botNames(state) {
             return state.list.map(bot => bot.botName);
+        },
+        botTgField(state) {
+            return (botId, field) => {
+                let bot = state.list.find(bot => bot.id === botId);
+                return bot.tg[field] || false;
+            }
         }
     },
     actions: {

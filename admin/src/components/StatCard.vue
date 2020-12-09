@@ -1,6 +1,7 @@
 <template>
     <v-card>
-        <v-card-title>{{stats.botId}}
+        <v-card-title @click="gotoBotStats(stats.botId)">{{getTgUsername(stats.botId)}}
+            <v-card-subtitle>{{stats.botId}}</v-card-subtitle>
             <v-card-subtitle v-if="stats.external">Внешний</v-card-subtitle>
         </v-card-title>
         <v-list dense>
@@ -27,6 +28,9 @@
                 </v-list-item-action>
             </v-list-item>
         </v-list>
+        <v-card-actions>
+            <v-btn @click="gotoBotStats(stats.botId)">Статистика</v-btn>
+        </v-card-actions>
     </v-card>
 </template>
 
@@ -34,6 +38,14 @@
     export default {
         name: "StatCard",
         props: ['stats'],
+        methods: {
+            getTgUsername(botId) {
+                return '@' + this.$store.getters.botTgField(botId, 'username');
+            },
+            gotoBotStats(botId) {
+                this.$router.push({name: 'statsDetails', params: {id: botId}});
+            }
+        }
     }
 </script>
 

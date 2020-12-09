@@ -17,7 +17,7 @@ function publishCommand(command, botNames) {
 
 module.exports = {
     async list(ctx) {
-        ctx.body = {bots: config.botList()}
+        ctx.body = {bots: await config.botList()}
     },
     async restart(ctx) {
         let botNames = ctx.request.body.botNames || [];

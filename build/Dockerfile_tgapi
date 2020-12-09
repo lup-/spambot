@@ -1,6 +1,7 @@
 FROM alpine:3.9 as builder
 
 RUN apk add --no-cache \
+    linux-headers \
     gperf \
     alpine-sdk \
     openssl-dev \

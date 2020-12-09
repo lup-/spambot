@@ -14,7 +14,8 @@ const app = new Koa();
 const router = new Router();
 
 router
-    .post('/api/stats/list', stats.list);
+    .post('/api/stats/list', stats.general)
+    .post('/api/stats/details', stats.details);
 
 router
     .post('/api/amsg/list', ads.list)

@@ -1,5 +1,6 @@
 const fs = require('fs');
 const yaml = require('js-yaml');
+const Telegram = require('telegraf/telegram');
 
 module.exports = {
     parseEnvVars(varLines) {
@@ -14,13 +15,17 @@ module.exports = {
 
         return vars;
     },
-
     getEnvVars() {
         let envPath = fs.realpathSync(__dirname+'/../.env');
         let envFile = fs.readFileSync(envPath, 'utf8');
         return this.parseEnvVars( envFile.split('\n') );
     },
-    botList() {
+    async getTgBotData(botToken) {
+        const telegram = new Telegram(botToken);
+        let me = await telegram.getMe();
+        return me;
+    },
+    async botList() {
         let bots = [];
 
         try {
@@ -38,8 +43,12 @@ module.exports = {
                 let botName = botEnv['BOT_NAME'];
                 let token = envVars[tokenVar];
 
+                let tg = token
+                    ? await this.getTgBotData(token)
+                    : false;
+
                 bots.push({
-                    id, containerName, dbName, botName, token
+                    id, containerName, dbName, botName, token, tg
                 });
             }
         }

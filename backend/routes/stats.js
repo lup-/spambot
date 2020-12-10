@@ -109,6 +109,7 @@ module.exports = {
         for (const bot of bots) {
             let db = await getDb(bot.dbName);
             let users = db.collection('users');
+            let refs = db.collection('refs');
 
             let usersResult = await users.aggregate([
                 {$match: {$and: [{registered: {$gte: range.start}}, {registered: {$lt: range.end}}]}},
@@ -122,13 +123,52 @@ module.exports = {
                 {$sort: {"tag": 1}}
             ]).toArray();
 
+            let refsResult = await refs.aggregate([
+                {$match: {$and: [{date: {$gte: range.start}}, {date: {$lt: range.end}}]}},
+                {$set: {registered_date: {$toDate: {$multiply: ["$date", 1000]}}}},
+                {$set: {
+                        timeslot: { $dateToString: {date: "$registered_date", format: format.slot} },
+                        tag: {$dateToString: {date: {$min: "$registered_date"}, format: format.tag} }
+                    }
+                },
+                {$group: {"_id": {$concat: ["$timeslot", ":", "$ref"]}, "count": {$sum: 1}, "tag": {$first: "$tag"}, "ref": {$first: "$ref"}}},
+                {$sort: {"tag": 1}}
+            ]).toArray();
+
+            let refNames = refsResult.map(item => item.ref).filter((ref, index, all) => all.indexOf(ref) === index);
+
             let stats = tags.map(tag => {
                 let userCount = usersResult.find(item => item.tag === tag);
+
                 let count = userCount && userCount['count'] ? userCount['count'] : 0;
                 return {tag, count};
             });
 
-            botstats.push({botId: bot.id, stats});
+            let refStats = refNames.map(refName => {
+                let stats = tags.map(tag => {
+                    let item = refsResult.find(item => item.tag === tag && item.ref === refName);
+                    let count = item && item['count'] ? item['count'] : 0;
+                    return {tag, count};
+                });
+
+                return {ref: refName, stats};
+            });
+
+            let noRefsCount = stats.map(tagTotalStats => {
+                let totalTagRefCount = refStats.reduce((sum, refStat) => {
+                    let tagRefItem = refStat.stats.find(item => item.tag === tagTotalStats.tag);
+                    if (tagRefItem) {
+                        sum += tagRefItem.count;
+                    }
+
+                    return sum;
+                }, 0);
+
+                return {tag: tagTotalStats.tag, count: tagTotalStats.count - totalTagRefCount};
+            });
+
+            refStats.push({ref: false, stats: noRefsCount});
+            botstats.push({botId: bot.id, stats, refStats});
         }
 
         ctx.body = {stats: botstats};

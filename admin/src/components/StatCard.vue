@@ -14,19 +14,30 @@
                 </v-list-item-action>
             </v-list-item>
             <v-divider v-if="stats.refs && stats.refs.length > 0"></v-divider>
-            <v-list-item v-if="stats.refs && stats.refs.length > 0">
-                <v-list-item-content>
-                    <v-list-item-title>Ссылки</v-list-item-title>
-                </v-list-item-content>
-            </v-list-item>
-            <v-list-item v-for="(ref, index) in stats.refs" :key="ref.code" :style="{backgroundColor: index % 2 === 0 ? 'white' : 'rgba(0,0,0,0.1)'}">
-                <v-list-item-content>
-                    <v-list-item-title>{{ref.code}}</v-list-item-title>
-                </v-list-item-content>
-                <v-list-item-action>
-                    <v-list-item-action-text>{{ref.count || 0}}</v-list-item-action-text>
-                </v-list-item-action>
-            </v-list-item>
+            <v-card-actions v-if="stats.refs && stats.refs.length > 0">
+                <v-btn text>Рефки</v-btn>
+                <v-spacer></v-spacer>
+                <v-btn icon @click="show = !show">
+                    <v-icon>{{ show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                </v-btn>
+            </v-card-actions>
+            <v-expand-transition v-if="stats.refs && stats.refs.length > 0">
+                <div v-show="show">
+                    <v-list-item v-if="stats.refs && stats.refs.length > 0">
+                        <v-list-item-content>
+                            <v-list-item-title>Ссылки</v-list-item-title>
+                        </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item v-for="(ref, index) in stats.refs" :key="ref.code" :style="{backgroundColor: index % 2 === 0 ? 'white' : 'rgba(0,0,0,0.1)'}">
+                        <v-list-item-content>
+                            <v-list-item-title>{{ref.code}}</v-list-item-title>
+                        </v-list-item-content>
+                        <v-list-item-action>
+                            <v-list-item-action-text>{{ref.count || 0}}</v-list-item-action-text>
+                        </v-list-item-action>
+                    </v-list-item>
+                </div>
+            </v-expand-transition>
         </v-list>
         <v-card-actions>
             <v-btn @click="gotoBotStats(stats.botId)">Статистика</v-btn>
@@ -38,6 +49,7 @@
     export default {
         name: "StatCard",
         props: ['stats'],
+        data: () => ({show: false}),
         methods: {
             getTgUsername(botId) {
                 return '@' + this.$store.getters.botTgField(botId, 'username');

@@ -11,7 +11,7 @@ export default {
         botTgField(state) {
             return (botId, field) => {
                 let bot = state.list.find(bot => bot.id === botId);
-                return bot.tg[field] || false;
+                return bot && bot.tg ? bot.tg[field] || false : false;
             }
         }
     },

@@ -1,5 +1,5 @@
 <template>
-    <v-container class="fill-height" :class="{'align-start': !isLoading}">
+    <v-container :class="{'align-start': !isLoading, 'fill-height': isLoading}">
         <v-row>
             <v-col cols="12" lg="6">
                 <v-select v-model="botIds" multiple :items="bots" label="Боты"></v-select>
@@ -38,7 +38,7 @@
                 </v-menu>
             </v-col>
 
-            <v-col cols="12" lg="6">
+            <v-col cols="12" lg="4">
                 <v-menu
                     v-model="menuEnd"
                     :close-on-content-click="false"
@@ -77,7 +77,17 @@
         </v-row>
         <v-row>
             <v-col cols="12">
-                <plotly :data="data" :layout="layout" :displayModeBar="false"/>
+                <plotly ref="plot" :data="data" :layout="layout" :displayModeBar="false"/>
+            </v-col>
+        </v-row>
+        <v-row>
+            <v-col cols="12">
+                <v-data-table
+                    dense
+                    :headers="tableHeaders"
+                    :items="tableData"
+                    :items-per-page="50"
+                ></v-data-table>
             </v-col>
         </v-row>
     </v-container>
@@ -214,9 +224,34 @@
                     return lineMax > max ? lineMax : max;
                 }, 0);
 
-                return max === 0
-                    ? {yaxis: {range: [0, 1], dtick: 1}}
-                    : {};
+                let layout = {
+                    xaxis: {
+                        showspikes: true,
+                        spikemode: 'across'
+                    },
+                    yaxis: {
+                        showspikes: true,
+                        spikemode: 'toaxis'
+                    }
+                };
+
+                if (max === 0) {
+                    layout.yaxis.range = [0, 1];
+                    layout.yaxis.dtick = 1;
+                }
+
+                return layout;
+            },
+            tableAll() {
+                return this.$store.getters.statTable;
+            },
+            tableHeaders() {
+                let {headers} = this.tableAll;
+                return headers;
+            },
+            tableData() {
+                let {rows} = this.tableAll;
+                return rows;
             }
         }
     }

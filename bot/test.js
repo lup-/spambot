@@ -1,6 +1,7 @@
 const {initManagers} = require('./managers');
 const { Telegraf } = require('telegraf');
 const {catchErrors} = require('./bots/helpers/common');
+const Markup = require('telegraf/markup');
 
 function getMeanings(familyName) {
     let allMeatings = [
@@ -95,6 +96,21 @@ function getMeanings(familyName) {
 
 let tbot = new Telegraf('1407429211:AAF0Etp7vkVQXsVbwSZLVI-Od4uAdTCdwHI');
 
+
+function makeVersionsMenu(versions) {
+    let buttons = [
+        Markup.callbackButton('Нажми меня!', 'action1'),
+        Markup.callbackButton('Нажми меня!', 'action1'),
+    ];
+
+    let versionButtons = []
+    for (const version of versions) {
+        versionButtons.push();
+    }
+
+}
+let keyboard = Markup.inlineKeyboard(buttons).extra();
+
 initManagers(['test', 'chat']).then( async  ({test, chat}) => {
     tbot.catch(catchErrors);
 
@@ -110,26 +126,14 @@ initManagers(['test', 'chat']).then( async  ({test, chat}) => {
         if (msg) {
             let familyName = msg.text;
             let meanings = getMeanings(familyName);
+            .
 
-            return ctx.replyWithHTML( meanings.versions[0].text );
+            return ctx.replyWithHTML( meanings.versions[0].text, keyboard );
         }
         else {
             return ctx.reply('Введите фамилию')
         }
     });
-
-    tbot.on('message', (msg) => {
-        const chatId = msg.chat.id;
-        bot.sendPhoto(chatId, 'keks.png');
-    });
-
-    tbot.message_handler(content_types=["text"])
-        def default_test(message):
-        keyboard = types.InlineKeyboardMarkup()
-        url_button = types.InlineKeyboardButton(text="Перейти на версию", url="/")
-        keyboard.add(url_button)
-        bot.send_message(message.chat.id, "версия", reply_markup=keyboard)
-
 
     tbot.launch();
 

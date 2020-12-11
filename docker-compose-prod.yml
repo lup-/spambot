@@ -239,6 +239,7 @@ services:
       - MONGO_DB=podcast_bot
       - BOT_TOKEN=${PODCAST_BOT_TOKEN}
       - BOT_NAME=podcast_bot
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
     command: npm run podcast_bot
 
   languagetool:

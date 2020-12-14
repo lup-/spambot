@@ -18,6 +18,21 @@ module.exports = function () {
             runTask = newRunTask;
         },
 
+        async addCustomTaskInTime(userId, chatId, time, zone = false) {
+            const db = await getDb();
+            const tasks = db.collection('tasks');
+            const taskId = shortid.generate();
+
+            if (moment.isMoment(time)) {
+                time = time.unix();
+            }
+
+            let result = await tasks.insertOne({taskId, userId, chatId, nextRemind: time, lastRemind: null, zone});
+            return result && result.ops
+                ? result.ops[0] || false
+                :  false;
+        },
+
         async addTask(text, userId, chatId, zone) {
             const db = await getDb();
             const tasks = db.collection('tasks');
@@ -77,6 +92,12 @@ module.exports = function () {
             const tasks = db.collection('tasks');
             await tasks.updateOne({taskId}, {$set: {complete: true}}, {returnOriginal: false});
             return this.getTask(taskId);
+        },
+
+        async setAllUserTasksComplete(userId) {
+            const db = await getDb();
+            const tasks = db.collection('tasks');
+            return tasks.updateMany({userId}, {$set: {complete: true}}, {returnOriginal: false});
         },
 
         async setTaskRemindSuccess(taskId) {

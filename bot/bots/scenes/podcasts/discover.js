@@ -85,7 +85,10 @@ async function replyWithPodcast(ctx, podcastManager, showNewMessage) {
                 ? ctx.replyWithPhoto(media, photoExtra)
                 : ctx.editMessageMedia({type: 'photo', media, caption: podcastDescription(results.podcast)}, photoExtra);
         },
-        ctx => ctx.replyWithPhoto(EMPTY_FILE_ID, {caption: 'Ошибка загрузки данных'}, podcastMenu(results)),
+        [
+            ctx => ctx.replyWithPhoto(media, photoExtra),
+            ctx => ctx.replyWithPhoto(EMPTY_FILE_ID, {caption: 'Ошибка загрузки данных'}, podcastMenu(results)),
+        ],
         ctx);
 }
 

@@ -29,7 +29,7 @@ module.exports = function () {
             return this;
         },
 
-        async safeReply(replyFn, ctxFallback, ctx, next) {
+        async safeReply(replyFn, ctxFallbacks, ctx, next) {
             let firstError = null;
             let secondError = null;
             let result = null;
@@ -50,15 +50,24 @@ module.exports = function () {
                 }
             }
 
-            if (!result) {
-                try {
-                    result = await ctxFallback(ctx, next);
-                }
-                catch (e) {
-                    secondError = e;
-                    if (defaultFallback && typeof (defaultFallback) === 'function') {
-                        return defaultFallback(ctx, next, firstError, secondError);
+            if (!(ctxFallbacks instanceof Array)) {
+                ctxFallbacks = [ctxFallbacks];
+            }
+
+            for (let ctxFallback of ctxFallbacks) {
+                if (!result) {
+                    try {
+                        result = await ctxFallback(ctx, next);
                     }
+                    catch (e) {
+                        secondError = e;
+                    }
+                }
+            }
+
+            if (!result) {
+                if (defaultFallback && typeof (defaultFallback) === 'function') {
+                    return defaultFallback(ctx, next, firstError, secondError);
                 }
             }
 

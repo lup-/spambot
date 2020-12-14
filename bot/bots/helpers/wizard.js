@@ -1,7 +1,7 @@
 const Markup = require('telegraf/markup');
 const Composer = require('telegraf/composer');
 
-function menu(buttons, columns = false, oneTime = false) {
+function getMarkupButtons(buttons, columns = false) {
     if (columns === true) {
         columns = 1;
     }
@@ -36,6 +36,11 @@ function menu(buttons, columns = false, oneTime = false) {
         columnButtons = markupButtons;
     }
 
+    return columnButtons;
+}
+function menu(buttons, columns = false, oneTime = false) {
+
+    let columnButtons = getMarkupButtons(buttons, columns);
     let keyboard = Markup.inlineKeyboard(columnButtons);
 
     if (oneTime) {
@@ -43,6 +48,12 @@ function menu(buttons, columns = false, oneTime = false) {
     }
 
     return keyboard.extra();
+}
+function menuWithControls(buttons, buttonColumns, controls) {
+    let mainButtons = getMarkupButtons(buttons, buttonColumns);
+    let controlButtons = getMarkupButtons(controls, controls.length);
+    let allButtons = mainButtons.concat(controlButtons);
+    return Markup.inlineKeyboard(allButtons).extra();
 }
 
 function yesNoMenu() {
@@ -87,4 +98,4 @@ function buttonStep(actions = [], events = []) {
     return handler;
 }
 
-module.exports = {menu, yesNoMenu, buttonStep, urlButton};
+module.exports = {menu, yesNoMenu, buttonStep, urlButton, menuWithControls};

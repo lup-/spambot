@@ -34,7 +34,13 @@ initManagers(['chat', 'film', 'bus']).then(async ({chat, film, bus}) => {
     app.catch(catchErrors);
     app.start(async (ctx) => {
         try {
-            return ctx.scene.enter('searchMenu');
+            let hasPassedSettings = ctx.session && ctx.session.profile && ctx.session.profile.settings;
+            if (hasPassedSettings) {
+                return ctx.scene.enter('searchMenu');
+            }
+            else {
+                return ctx.scene.enter('settings');
+            }
         }
         catch (e) {}
     });

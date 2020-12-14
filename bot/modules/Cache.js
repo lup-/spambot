@@ -22,6 +22,10 @@ function CacheManager() {
         },
 
         async getPermanent(key, getFn, timeSec = 86400) {
+            if (!mongoCache) {
+                return false;
+            }
+
             let cacheItem = await mongoCache.findOne({key});
 
             if (!cacheItem) {
@@ -49,7 +53,7 @@ function CacheManager() {
                 }
             }
 
-            return cacheItem.value;
+            return cacheItem ? cacheItem.value : false;
         }
     }
 }

@@ -10,6 +10,8 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 let app = new Telegraf(BOT_TOKEN);
 let format = 'best[filesize<50M]/worst';
 
+const SaveActivityMiddleware = require('../modules/SaveActivityMiddleware');
+
 function download(url, onProgress) {
     return new Promise((resolve, reject) => {
         const ytdlc = spawn('youtube-dlc', [url, '--format='+format], {cwd: '/downloads'});
@@ -97,6 +99,7 @@ async function waitForFile(path, maxTimeoutMs = 1000) {
 initManagers(['chat', 'bus']).then(async ({chat, bus}) => {
     app.use(chat.saveRefMiddleware());
     app.use(chat.saveUserMiddleware());
+    app.use(SaveActivityMiddleware);
 
     app.start(async (ctx) => {
         return ctx.reply(

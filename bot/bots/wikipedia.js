@@ -10,6 +10,8 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 let app = new Telegraf(BOT_TOKEN);
 const headers = {'User-Agent': 'wikipedia-tlg-search-bot-requests @reflexum'};
 
+const SaveActivityMiddleware = require('../modules/SaveActivityMiddleware');
+
 async function loadPage(query) {
     try {
         const wikiPage = await wiki({apiUrl, headers}).page(query);
@@ -32,6 +34,7 @@ async function loadSearchResults(titles) {
 initManagers(['chat', 'bus']).then(async ({chat, bus}) => {
     app.use(chat.saveRefMiddleware());
     app.use(chat.saveUserMiddleware());
+    app.use(SaveActivityMiddleware);
 
     app.start(async (ctx) => {
         return ctx.reply(

@@ -5,6 +5,8 @@ const {menu} = require('./helpers/wizard');
 const {trimHTML} = require('../modules/Helpers');
 const {__} = require('../modules/Messages');
 
+const SaveActivityMiddleware = require('../modules/SaveActivityMiddleware');
+
 const session = require('telegraf/session');
 const store = new Map();
 
@@ -49,6 +51,7 @@ initManagers(['chat', 'diseases', 'bus']).then(async ({chat, diseases, bus}) => 
     app.use(chat.initIdsMiddleware());
     app.use(chat.saveRefMiddleware());
     app.use(chat.saveUserMiddleware());
+    app.use(SaveActivityMiddleware);
 
     app.start(ctx => {
         return ctx.reply(

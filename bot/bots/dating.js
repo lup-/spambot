@@ -13,13 +13,13 @@ const getMainMenu = require('./scenes/dating/main');
 const getSettings = require('./scenes/dating/settings');
 
 const SafeReplyMiddleware = require('../modules/SafeReplyMiddleware');
+const SaveActivityMiddleware = require('../modules/SaveActivityMiddleware');
 
 const {catchErrors} = require('./helpers/common');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 let app = new Telegraf(BOT_TOKEN);
 let telegram = new Telegram(BOT_TOKEN);
-
 
 Promise.all([
     initManagers(['dating', 'chat', 'bus']),
@@ -55,6 +55,7 @@ Promise.all([
         app.use(dating.initSessionProfileMiddleware());
         app.use(chat.saveRefMiddleware());
         app.use(chat.saveUserMiddleware());
+        app.use(SaveActivityMiddleware);
         app.use(stage.middleware());
 
         app.start(async (ctx) => {

@@ -7,6 +7,8 @@ const store = new Map();
 const {initManagers} = require('../managers');
 const {catchErrors} = require('./helpers/common');
 
+const SaveActivityMiddleware = require('../modules/SaveActivityMiddleware');
+
 const getCategoryMenu = require('./scenes/present/categoryMenu');
 const getDiscover = require('./scenes/present/discover');
 
@@ -22,6 +24,7 @@ initManagers(['chat', 'present', 'bus']).then(async ({chat, present, bus}) => {
     app.use(chat.initIdsMiddleware());
     app.use(chat.saveRefMiddleware());
     app.use(chat.saveUserMiddleware());
+    app.use(SaveActivityMiddleware);
     app.use(stage.middleware());
 
     app.catch(catchErrors);

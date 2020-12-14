@@ -7,6 +7,7 @@ const store = new Map();
 const {initManagers} = require('../managers');
 const {catchErrors} = require('./helpers/common');
 const SafeReplyMiddleware = require('../modules/SafeReplyMiddleware');
+const SaveActivityMiddleware = require('../modules/SaveActivityMiddleware');
 
 const getSearchMenu = require('./scenes/film/searchMenu');
 const getSettings = require('./scenes/film/settings');
@@ -29,6 +30,7 @@ initManagers(['chat', 'film', 'bus']).then(async ({chat, film, bus}) => {
     app.use(chat.saveRefMiddleware());
     app.use(chat.saveUserMiddleware());
     app.use(film.initSessionProfileMiddleware());
+    app.use(SaveActivityMiddleware);
     app.use(stage.middleware());
 
     app.catch(catchErrors);

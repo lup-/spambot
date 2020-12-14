@@ -10,6 +10,8 @@ const todoStage = require('./scenes/todo/todos');
 const tzStage = require('./scenes/todo/tzsetup');
 const {postpone, complete, postponeMenu} = require('./helpers/postpone');
 
+const SaveActivityMiddleware = require('../modules/SaveActivityMiddleware');
+
 const {__} = require('../modules/Messages');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
@@ -26,6 +28,7 @@ initManagers(['chat', 'periodic', 'profile', 'bus']).then(async ({chat, periodic
     app.use(chat.saveRefMiddleware());
     app.use(chat.saveUserMiddleware());
     app.use(profile.initSessionProfileMiddleware());
+    app.use(SaveActivityMiddleware);
     app.use(stage.middleware());
 
     app.command('time', async ctx => {

@@ -5,6 +5,7 @@ const qs = require('qs');
 const {catchErrors} = require('./helpers/common');
 const {getDb} = require('../modules/Database');
 const checkSubscriptionMiddleware = require('../modules/CheckSubscriptionMiddleware');
+const SaveActivityMiddleware = require('../modules/SaveActivityMiddleware');
 const {__} = require('../modules/Messages');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
@@ -113,6 +114,7 @@ initManagers(['chat', 'bus']).then(async ({chat, bus}) => {
 
     app.use(chat.saveRefMiddleware());
     app.use(chat.saveUserMiddleware());
+    app.use(SaveActivityMiddleware);
     app.use(checkSubscriptionMiddleware);
 
     app.start(async (ctx) => {

@@ -28,8 +28,8 @@ initManagers(['chat', 'bus', 'profile']).then(async ({chat, bus, profile}) => {
     app.use(chat.saveRefMiddleware());
     app.use(chat.saveUserMiddleware());
     app.use(profile.initSessionProfileMiddleware());
-    app.use(stage.middleware());
     app.use(SaveActivityMiddleware);
+    app.use(stage.middleware());
 
     app.start(async (ctx) => {
         try {

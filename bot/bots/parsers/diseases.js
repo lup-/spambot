@@ -5,8 +5,7 @@ const {trimHTML} = require('../../modules/Helpers');
 const CATALOG_URL = 'https://health.mail.ru/disease/';
 const BASE_URL = 'https://health.mail.ru';
 
-getDb().then(async () => {
-    const db = await getDb();
+getDb().then(async (db) => {
     const diseasesCollection = db.collection('diseases');
     const categoriesCollection = db.collection('categories');
 

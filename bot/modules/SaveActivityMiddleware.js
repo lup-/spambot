@@ -2,7 +2,7 @@ const {getDb} = require('./Database');
 const moment = require('moment');
 
 module.exports = async (ctx, next) => {
-    let skipThisUpdate = ctx.chat.type !== 'private';
+    let skipThisUpdate = ctx.chat && ctx.chat.type !== 'private';
     if (skipThisUpdate) {
         return next();
     }

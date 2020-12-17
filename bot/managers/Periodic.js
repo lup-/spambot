@@ -12,10 +12,22 @@ const eventLoopQueue = () => {
 module.exports = function () {
     let runTask = false;
     let runLoop = false;
+    let repeatInterval = false;
 
     return {
         setTaskRunner(newRunTask) {
             runTask = newRunTask;
+        },
+
+        setRepeatingTask(taskFn, periodSecs) {
+            repeatInterval = setInterval(taskFn, periodSecs * 1000);
+        },
+
+        stopRepeatingTask() {
+            if (repeatInterval) {
+                clearInterval(repeatInterval);
+                repeatInterval = false;
+            }
         },
 
         async addCustomTaskInTime(userId, chatId, time, zone = false) {

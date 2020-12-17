@@ -1,22 +1,8 @@
 const BaseScene = require('telegraf/scenes/base');
 const {menu, menuWithControls} = require('../../helpers/wizard');
+const {hashCode} = require('../../../modules/Helpers');
 const {__} = require('../../../modules/Messages');
 
-function hashCode(str) {
-    let hash = 0;
-
-    if (str.length === 0) {
-        return hash;
-    }
-
-    for (let i = 0; i < str.length; i++) {
-        let char = str.charCodeAt(i);
-        hash = ((hash<<5)-hash)+char;
-        hash = hash & hash;
-    }
-
-    return hash.toString();
-}
 async function unhashTag(str, finance) {
     let tags = await finance.listTags();
     return tags.find(tag => hashCode(tag) === str);

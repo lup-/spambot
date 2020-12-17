@@ -242,6 +242,49 @@ services:
       - NODE_TLS_REJECT_UNAUTHORIZED=0
     command: npm run podcast_bot
 
+  finance_bot:
+    image: node
+    container_name: 'finance_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+    volumes:
+      - ./bot:/var/www
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=finance_bot
+      - BOT_TOKEN=${FINANCE_BOT_TOKEN}
+      - BOT_NAME=finance_bot
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+    command: npm run finance_bot
+
+  business_bot:
+    image: node
+    container_name: 'business_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+    volumes:
+      - ./bot:/var/www
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=business_bot
+      - BOT_TOKEN=${BUSINESS_BOT_TOKEN}
+      - BOT_NAME=business_bot
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - FF_LOGIN=${FF_LOGIN}
+      - FF_PASSWORD=${FF_PASSWORD}
+      - TELEGRAPH_TOKEN=${TELEGRAPH_TOKEN}
+    command: npm run business_bot
+
   languagetool:
     build:
       context: "."

@@ -2,12 +2,13 @@
 
 const got = require('got');
 const {getDb} = require('../../modules/Database');
+const {saveArticleToTelegraph} = require('./saveToTelegraph');
 const { JSDOM } = require("jsdom");
 const {CookieJar} = require('tough-cookie');
 const FormData = require('form-data');
 
-const FF_LOGIN = 'daderanetive@gmail.com';
-const FF_PASSWORD = '123456789d';
+const FF_LOGIN = process.env.FF_LOGIN;
+const FF_PASSWORD = process.env.FF_PASSWORD;
 
 const FF_BASE = 'https://fastfounder.ru';
 const FF_LOGIN_URL = 'https://fastfounder.ru/wp-login.php';
@@ -62,6 +63,7 @@ function parseArticles(document) {
 
     for (const articleEl of articlesEls) {
         let headerEl = articleEl.querySelector('.entry-title');
+        let descriptionEl = articleEl.querySelector('.entry-content p');
         let coverImgEl = articleEl.querySelector('.coverimg img');
         let badgeSumEl = articleEl.querySelector('.badge .fst');
         let badgeTypeEl = articleEl.querySelector('.badgetype');
@@ -85,13 +87,16 @@ function parseArticles(document) {
         let tags = [];
         tagEls.forEach(tagEl => tags.push(tagEl.innerHTML));
 
+        let description = descriptionEl ? descriptionEl.innerHTML.replace(/ +…<a.*?\/a>$/i, '') : ''
+
         let article = {
+            source: 'ff',
             slug,
             datePosted: dateEl ? dateEl.innerHTML.trim() : null,
             title: headerEl ? headerEl.innerHTML.trim() : null,
+            description,
             cover: coverUrl,
-            actionSum: badgeSumEl ? badgeSumEl.innerHTML.trim() : null,
-            actionType: badgeTypeEl ? badgeTypeEl.innerHTML.trim() : null,
+            action: {sum: badgeSumEl ? badgeSumEl.innerHTML.trim() : null, type: badgeTypeEl ? badgeTypeEl.innerHTML.trim() : null},
             url: articleUrl,
             category: categoryUrlEl ? categoryUrlEl.innerHTML.trim() : null,
             tags
@@ -185,15 +190,15 @@ async function parseAllBriefs() {
 
     return articles;
 }
-
-getDb().then(async (db) => {
+async function parseNewFFArticles(progress = false) {
+    let db = await getDb();
     let articleCollection = db.collection('articles');
-    let savedArticles = await articleCollection.find({}).toArray();
+    let savedArticles = await articleCollection.find({source: 'ff'}).toArray();
 
     if (savedArticles.length === 0) {
         let allArticles = await parseAllBriefs();
         await articleCollection.insert(allArticles);
-        savedArticles = await articleCollection.find({}).toArray();
+        savedArticles = await articleCollection.find({source: 'ff'}).toArray();
     }
 
     let allFullSlugs = savedArticles.filter(article => article.blocks && article.blocks.length > 0).map(article => article.slug);
@@ -209,9 +214,19 @@ getDb().then(async (db) => {
         anyArticleNew = newArticles.length > 0;
         allArticlesNew = newArticles.length === articles.length;
         for (let newArticle of newArticles) {
-            console.log(newArticle.title, newArticle.url);
+            if (progress) {
+                console.log(newArticle.title, newArticle.url);
+            }
             let extra = await parseArticleContent(newArticle.url);
             newArticle = Object.assign(newArticle, extra);
+
+            let telegraphPublications = await saveArticleToTelegraph(newArticle);
+
+            if (telegraphPublications) {
+                newArticle.publications = telegraphPublications;
+                newArticle.viewLink = telegraphPublications[0].url;
+            }
+
             await articleCollection.findOneAndReplace({slug: newArticle.slug}, newArticle);
         }
         pageNum++;
@@ -220,4 +235,13 @@ getDb().then(async (db) => {
             articles = parseArticles(page);
         }
     } while (anyArticleNew && pageNum <= totalPages);
-});
+}
+
+(async () => {
+    if (process.env.PARSER === '1') {
+        await parseNewFFArticles(true);
+        console.log('Готово');
+    }
+})();
+
+module.exports = {parseNewFFArticles};

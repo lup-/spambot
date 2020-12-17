@@ -12,6 +12,7 @@ const ProfileManager = require('./Profile');
 const DiseasesManager = require('./Diseases');
 const PodcastsManager = require('./Podcasts');
 const FinanceManager = require('./Finance');
+const BusinessManager = require('./Business');
 const MessageBus = require('./MessageBus');
 
 let instances = {};
@@ -48,6 +49,8 @@ function init(manager, params = {}) {
             return new PodcastsManager();
         case 'finance':
             return new FinanceManager();
+        case 'business':
+            return new BusinessManager();
         case 'bus':
             return new MessageBus();
 

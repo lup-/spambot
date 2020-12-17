@@ -12,6 +12,7 @@ const SaveActivityMiddleware = require('../modules/SaveActivityMiddleware');
 const getSettings = require('./scenes/finance/settings');
 const {__} = require('../modules/Messages');
 const {menu} = require('./helpers/wizard');
+const {parseNewArticles} = require('./parsers/finance');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 let app = new Telegraf(BOT_TOKEN);
@@ -35,7 +36,13 @@ initManagers(['chat', 'bus', 'periodic', 'profile', 'finance']).then(async ({cha
     app.use(stage.middleware());
 
     app.start(async (ctx) => {
+        let messageShown = ctx && ctx.session && ctx.session.introShown;
+        if (messageShown) {
+            return ctx.scene.enter('settings');
+        }
+
         try {
+            ctx.session.introShown = true;
             return ctx.reply(__(`Выберите интересующую вас категорию для подписки. Каждая из них содержит темы, которые могут быть вам интересны.
 
 Нажимая на кнопку ПОДПИСАТЬСЯ вы подписываетесь на все категории`, ['content', 'intro']), menu([{code: 'accept', text: 'Понятно'}]));
@@ -83,6 +90,9 @@ ${article.description}
             }
         }
     });
+    periodic.setRepeatingTask(async () => {
+        await parseNewArticles();
+    }, 86400);
 
     app.launch();
     periodic.launch();

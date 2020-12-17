@@ -69,7 +69,7 @@ module.exports = function () {
             return categories;
         },
         getNextRemindDate() {
-            return moment().add(2, 'm');
+            return moment().startOf('d').add(1, 'd').add(11, 'h');
         },
         async subscribe(profileData, periodic, profile) {
             profileData.subscribed = true;

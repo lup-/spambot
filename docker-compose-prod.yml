@@ -222,6 +222,25 @@ services:
       - BOT_NAME=symptoms_bot
     command: npm run symptoms_bot
 
+  disease_bot:
+    image: node
+    container_name: 'disease_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+    volumes:
+      - ./bot:/var/www
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=disease_bot
+      - BOT_TOKEN=${DISEASE_BOT_TOKEN}
+      - BOT_NAME=disease_bot
+    command: npm run disease_bot
+
   podcast_bot:
     image: node
     container_name: 'podcast_bot'

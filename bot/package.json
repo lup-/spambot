@@ -28,6 +28,14 @@
     "admin_bot_debug": "node --inspect=0.0.0.0 bots/admin.js",
     "podcast_bot": "node bots/podcasts.js",
     "podcast_bot_debug": "node --inspect-brk=0.0.0.0 bots/podcasts.js",
+
+    "disease_bot": "node bots/disease.js",
+    "disease_bot_debug": "node --inspect-brk=0.0.0.0 bots/disease.js",
+    "finance_bot": "node bots/finance.js",
+    "finance_bot_debug": "node --inspect-brk=0.0.0.0 bots/finance.js",
+    "business_bot": "node bots/business.js",
+    "business_bot_debug": "node --inspect-brk=0.0.0.0 bots/business.js",
+
     "tglib": "node --inspect=0.0.0.0 tglib.js"
   },
   "author": "",

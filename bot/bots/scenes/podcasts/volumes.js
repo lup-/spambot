@@ -3,8 +3,16 @@ const BaseScene = require('telegraf/scenes/base');
 const {menu} = require('../../helpers/wizard');
 const {__} = require('../../../modules/Messages');
 
-function moreMenu() {
-    return menu([{code: 'more', text: 'Послушать другой'}]);
+function moreMenu(showEpisode = true) {
+    let buttons = [];
+
+    if (showEpisode) {
+        buttons.push({code: 'episode', text: 'Послушать другой эпизод'});
+    }
+
+    buttons.push({code: 'more', text: 'Послушать другой подкаст'});
+
+    return menu(buttons, 1);
 }
 function volumesMenu(volumes, pageIndex = 0) {
     let MAX_VOLUMES_PER_PAGE = 10;
@@ -27,13 +35,17 @@ function volumesMenu(volumes, pageIndex = 0) {
         let nextPageIndex = pageIndex < maxPageIndex ? pageIndex+1 : false;
 
         let pageButtons = [];
-        if (prevPageIndex !== false) {
-            pageButtons.push(Markup.callbackButton('◀', 'page_'+prevPageIndex));
-        }
+        pageButtons.push(prevPageIndex
+         ? Markup.callbackButton('◀', 'page_'+prevPageIndex)
+         : Markup.callbackButton('➖', '_skip')
+        );
 
-        if (nextPageIndex !== false) {
-            pageButtons.push(Markup.callbackButton('▶', 'page_'+nextPageIndex));
-        }
+        pageButtons.push(Markup.callbackButton('↩', 'menu'));
+
+        pageButtons.push(nextPageIndex
+         ? Markup.callbackButton('▶', 'page_'+nextPageIndex)
+         : Markup.callbackButton('➖', '_skip')
+        );
 
         volumeButtons.push(pageButtons);
     }
@@ -44,7 +56,7 @@ function volumesMenu(volumes, pageIndex = 0) {
 function replyWithListenLink(link, ctx) {
     return ctx.safeReply(
         async ctx => {
-            await ctx.replyWithHTML(__('Ссылка на прослушивание: '+link, ['content', 'link']), moreMenu());
+            await ctx.replyWithHTML(__('Ссылка на прослушивание: '+link, ['content', 'link']), moreMenu(false));
         }, null, ctx
     );
 }
@@ -56,6 +68,8 @@ module.exports = function (podcastManager) {
         let podcastIndex = ctx.session.index;
         let fromPage = ctx.session.fromPage || false;
         let pageIndex = ctx.session.volumesPageIndex || 0;
+        let searchType = ctx.scene.state.type || 'search';
+        let favorites = ctx.session.profile.favorite || {};
 
         ctx.session.fromPage = false;
 
@@ -64,7 +78,8 @@ module.exports = function (podcastManager) {
         }
 
         let categoryIds = podcastManager.getSavedCategories(ctx);
-        let {podcast} = await podcastManager.getPodcastByIndex(podcastIndex, categoryIds);
+        let sort = podcastManager.getSavedSort(ctx);
+        let {podcast} = await podcastManager.getPodcastByIndex(podcastIndex, categoryIds, sort, searchType, favorites);
         let hasVolumes = await podcastManager.isListSupported(podcast);
 
         if (!hasVolumes) {
@@ -91,13 +106,17 @@ module.exports = function (podcastManager) {
         return ctx.scene.reenter();
     });
 
-    scene.action('more', ctx => {
-        return ctx.scene.enter('discover');
+    scene.action('episode', ctx => {
+        ctx.scene.reenter();
     });
+    scene.action('more', ctx => ctx.scene.enter('discover'));
+    scene.action('menu', ctx => ctx.scene.enter('discover'));
 
     scene.action(/volume_(.*)/, async ctx => {
         ctx.session.volumesPageIndex = 0;
         let volumeId = ctx.match[1];
+        let searchType = ctx.scene.state.type || 'search';
+        let favorites = ctx.session.profile.favorite || {};
 
         let podcastIndex = ctx.session.index;
         if (typeof (podcastIndex) !== 'number') {
@@ -107,7 +126,8 @@ module.exports = function (podcastManager) {
         await ctx.replyWithHTML(__('Подождите, идет загрузка подкаста', ['status', 'wait']));
 
         let categoryIds = podcastManager.getSavedCategories(ctx);
-        let {podcast} = await podcastManager.getPodcastByIndex(podcastIndex, categoryIds);
+        let sort = podcastManager.getSavedSort(ctx);
+        let {podcast} = await podcastManager.getPodcastByIndex(podcastIndex, categoryIds, sort, searchType, favorites);
         let volumes = await podcastManager.getVolumesByPodcast(podcast);
         if (!volumes) {
             return ctx.scene.reenter();
@@ -142,6 +162,8 @@ module.exports = function (podcastManager) {
             }, ctx
         );
     });
+
+    scene.action('_skip', ctx => {});
 
     return scene;
 }

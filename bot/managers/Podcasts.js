@@ -18,7 +18,7 @@ const supported = [
 
 module.exports = function () {
     return {
-        async listPodcasts(categoryIds) {
+        async listPodcasts(categoryIds, sort) {
             let cache = await getCache();
 
             try {
@@ -34,11 +34,22 @@ module.exports = function () {
                         .filter(category => categoryIds.indexOf(category.id) !== -1)
                         .map(category => category.title);
 
-                    return list.filter(podcast => categoryNames.indexOf(podcast.category) !== -1);
+                    list = list.filter(podcast => categoryNames.indexOf(podcast.category) !== -1);
                 }
-                else {
-                    return list;
+
+                if (sort) {
+                    list.sort((a, b) => {
+                        let sortField = Object.keys(sort)[0] || false;
+                        let dir = sortField ? sort[sortField] : false;
+                        let objectField = `${sortField}_count`;
+
+                        return sortField
+                            ? (a[objectField] - b[objectField]) * dir
+                            : 0;
+                    });
                 }
+
+                return list;
             }
             catch (e) {
                 return false;
@@ -120,18 +131,23 @@ module.exports = function () {
             let platform = await this.getPlatform(podcast);
             return platform ? platform.download : false;
         },
-        async getPodcastByIndex(index, categoryIds) {
-            let list = await this.listPodcasts(categoryIds);
+        async getPodcastByIndex(index, categoryIds, sort, searchType, favorites) {
+            let list = await this.listPodcasts(categoryIds, sort);
             if (!list) {
                 return  false;
+            }
+
+            if (searchType === 'favorite') {
+                list = list.filter(podcast => favorites.indexOf(podcast.id) !== -1);
             }
 
             let podcast = list[index] || false;
             let hasPrev = index > 0;
             let totalPodcasts = list.length;
             let hasNext = index < totalPodcasts-1;
+            let isFavorite = podcast && favorites && favorites.length > 0 ? favorites.indexOf(podcast.id) !== -1 : false;
 
-            return {podcast, hasPrev, hasNext, index, totalPodcasts} || false;
+            return {podcast, hasPrev, hasNext, index, totalPodcasts, isFavorite} || false;
         },
 
         async getVolumesByPodcast(podcast) {
@@ -144,9 +160,15 @@ module.exports = function () {
             if (parser) {
                 let cache = await getCache();
 
-                return cache.getPermanent('podcast_volumes_'+podcast.id, async () => {
+                let volumes = await cache.getPermanent('podcast_volumes_'+podcast.id, async () => {
                     return parser.parseVolumes(url);
                 });
+
+                if (volumes && volumes.length > 0) {
+                    volumes.reverse();
+                }
+
+                return volumes;
             }
 
             return false;
@@ -167,6 +189,26 @@ module.exports = function () {
                 : (ctx.session.profile ? ctx.session.profile.category || []: []);
         },
 
+        getSavedSort(ctx) {
+            return ctx.session.profile
+                ? ctx.session.profile.sort || {}
+                : {};
+        },
+        async toggleInFavourites(profile, podcast, profileManager) {
+            if (!profile.favorite) {
+                profile.favorite = [];
+            }
+
+            let favIndex = profile.favorite.indexOf(podcast.id);
+            if (favIndex === -1) {
+                profile.favorite.push(podcast.id);
+            }
+            else {
+                profile.favorite.splice(favIndex, 1);
+            }
+
+            return profileManager.saveProfile(profile);
+        },
         async saveListen(userId, podcast, volume = false) {
             let db = await getDb();
             let listens = db.collection('listens');

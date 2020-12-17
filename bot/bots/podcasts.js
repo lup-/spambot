@@ -6,12 +6,16 @@ const store = new Map();
 
 const {initManagers} = require('../managers');
 const {catchErrors} = require('./helpers/common');
+const {menu} = require('./helpers/wizard');
+const {__} = require('../modules/Messages');
 const SafeReplyMiddleware = require('../modules/SafeReplyMiddleware');
 const SaveActivityMiddleware = require('../modules/SaveActivityMiddleware');
 
+const getIntro = require('./scenes/podcasts/intro');
 const getDiscover = require('./scenes/podcasts/discover');
 const getVolumes = require('./scenes/podcasts/volumes');
 const getSettings = require('./scenes/podcasts/settings');
+const getSettingsRouter = require('./scenes/podcasts/selectSettings');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 let app = new Telegraf(BOT_TOKEN, {
@@ -24,9 +28,11 @@ initManagers(['chat', 'profile', 'podcasts', 'bus']).then(async ({chat, profile,
     app.catch(catchErrors);
 
     const stage = new Stage();
-    stage.register(getDiscover(podcasts));
+    stage.register(getIntro());
+    stage.register(getDiscover(podcasts, profile));
     stage.register(getVolumes(podcasts));
-    stage.register(getSettings(podcasts, profile))
+    stage.register(getSettings(podcasts, profile));
+    stage.register(getSettingsRouter());
 
     let safeReply = new SafeReplyMiddleware();
     safeReply.setDefaultFallback(catchErrors);
@@ -40,20 +46,10 @@ initManagers(['chat', 'profile', 'podcasts', 'bus']).then(async ({chat, profile,
     app.use(SaveActivityMiddleware);
     app.use(stage.middleware());
 
-    app.start(async (ctx) => {
-        try {
-            let hasPassedSettings = ctx.session && ctx.session.profile && ctx.session.profile.category;
-            if (hasPassedSettings) {
-                return ctx.scene.enter('discover');
-            }
-            else {
-                return ctx.scene.enter('settings');
-            }
-        }
-        catch (e) {}
-    });
-    app.action(/.*/, ctx => ctx.scene.enter('discover'));
-    app.on('message', ctx => ctx.scene.enter('discover'));
+    app.start(async ctx => ctx.scene.enter('intro'));
+
+    app.action(/.*/, ctx => ctx.scene.enter('discover', {type: 'search'}));
+    app.on('message', ctx => ctx.scene.enter('discover', {type: 'search'}));
 
     app.launch();
     bus.listenCommands();

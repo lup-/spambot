@@ -5,7 +5,7 @@ let chatInstance = null;
 
 function ChatManager() {
     return {
-        async init() {
+        init() {
             return this;
         },
         async saveChat(chatFields, botName = false) {

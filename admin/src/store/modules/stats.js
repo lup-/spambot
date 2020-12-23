@@ -6,20 +6,46 @@ export default {
         details: [],
     },
     getters: {
-        plotlyDetails(state) {
+        plotlyTotals(state) {
             let totals = state.details.map(botStat => {
+                return {
+                    x: botStat.stats.map(item => item.tag),
+                    y: botStat.stats.map(item => item.total),
+                    type: 'scatter',
+                    name: botStat.botId+', всего',
+                }
+            });
+
+            return totals;
+        },
+        plotlyActive(state) {
+            let active = state.details.map(botStat => {
+                return {
+                    x: botStat.stats.map(item => item.tag),
+                    y: botStat.stats.map(item => item.active),
+                    type: 'scatter',
+                    name: botStat.botId+', активных',
+                }
+            });
+
+            return active;
+        },
+        plotlyNew(state) {
+            let newUsers = state.details.map(botStat => {
                 return {
                     x: botStat.stats.map(item => item.tag),
                     y: botStat.stats.map(item => item.count),
                     type: 'scatter',
-                    mode: 'markers',
-                    name: botStat.botId,
+                    name: botStat.botId+', всего новых',
                     marker: {
                         size: 10,
                     }
                 }
             });
 
+            return newUsers;
+        },
+        plotlyRefs(state) {
             let refs = state.details.reduce((lines, botStat) => {
                 let refLines = botStat.refStats.map(refStat => {
                     return {
@@ -27,7 +53,9 @@ export default {
                         y: refStat.stats.map(item => item.count),
                         type: 'scatter',
                         mode: 'lines',
-                        name: botStat.botId+':'+(refStat.ref ? refStat.ref : 'прямые'),
+                        name: refStat.ref
+                            ? botStat.botId+':'+refStat.ref
+                            : botStat.botId+', органика',
                         stackgroup: botStat.botId,
                         line: {
                             width: 2
@@ -39,7 +67,7 @@ export default {
                 return lines;
             }, []);
 
-            return totals.concat(refs);
+            return refs;
         },
         statTable(state) {
             let noDetails = state.details.length === 0;
@@ -60,7 +88,9 @@ export default {
                     }, {});
 
                     columns = Object.assign(columns, refCols);
-                    columns[`${botStat.botId}:_total`] = totalItem && totalItem.count ? totalItem.count : 0;
+                    columns[`${botStat.botId}:_new`] = totalItem && totalItem.count ? totalItem.count : 0;
+                    columns[`${botStat.botId}:_active`] = totalItem && totalItem.active ? totalItem.active : 0;
+                    columns[`${botStat.botId}:_total`] = totalItem && totalItem.total ? totalItem.total : 0;
                     return columns;
                 }, {tag});
 
@@ -70,20 +100,33 @@ export default {
             let headers = Object.keys(rows[0]).map(colCode => {
                 let [botId, colType] = colCode.split(':');
                 let colName = colCode;
+                let type = 'refs';
 
                 if (colCode === 'tag') {
                     colName = 'Время';
+                    type = false;
+                }
+
+                if (colType === '_direct') {
+                    colName = `${botId}, органика`;
+                }
+
+                if (colType === '_new') {
+                    colName = `${botId}, всего новых`;
+                    type = 'new';
+                }
+
+                if (colType === '_active') {
+                    colName = `${botId}, активных`;
+                    type = 'active';
                 }
 
                 if (colType === '_total') {
                     colName = `${botId}, всего`;
+                    type = 'totals';
                 }
 
-                if (colType === '_direct') {
-                    colName = `${botId}, прямые`;
-                }
-
-                return {text: colName, value: colCode};
+                return {text: colName, value: colCode, type};
             });
 
             return {headers, rows}
@@ -91,10 +134,12 @@ export default {
     },
     actions: {
         async loadStats({commit}, filter) {
-            let response = await axios.post(`/api/stats/list`, {filter});
+            let tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            let response = await axios.post(`/api/stats/list`, {filter, tz});
             return commit('setStats', response.data.stats);
         },
         async loadDetails({commit}, params) {
+            params.tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
             let response = await axios.post(`/api/stats/details`, params);
             return commit('setDetails', response.data.stats);
         },

@@ -1,30 +1,58 @@
 <template>
     <v-container class="fill-height" :class="{'align-start': !isEmpty && !isLoading}">
-        <v-data-iterator
-                :items="stats"
-                :loading="isLoading"
-                locale="ru"
-        >
-            <template v-slot:default="{ items }">
-                <v-row>
-                    <v-col cols="12" sm="6" lg="4" v-for="stat in items" :key="'stats'+stat.botId">
-                        <stat-card :stats="stat"></stat-card>
-                    </v-col>
-                </v-row>
-            </template>
-        </v-data-iterator>
+        <v-row>
+            <v-col cols="12">
+                <v-data-table
+                        dense
+                        :headers="tableHeaders"
+                        :items="tableData"
+                        :loading="isLoading"
+                        :single-expand="false"
+                        :expanded.sync="expanded"
+                        :items-per-page="50"
+                        item-key="botId"
+                        show-expand
+                >
+                    <template v-slot:expanded-item="{ headers, item }">
+                        <td></td>
+                        <td colspan="2" class="pr-0">
+                            <table class="expand-table">
+                                <tr v-for="(ref, index) in item.refs" :key="ref.code" :style="{backgroundColor: index % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.1)'}">
+                                    <td>{{ref.code}}</td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td colspan="2" class="px-0">
+                            <table class="expand-table">
+                                <tr v-for="(ref, index) in item.refs" :key="ref.code" :style="{backgroundColor: index % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.1)'}">
+                                    <td class="pl-4">{{ref.count || 0}}</td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td></td>
+                    </template>
+                    <template v-slot:item.external="{ item }">
+                        <v-simple-checkbox
+                            v-model="item.external"
+                            disabled
+                        ></v-simple-checkbox>
+                    </template>
+                    <template v-slot:item.actions="{ item }">
+                        <v-btn small @click="gotoBotStats(item.botId)">Статистика</v-btn>
+                    </template>
+                </v-data-table>
+            </v-col>
+        </v-row>
     </v-container>
 </template>
 
 <script>
-    import StatCard from "@/components/StatCard";
-
     export default {
         name: "Stats",
-        components: {StatCard},
         data() {
             return {
                 isLoading: false,
+                expanded: [],
             }
         },
         async mounted() {
@@ -35,6 +63,9 @@
                 this.isLoading = true;
                 await this.$store.dispatch('loadStats', {});
                 this.isLoading = false;
+            },
+            gotoBotStats(botId) {
+                this.$router.push({name: 'statsDetails', params: {id: botId}});
             }
         },
         computed: {
@@ -43,11 +74,32 @@
             },
             isEmpty() {
                 return this.stats.length === 0 && this.isLoading === false;
+            },
+            tableHeaders() {
+                return [
+                    {text: 'Код бода', value: 'botId'},
+                    {text: 'Подключено к', value: 'userName'},
+                    {text: 'Пользователи', value: 'count'},
+                    {text: 'Внешний', value: 'external'},
+                    {text: 'Действия', value: 'actions', sortable: false},
+                ]
+            },
+            tableData() {
+                return this.stats.map(stat => {
+                    let userName = this.$store.getters.botTgField(stat.botId, 'username')
+                    return {
+                        botId: stat.botId,
+                        userName: userName ? '@' + userName : false,
+                        count: stat.users.count,
+                        external: stat.external,
+                        refs: stat.refs,
+                    }
+                });
             }
         }
     }
 </script>
 
-<style scoped>
-
+<style>
+    .expand-table {width: 100%; border-collapse: collapse;}
 </style>

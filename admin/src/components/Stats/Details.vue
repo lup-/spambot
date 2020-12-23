@@ -77,6 +77,12 @@
         </v-row>
         <v-row>
             <v-col cols="12">
+                <v-btn-toggle v-model="graphs" multiple dense color="primary">
+                    <v-btn value="plotlyTotals">Всего пользователей</v-btn>
+                    <v-btn value="plotlyActive">Активных</v-btn>
+                    <v-btn value="plotlyNew">Новых</v-btn>
+                    <v-btn value="plotlyRefs">Источники</v-btn>
+                </v-btn-toggle>
                 <plotly ref="plot" :data="data" :layout="layout" :displayModeBar="false"/>
             </v-col>
         </v-row>
@@ -131,6 +137,7 @@
                 rangeEnd: moment().endOf('d').format('YYYY-MM-DD'),
                 rangeStartFormatted: moment().startOf('d').format('DD.MM.YYYY'),
                 rangeEndFormatted: moment().endOf('d').format('DD.MM.YYYY'),
+                graphs: ['plotlyTotals'],
                 isLoading: false,
                 menuStart: false,
                 menuEnd: false,
@@ -216,7 +223,17 @@
                 return this.$store.state.bots.list.map( bot => ({text: bot.tg.username ? '@'+bot.tg.username : bot.id, value: bot.id}) );
             },
             data() {
-                return this.$store.getters.plotlyDetails;
+                return this.graphs.reduce( (lines, graph) => {
+                    let graphLines = this.$store.getters[graph];
+                    if (this.graphs.length > 1 && graph === 'plotlyTotals') {
+                        graphLines = graphLines.map(line => {
+                            line.yaxis = 'y2';
+                            return line;
+                        });
+                    }
+
+                    return lines.concat(graphLines);
+                }, []);
             },
             layout() {
                 let max = this.data.reduce((max, line) => {
@@ -225,15 +242,18 @@
                 }, 0);
 
                 let layout = {
-                    xaxis: {
-                        showspikes: true,
-                        spikemode: 'across'
-                    },
-                    yaxis: {
-                        showspikes: true,
-                        spikemode: 'toaxis'
-                    }
+                    xaxis: {},
+                    yaxis: {},
+                    legend: {orientation: 'h', x: 0.5, y: -0.5, xanchor: 'center', yanchor: 'top'}
                 };
+
+                if (this.graphs.indexOf('plotlyTotals') !== -1 && this.graphs.length > 1) {
+                    layout.yaxis2 = {
+                        title: 'Всего',
+                        side: 'right',
+                        overlaying: 'y',
+                    }
+                }
 
                 if (max === 0) {
                     layout.yaxis.range = [0, 1];
@@ -247,7 +267,9 @@
             },
             tableHeaders() {
                 let {headers} = this.tableAll;
-                return headers;
+                let selectedBlocks = this.graphs.map(graph => graph.replace('plotly', '').toLowerCase());
+                let filteredHeaders = headers.filter(header => selectedBlocks.indexOf(header.type) !== -1 || header.type === false);
+                return filteredHeaders;
             },
             tableData() {
                 let {rows} = this.tableAll;

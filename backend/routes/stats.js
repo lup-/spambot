@@ -77,6 +77,10 @@ module.exports = {
             ? ctx.request.body.botIds || []
             : [];
 
+        let tz = ctx.request.body && ctx.request.body.tz
+            ? ctx.request.body.tz || false
+            : false;
+
         let defaultRange = {start: moment().startOf('d').unix(), end: moment().endOf('d').unix()};
         let range = ctx.request.body && ctx.request.body.range
             ? ctx.request.body.range || defaultRange
@@ -98,8 +102,23 @@ module.exports = {
 
         let start = moment.unix(range.start);
         let tagsCount = moment.unix(range.end).diff(moment.unix(range.start), format.step);
-        let tags = Array(tagsCount).fill(0).map(() => start.add(1, format.step).format(format.momentTag));
+        let steps = Array(tagsCount).fill(0).map((_, index) => start.clone().add(index, format.step));
+        let tags = steps.map(step => step.format(format.momentTag));
+        let unixSteps = steps.map(step => step.unix());
 
+        let projectQuery = unixSteps.reduce( (fields, time, index) => {
+            let key = `date_group_${index}`;
+            fields[key] = {"$cond": [ { "$lte": [ "$targetDate", time ] }, 1, 0 ]};
+            return fields;
+        }, {} );
+
+        let groupQuery = unixSteps.reduce( (fields, time, index) => {
+            let fieldKey = `date_group_${index}`;
+            let key = `count_${index}`;
+            fields[key] = {"$sum": `$${fieldKey}`};
+            return fields;
+        }, {'_id': '1'} );
+        
         let allBots = await config.botList();
         let bots = botIds && botIds.length > 0
             ? allBots.filter(bot => botIds.indexOf(bot.id) !== -1)
@@ -110,6 +129,13 @@ module.exports = {
             let db = await getDb(bot.dbName);
             let users = db.collection('users');
             let refs = db.collection('refs');
+            let activity = db.collection('activity');
+
+            let totalUsersResult = await users.aggregate([
+                {$set: {targetDate: "$registered"}},
+                {$project: projectQuery},
+                {$group: groupQuery}
+            ]).toArray();
 
             let usersResult = await users.aggregate([
                 {$match: {$and: [{registered: {$gte: range.start}}, {registered: {$lt: range.end}}]}},
@@ -135,13 +161,29 @@ module.exports = {
                 {$sort: {"tag": 1}}
             ]).toArray();
 
+            let activeUsersResult = await activity.aggregate([
+                {$match: {$and: [{date: {$gte: range.start}}, {date: {$lt: range.end}}]}},
+                {$set: {date_date: {$toDate: {$multiply: ["$date", 1000]}}}},
+                {$set: {
+                        timeslot: { $dateToString: {date: "$date_date", format: format.slot} },
+                        tag: {$dateToString: {date: {$min: "$date_date"}, format: format.tag} }
+                    }
+                },
+                {$group: {"_id": "$timeslot", "count": {$sum: 1}, "tag": {$first: "$tag"}}},
+                {$sort: {"tag": 1}}
+            ]).toArray();
+
             let refNames = refsResult.map(item => item.ref).filter((ref, index, all) => all.indexOf(ref) === index);
 
-            let stats = tags.map(tag => {
+            let stats = tags.map((tag, index) => {
                 let userCount = usersResult.find(item => item.tag === tag);
+                let activeUserCount = activeUsersResult.find(item => item.tag === tag);
 
                 let count = userCount && userCount['count'] ? userCount['count'] : 0;
-                return {tag, count};
+                let total = totalUsersResult[0][`count_${index}`] || 0;
+                let active = activeUserCount && activeUserCount['count'] ? activeUserCount['count'] : 0;
+
+                return {tag, count, active, total};
             });
 
             let refStats = refNames.map(refName => {

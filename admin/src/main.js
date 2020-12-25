@@ -5,6 +5,8 @@ import routes from "@/routes";
 import vuetify from './plugins/vuetify';
 import store from "@/store";
 
+import VueTrix from "vue-trix";
+
 let vueInstance;
 const router = new VueRouter({
   routes
@@ -20,6 +22,7 @@ Vue.config.errorHandler = function (err) {
 };
 
 Vue.use(VueRouter);
+Vue.use(VueTrix);
 
 vueInstance = new Vue({
   store,

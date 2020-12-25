@@ -214,5 +214,57 @@ module.exports = {
         }
 
         ctx.body = {stats: botstats};
+    },
+    async refUsers(ctx) {
+        let db = await getDb('refs_bot');
+        let profiles = await db.collection('profiles').find({}).toArray();
+        ctx.body = {users: profiles}
+    },
+    async updateRefUser(ctx) {
+        let db = await getDb('refs_bot');
+        let updatedProfile = ctx.request.body && ctx.request.body.profile
+            ? ctx.request.body.profile
+            : false;
+
+        let userId = updatedProfile && updatedProfile.userId
+            ? updatedProfile.userId
+            : false;
+
+        if (!userId) {
+            ctx.body = {user: false};
+            return;
+        }
+
+        if (updatedProfile._id) {
+            delete updatedProfile._id;
+        }
+
+        let result = await db.collection('profiles').findOneAndReplace({userId}, updatedProfile);
+
+        ctx.body = {user: result && result.ok ? result.value : false};
+    },
+    async refList(ctx) {
+        let botIds = ctx.request.body && ctx.request.body.botIds
+            ? ctx.request.body.botIds || []
+            : [];
+
+        let allBots = await config.botList();
+        let bots = botIds && botIds.length > 0
+            ? allBots.filter(bot => botIds.indexOf(bot.id) !== -1)
+            : allBots;
+
+        let refs = [];
+        for (const bot of bots) {
+            let db = await getDb(bot.dbName);
+            let visits = db.collection('refs');
+            let foundRefs = await visits.aggregate([{$group: {"_id": "$ref"}}]).toArray();
+            refs.push({
+                botId: bot.id,
+                bot,
+                refs: foundRefs.map(ref => ref._id),
+            });
+        }
+
+        ctx.body = {refs};
     }
 }

@@ -19,6 +19,22 @@
                         <v-list-item-title>Приписки</v-list-item-title>
                     </v-list-item-content>
                 </v-list-item>
+                <v-list-item link @click="$router.push({name: 'mailingList'})" :disabled="$route.name === 'mailingList'">
+                    <v-list-item-action>
+                        <v-icon>mdi-email</v-icon>
+                    </v-list-item-action>
+                    <v-list-item-content>
+                        <v-list-item-title>Рассылки</v-list-item-title>
+                    </v-list-item-content>
+                </v-list-item>
+                <v-list-item link @click="$router.push({name: 'refUsersList'})" :disabled="$route.name === 'refUsersList'">
+                    <v-list-item-action>
+                        <v-icon>mdi-account-multiple</v-icon>
+                    </v-list-item-action>
+                    <v-list-item-content>
+                        <v-list-item-title>Админы</v-list-item-title>
+                    </v-list-item-content>
+                </v-list-item>
             </v-list>
         </v-navigation-drawer>
 

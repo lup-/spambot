@@ -4,6 +4,9 @@ export default {
     state: {
         stats: [],
         details: [],
+        currentRefUser: false,
+        refUsersList: [],
+        botRefs: [],
     },
     getters: {
         plotlyTotals(state) {
@@ -143,6 +146,25 @@ export default {
             let response = await axios.post(`/api/stats/details`, params);
             return commit('setDetails', response.data.stats);
         },
+        async loadRefUsers({commit}) {
+            let response = await axios.post(`/api/stats/refUsers`);
+            return commit('setRefUsers', response.data.users);
+        },
+        async loadBotRefs({commit}, {botIds}) {
+            let response = await axios.post(`/api/stats/refList`, {botIds});
+            return commit('setBotRefs', response.data.refs);
+        },
+        async setCurrentRefUser({commit, state}, userId) {
+            let refUser = state.refUsersList
+                ? state.refUsersList.find(item => item.id === userId)
+                : false;
+            if (refUser) {
+                commit('setCurrentRefUser', refUser);
+            }
+        },
+        async editRefUser(_, refUser) {
+            await axios.post(`/api/stats/updateRefUser`, {profile: refUser});
+        }
     },
     mutations: {
         setStats(state, stats) {
@@ -150,6 +172,15 @@ export default {
         },
         setDetails(state, stats) {
             state.details = stats;
+        },
+        setRefUsers(state, refUsers) {
+            state.refUsersList = refUsers;
+        },
+        setCurrentRefUser(state, refUser) {
+            state.currentRefUser = refUser;
+        },
+        setBotRefs(state, refs) {
+            state.botRefs = refs;
         }
     }
 }

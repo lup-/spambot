@@ -43,7 +43,7 @@
                                     v-model="probPercent"
                                     min="0"
                                     max="100"
-                                    step="10"
+                                    step="1"
                                     ticks="always"
                                     thumb-label="always"
                                     label="Вероятность показа, %"

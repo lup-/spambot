@@ -304,6 +304,32 @@ services:
       - TELEGRAPH_TOKEN=${TELEGRAPH_TOKEN}
     command: npm run business_bot
 
+  refs_bot:
+    image: node
+    container_name: 'refs_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+    volumes:
+      - ./backend:/var/backend
+      - ./bot:/var/www
+      - type: bind
+        source: ./docker-compose-prod.yml
+        target: /var/docker-compose.yml
+      - type: bind
+        source: ./.env
+        target: /var/.env
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=refs_bot
+      - BOT_TOKEN=${REFS_BOT_TOKEN}
+      - BOT_NAME=refs_bot
+    command: npm run refs_bot
+
   languagetool:
     build:
       context: "."

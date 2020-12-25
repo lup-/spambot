@@ -16,6 +16,10 @@ function mainMenu(ctx) {
     ], true);
 }
 
+function hasFilledProfile(ctx) {
+    return ctx.session && ctx.session.profile && ctx.session.profile.name;
+}
+
 module.exports = function (datingManager) {
     const scene = new BaseScene('mainMenu');
 
@@ -25,16 +29,14 @@ module.exports = function (datingManager) {
         mainMenu(ctx)), null, ctx);
     });
 
-    scene.action('rateProfiles', ctx => ctx.session && ctx.session.profile
+    scene.action('rateProfiles', ctx => hasFilledProfile(ctx)
         ? ctx.scene.enter('rateProfiles')
-        : ctx.scene.enter('mainMenu'));
-    scene.action('profileWizard', ctx => ctx.session && ctx.session.profile
-        ? ctx.scene.enter('profileWizard')
-        : ctx.scene.enter('mainMenu'));
+        : ctx.scene.enter('profileWizard'));
+    scene.action('profileWizard',  ctx => ctx.scene.enter('profileWizard'));
     scene.action('stop', async ctx => {
-        let hasProfile = ctx.session && ctx.session.profile;
+        let hasProfile = hasFilledProfile(ctx);
         if (!hasProfile) {
-            return ctx.scene.enter('mainMenu');
+            return ctx.scene.enter('profileWizard');
         }
 
         ctx.session.profile = await datingManager.stopSeeking(ctx.session.profile);
@@ -44,19 +46,19 @@ module.exports = function (datingManager) {
     scene.action('start', async ctx => {
         let hasProfile = ctx.session && ctx.session.profile;
         if (!hasProfile) {
-            return ctx.scene.enter('mainMenu');
+            return ctx.scene.enter('profileWizard');
         }
 
         ctx.session.profile = await datingManager.startSeeking(ctx.session.profile);
         await ctx.reply('Ваша анкета снова в поиске');
         return ctx.scene.reenter();
     });
-    scene.action('rateFans', ctx => ctx.session && ctx.session.profile
+    scene.action('rateFans', ctx => hasFilledProfile(ctx)
         ? ctx.scene.enter('rateFans')
-        : ctx.scene.enter('mainMenu'));
-    scene.action('settings', ctx => ctx.session && ctx.session.profile
+        : ctx.scene.enter('profileWizard'));
+    scene.action('settings', ctx => hasFilledProfile(ctx)
         ? ctx.scene.enter('settings')
-        : ctx.scene.enter('mainMenu'));
+        : ctx.scene.enter('profileWizard'));
     scene.use(ctx => ctx.reply('Выбери что-то из меню', mainMenu(ctx)));
 
     return scene;

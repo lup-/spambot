@@ -22,10 +22,10 @@ let app = new Telegraf(BOT_TOKEN);
 let telegram = new Telegram(BOT_TOKEN);
 
 Promise.all([
-    initManagers(['dating', 'chat', 'bus']),
+    initManagers(['dating', 'chat', 'bus', 'profile']),
     getDb()
 ])
-    .then(([{dating, chat, bus}, db]) => {
+    .then(([{dating, chat, bus, profile}, db]) => {
         const profileWizard = getProfileWizard(dating);
         const rateProfiles = getRateProfiles(dating, false, telegram);
         const rateFans = getRateProfiles(dating, true, telegram);
@@ -52,7 +52,7 @@ Promise.all([
 
         app.use(safeReply.getMiddleware());
         app.use(session({store}));
-        app.use(dating.initSessionProfileMiddleware());
+        app.use(profile.initSessionProfileMiddleware());
         app.use(chat.saveRefMiddleware());
         app.use(chat.saveUserMiddleware());
         app.use(SaveActivityMiddleware);

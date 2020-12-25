@@ -87,6 +87,10 @@ module.exports = function (datingManager) {
             return ctx.wizard.next();
         },
         (ctx) => {
+            if (!ctx.message.text) {
+                return ctx.reply('Как мне тебя называть?');
+            }
+
             ctx.wizard.state.profile.name = ctx.message.text.trim();
 
             ctx.reply(

@@ -1,13 +1,14 @@
 const { Telegraf } = require('telegraf');
 const setupBot = require('./helpers/setup');
 const {init} = require('../managers');
+const RefStat = require('../managers/RefStat');
 const {menu} = require('./helpers/wizard');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 let app = new Telegraf(BOT_TOKEN);
 let bus = init('bus');
 let profile = init('profile');
-let refstat = init('refstat');
+let refstat = new RefStat();
 
 function hasPermissions(ctx) {
     return ctx.session && ctx.session.profile && ctx.session.profile.refs && ctx.session.profile.refs.length > 0;

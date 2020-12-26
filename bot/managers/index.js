@@ -1,7 +1,6 @@
 const getBotManager = require('./Bot');
 const getChatManager = require('./Chat');
 const StatManager = require('./Stat');
-const RefStat = require('./RefStat');
 const HoroscopeManager = require('./Horoscope');
 const MailingManager = require('./Mailing');
 const DatingManager = require('./Dating');
@@ -28,9 +27,6 @@ function init(manager, params = {}) {
         case 'stat':
             let db = params.db || process.env.MONGO_DB;
             return (new StatManager).init(db);
-        case 'refstat':
-            return new RefStat();
-        break;
         case 'horoscope':
             return new HoroscopeManager();
         case 'mailing':

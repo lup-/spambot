@@ -89,8 +89,10 @@ module.exports = function () {
             return this.saveProfile(profile);
         },
         async blockUser(profile) {
-            profile.blocked = true;
-            return this.saveProfile(profile);
+            if (profile) {
+                profile.blocked = true;
+                return this.saveProfile(profile);
+            }
         },
         async stopSeeking(profile) {
             profile.stopped = true;

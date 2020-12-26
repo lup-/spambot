@@ -5,6 +5,10 @@ const {initManagers} = require('../managers');
 const {wait} = require('../modules/Helpers');
 const {catchErrors} = require('./helpers/common');
 const {__} = require('../modules/Messages');
+const moment = require('moment');
+
+const session = require('telegraf/session');
+const store = new Map();
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 let app = new Telegraf(BOT_TOKEN);
@@ -97,6 +101,7 @@ async function waitForFile(path, maxTimeoutMs = 1000) {
 }
 
 initManagers(['chat', 'bus']).then(async ({chat, bus}) => {
+    app.use(session({store}));
     app.use(chat.saveRefMiddleware());
     app.use(chat.saveUserMiddleware());
     app.use(SaveActivityMiddleware);
@@ -111,6 +116,17 @@ initManagers(['chat', 'bus']).then(async ({chat, bus}) => {
         let url = ctx.update && ctx.update.message ? ctx.update.message.text.trim() : '';
         let isValidUrl = url.indexOf('http') === 0;
 
+        if (ctx.session.lastDownload) {
+            let TIME_DIFF_LIMIT = 10;
+            let lastTime = moment.unix(ctx.session.lastDownload);
+            let deltaSect = moment().diff( lastTime, 'seconds' );
+            let isOverLimit = deltaSect < TIME_DIFF_LIMIT;
+
+            if (isOverLimit) {
+                return ctx.reply('Пожалуйста, подождите 10 секунд и отправьте ссылку еще раз');
+            }
+        }
+
         if (!isValidUrl) {
             return ctx.reply('Не похоже на ссылку. Для загрузки видео нужна ссылка');
         }
@@ -120,6 +136,8 @@ initManagers(['chat', 'bus']).then(async ({chat, bus}) => {
         let progressMessage = await ctx.reply(messageText);
         let filename;
         let filePath;
+
+        ctx.session.lastDownload = moment().unix();
 
         try {
             filename = await getDownloadFilename(url);
@@ -173,6 +191,8 @@ initManagers(['chat', 'bus']).then(async ({chat, bus}) => {
             console.error(e);
             return ctx.reply('Ошибка загрузки. Попробуйте еще раз.\n\nPS. Загрузки приватных ссылок не поддерживаются:(');
         }
+
+        ctx.session.lastDownload = moment().unix();
     });
 
     app.catch(catchErrors);

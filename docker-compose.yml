@@ -84,6 +84,7 @@ services:
       - ${BOT_DEBUG_PORT}:9229
     depends_on:
       - mongo
+      - redis
     volumes:
       - ./files:/downloads
       - ./bot:/var/www
@@ -91,6 +92,7 @@ services:
     environment:
       - NODE_ENV=development
       - MONGO_HOST=spambot_mongo
+      - REDIS_HOST=spambot_redis
       - MONGO_DB=ytdlc_bot
       - BOT_TOKEN=${YTDLC_BOT_TOKEN}
     command: npm run ytdlc_bot_debug

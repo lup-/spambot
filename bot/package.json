@@ -22,6 +22,8 @@
     "present_bot_debug": "node --inspect=0.0.0.0 bots/present.js",
     "film_bot": "node bots/film.js",
     "film_bot_debug": "node --inspect=0.0.0.0 bots/film.js",
+    "familyname_bot": "node bots/familyname.js",
+    "familyname_bot_debug": "node --inspect=0.0.0.0 bots/familyname.js",
     "symptoms_bot": "node bots/symptoms.js",
     "symptoms_bot_debug": "node --inspect=0.0.0.0 bots/symptoms.js",
     "admin_bot": "node bots/admin.js",
@@ -34,10 +36,8 @@
     "finance_bot_debug": "node --inspect-brk=0.0.0.0 bots/finance.js",
     "business_bot": "node bots/business.js",
     "business_bot_debug": "node --inspect-brk=0.0.0.0 bots/business.js",
-
     "refs_bot": "node bots/refs.js",
     "refs_bot_debug": "node --inspect-brk=0.0.0.0 bots/refs.js",
-
     "tglib": "node --inspect=0.0.0.0 tglib.js"
   },
   "author": "",

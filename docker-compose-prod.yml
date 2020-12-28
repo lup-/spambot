@@ -175,7 +175,6 @@ services:
     working_dir: /var/www
     environment:
       - NODE_ENV=development
-      - REDIS_HOST=redis
       - MONGO_HOST=aquarium_mongo
       - REDIS_HOST=aquarium_redis
       - MONGO_DB=film_bot
@@ -303,6 +302,25 @@ services:
       - FF_PASSWORD=${FF_PASSWORD}
       - TELEGRAPH_TOKEN=${TELEGRAPH_TOKEN}
     command: npm run business_bot
+
+  familyname_bot:
+    image: node
+    container_name: 'familyname_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+    volumes:
+      - ./bot:/var/www
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=familyname_bot
+      - BOT_TOKEN=${FAMILYNAME_BOT_TOKEN}
+      - BOT_NAME=familyname_bot
+    command: npm run familyname_bot
 
   refs_bot:
     image: node

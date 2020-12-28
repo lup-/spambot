@@ -117,6 +117,26 @@ services:
       - BOT_TOKEN=${FILM_BOT_TOKEN}
     command: npm run film_bot_debug
 
+  familyname_bot:
+    image: node
+    container_name: 'familyname_bot'
+    ports:
+      - ${BOT_DEBUG_PORT}:9229
+    depends_on:
+      - mongo
+      - redis
+    volumes:
+      - ./bot:/var/www
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=spambot_mongo
+      - REDIS_HOST=spambot_redis
+      - MONGO_DB=familyname_bot
+      - BOT_NAME=familyname_bot
+      - BOT_TOKEN=${FAMILYNAME_BOT_TOKEN}
+    command: npm run familyname_bot_debug
+
   mongo:
     image: mongo
     container_name: 'spambot_mongo'

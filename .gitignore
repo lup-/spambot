@@ -194,3 +194,6 @@ fabric.properties
 
 !/etc/scripts/*.sh
 /etc/scripts/*
+.idea/_encodings.xml
+.idea/_vcs.xml
+database/

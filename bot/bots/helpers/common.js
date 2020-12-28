@@ -39,6 +39,11 @@ function escapeHTML(html) {
         html = html.replace( new RegExp('<(\/?)'+replaceData.from+'( *[^>]*)>', 'g'), '<$1'+replaceData.to+'$2>' );
     });
 
+    html = html.replace(/<\/p>/gi, '\n');
+    html = html.replace(/<br><\/div>/gi, '\n');
+    html = html.replace(/<br>/gi, '\n');
+    html = html.replace(/<\/div>/gi, '\n');
+
     let allowedTags = ['b', 'strong', 'em', 'i', 'u', 'ins', 's', 'strike', 'del', 'a', 'code', 'pre'];
     let removeTags = tags.filter(value => !allowedTags.includes(value));
     removeTags.map(tag => {

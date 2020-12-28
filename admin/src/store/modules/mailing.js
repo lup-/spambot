@@ -31,7 +31,14 @@ export default {
             await axios.post(`/api/mailing/delete`, {mailing});
             return dispatch('loadMailings', state.filter);
         },
-
+        async startMailing({dispatch}, mailing) {
+            await axios.post(`/api/mailing/play`, {mailing});
+            await dispatch('loadMailings');
+        },
+        async stopMailing({dispatch}, mailing) {
+            await axios.post(`/api/mailing/pause`, {mailing});
+            await dispatch('loadMailings');
+        },
     },
     mutations: {
         setMailings(state, mailings) {

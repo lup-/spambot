@@ -1,5 +1,5 @@
 <template>
-    <v-container class="fill-height" :class="{'align-start': !isEmpty && !isLoading}">
+    <v-container class="fill-height align-start">
         <v-row>
             <v-col cols="12">
                 <v-data-table
@@ -14,22 +14,31 @@
                         show-expand
                 >
                     <template v-slot:expanded-item="{ headers, item }">
-                        <td></td>
-                        <td colspan="2" class="pr-0">
+                        <td class="d-none d-md-table-cell"></td>
+                        <td class="d-none d-md-table-cell pr-0" colspan="2">
                             <table class="expand-table">
                                 <tr v-for="(ref, index) in item.refs" :key="ref.code" :style="{backgroundColor: index % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.1)'}">
                                     <td>{{ref.code}}</td>
                                 </tr>
                             </table>
                         </td>
-                        <td colspan="2" class="px-0">
+                        <td class="d-none d-md-table-cell px-0" colspan="2">
                             <table class="expand-table">
                                 <tr v-for="(ref, index) in item.refs" :key="ref.code" :style="{backgroundColor: index % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.1)'}">
                                     <td class="pl-4">{{ref.count || 0}}</td>
                                 </tr>
                             </table>
                         </td>
-                        <td></td>
+                        <td class="d-none d-md-table-cell"></td>
+
+                        <td class="d-md-none pr-0">
+                            <table class="expand-table">
+                                <tr v-for="(ref, index) in item.refs" :key="ref.code" :style="{backgroundColor: index % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.1)'}">
+                                    <td>{{ref.code}}</td>
+                                    <td class="pl-4">{{ref.count || 0}}</td>
+                                </tr>
+                            </table>
+                        </td>
                     </template>
                     <template v-slot:item.external="{ item }">
                         <v-simple-checkbox

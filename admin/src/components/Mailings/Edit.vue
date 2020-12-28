@@ -102,6 +102,11 @@
                                     </v-chip>
                                 </v-col>
                             </v-row>
+                            <v-row v-if="predictedUsers !== false">
+                                <v-col cols="12">
+                                    Примерное количество получателей: {{predictedUsers}}
+                                </v-col>
+                            </v-row>
                             <v-row>
                                 <v-col cols="12" md="6">
                                     <v-menu
@@ -218,8 +223,20 @@
                         </v-form>
                     </v-card-text>
                     <v-card-actions>
-                        <v-btn @click="$router.push({name: 'mailingList'})">К списку</v-btn>
-                        <v-btn large color="primary" @click="save">Сохранить</v-btn>
+                        <v-row align="end">
+                            <v-col cols="12" md="6">
+                                <v-select class="mr-2"
+                                        :items="testUsers"
+                                        v-model="testUser"
+                                        label="Тестировать на"
+                                ></v-select>
+                                <v-btn @click="sendPreview" :disabled="!testUser">Предпросмотр в боте</v-btn>
+                            </v-col>
+                            <v-col cols="12" md="6">
+                                <v-btn @click="$router.push({name: 'mailingList'})" class="mr-2">К списку</v-btn>
+                                <v-btn large color="primary" @click="save">Сохранить</v-btn>
+                            </v-col>
+                        </v-row>
                     </v-card-actions>
                 </v-card>
             </v-col>
@@ -231,12 +248,14 @@
 
 <script>
     import moment from "moment";
+    import axios from "axios";
 
     export default {
         name: "MailingEdit",
         data() {
             return {
                 mailing: {},
+                predictedUsers: false,
                 defaultMailing: {},
                 photos: [],
                 buttons: [],
@@ -259,31 +278,50 @@
                 startTime: moment().startOf('h').add(1, 'h').format('HH:mm'),
                 startDate: moment().format('YYYY-MM-DD'),
                 startDateFormatted: moment().format('DD.MM.YYYY'),
+                testUsers: [],
+                testUser: false,
             }
         },
-        created() {
+        async created() {
             if (this.mailingId) {
+                if (this.allMailings.length === 0) {
+                    await this.$store.dispatch('loadMailings');
+                }
+
                 this.$store.dispatch('setCurrentMailing', this.mailingId);
             }
             this.updateMailingDate();
+            await this.loadTestUsers();
         },
         watch: {
+            target: {
+                deep: true,
+                async handler() {
+                    await this.loadPredictedUsers();
+                }
+            },
             mailingId() {
                 this.$store.dispatch('setCurrentMailing', this.mailingId);
             },
-            allMailings() {
-                if (this.mailingId) {
-                    this.$store.dispatch('setCurrentMailing', this.mailingId);
+            allMailings: {
+                deep: true,
+                handler() {
+                    if (this.mailingId) {
+                        this.$store.dispatch('setCurrentMailing', this.mailingId);
+                    }
                 }
             },
             storeMailing() {
                 if (this.storeMailing) {
                     this.mailing = this.storeMailing;
-                    let mailingDate = moment.unix(this.mailing.startAt);
 
-                    this.startTime = mailingDate.format('HH:mm');
-                    this.startDate = mailingDate.format('YYYY-MM-DD');
-                    this.startDateFormatted = mailingDate.format('DD.MM.YYYY');
+                    if (this.mailing.startAt) {
+                        let mailingDate = moment.unix(this.mailing.startAt);
+
+                        this.startTime = mailingDate.format('HH:mm');
+                        this.startDate = mailingDate.format('YYYY-MM-DD');
+                        this.startDateFormatted = mailingDate.format('DD.MM.YYYY');
+                    }
 
                     this.target = this.mailing.target;
                     this.photos = this.mailing.photos;
@@ -305,19 +343,25 @@
             }
         },
         methods: {
-            async save() {
+            getMailingToSend() {
                 let mailing = this.mailing;
                 mailing.target = this.target;
                 mailing.photos = this.photos;
                 mailing.buttons = this.buttons;
 
+                return mailing;
+            },
+            async save() {
+                let mailing = this.getMailingToSend();
+
                 if (this.isNew) {
-                    await this.$store.dispatch('newMailing', this.mailing);
-                    await this.$router.push({name: 'mailingList'});
+                    await this.$store.dispatch('newMailing', mailing);
                 }
                 else {
-                    await this.$store.dispatch('editMailing', this.mailing);
+                    await this.$store.dispatch('editMailing', mailing);
                 }
+
+                await this.$router.push({name: 'mailingList'});
             },
             async loadToBrowser(file) {
                 return new Promise((resolve, reject) => {
@@ -417,6 +461,25 @@
                 }
 
                 return `${item.type} ${item.cmp || ''} ${this.formatDate(item.value)}`;
+            },
+            async loadPredictedUsers() {
+                let mailing = this.getMailingToSend();
+                let response = await axios.post(`/api/mailing/predictUsers`, {mailing});
+                this.predictedUsers = response && response.data ? response.data.count : false;
+            },
+            async loadTestUsers() {
+                let response = await axios.post(`/api/mailing/testUsers`);
+                this.testUsers = response && response.data
+                    ? response.data.users.map(user => ({
+                        text: [user.user.first_name, user.user.last_name].join(' ')+' (@'+user.user.username+')',
+                        value: user.chat.id
+                    }))
+                    : [];
+            },
+            async sendPreview() {
+                let mailing = this.getMailingToSend();
+                let chatId = this.testUser;
+                return axios.post(`/api/mailing/preview`, {mailing, chatId});
             }
         },
         computed: {

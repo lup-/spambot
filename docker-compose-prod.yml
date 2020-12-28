@@ -348,6 +348,33 @@ services:
       - BOT_NAME=refs_bot
     command: npm run refs_bot
 
+  mailer_bot:
+    image: node
+    container_name: 'mailer_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+    volumes:
+      - ./backend:/var/backend
+      - ./bot:/var/www
+      - type: bind
+        source: ./docker-compose-prod.yml
+        target: /var/docker-compose.yml
+      - type: bind
+        source: ./.env
+        target: /var/.env
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=mailer_bot
+      - BOT_TOKEN=${MAILER_BOT_TOKEN}
+      - BOT_NAME=mailer_bot
+      - IMGBB_TOKEN=${IMGBB_TOKEN}
+    command: npm run mailer_bot
+
   languagetool:
     build:
       context: "."
@@ -393,13 +420,14 @@ services:
     volumes:
       - ./bot:/var/bot
       - ./backend:/var/www
+      - ./backend:/var/backend
       - type: bind
         source: ./docker-compose-prod.yml
         target: /var/docker-compose.yml
       - type: bind
         source: ./.env
         target: /var/.env
-    working_dir: /var/www
+    working_dir: /var/backend
     environment:
       - NODE_ENV=development
       - MONGO_HOST=aquarium_mongo
@@ -409,4 +437,5 @@ services:
       - PG_PORT=${PG_PORT}
       - PG_USER=${PG_USER}
       - PG_PASS=${PG_PASS}
+      - IMGBB_TOKEN=${IMGBB_TOKEN}
     command: npm run debug

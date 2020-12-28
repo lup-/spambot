@@ -17,8 +17,10 @@
                 >
                     <template v-slot:item.actions="{ item }">
                         <v-btn icon small @click="gotoMailingEdit(item.id)"><v-icon>mdi-pencil</v-icon></v-btn>
-                        <v-btn icon small @click="deleteMailing(item)"><v-icon>mdi-delete</v-icon></v-btn>
-                        <v-btn icon small @click="stopMailing(item.id)"><v-icon>mdi-pause</v-icon></v-btn>
+                        <v-btn icon small @click="copyMailing(item)"><v-icon>mdi-content-copy</v-icon></v-btn>
+                        <v-btn icon small @click="deleteMailing(item)" v-if="!item.dateStarted"><v-icon>mdi-delete</v-icon></v-btn>
+                        <v-btn icon small @click="startMailing(item)" v-if="item.status === 'paused'"><v-icon>mdi-play</v-icon></v-btn>
+                        <v-btn icon small @click="stopMailing(item)" v-else><v-icon>mdi-pause</v-icon></v-btn>
                     </template>
                 </v-data-table>
             </v-col>
@@ -59,6 +61,18 @@
             await this.loadMailings();
         },
         methods: {
+            async copyMailing(mailing) {
+                let newMailing = {};
+                const allowedFields = ['target', 'photos', 'buttons', 'text', 'photoAsLink'];
+                for (const field of allowedFields) {
+                    if (typeof(mailing[field]) !== 'undefined') {
+                        newMailing[field] = mailing[field];
+                    }
+                }
+
+                await this.$store.dispatch('newMailing', newMailing);
+                await this.loadMailings();
+            },
             deleteMailing(mailing) {
                 this.$store.dispatch('deleteMailing', mailing);
             },
@@ -70,15 +84,18 @@
             gotoMailingEdit(id) {
                 this.$router.push({name: 'mailingEdit', params: {id}});
             },
-            stopMailing() {
-
+            startMailing(mailing) {
+                this.$store.dispatch('startMailing', mailing);
+            },
+            stopMailing(mailing) {
+                this.$store.dispatch('stopMailing', mailing);
             }
         },
         computed: {
             mailings() {
                 return this.isLoading ? [] : this.$store.state.mailing.list.map(mailing => {
                     let newMailing = clone(mailing);
-                    newMailing.startAt = moment.unix(mailing.startAt).format('DD.MM.YYYY');
+                    newMailing.startAt = mailing.startAt ? moment.unix(mailing.startAt).format('DD.MM.YYYY HH:mm') : '-';
                     newMailing.preview = trimHTML(mailing.text).substring(0, 50)+'...';
                     return newMailing;
                 });

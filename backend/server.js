@@ -33,7 +33,12 @@ router
     .post('/api/mailing/list', mailings.list)
     .post('/api/mailing/add', mailings.add)
     .post('/api/mailing/update', mailings.update)
-    .post('/api/mailing/delete', mailings.delete);
+    .post('/api/mailing/delete', mailings.delete)
+    .post('/api/mailing/play', mailings.start)
+    .post('/api/mailing/pause', mailings.pause)
+    .post('/api/mailing/testUsers', mailings.testUsers)
+    .post('/api/mailing/predictUsers', mailings.predictUsers)
+    .post('/api/mailing/preview', mailings.preview);
 
 router
     .post('/api/bots/list', bots.list)

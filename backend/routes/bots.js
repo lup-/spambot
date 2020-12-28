@@ -1,19 +1,5 @@
-const redis = require("redis");
 const config = require('../config');
-
-const publisher = redis.createClient({
-    host: process.env.REDIS_HOST || '127.0.0.1',
-    port: process.env.REDIS_PORT || 6379,
-});
-
-function publishCommand(command, botNames) {
-    const COMMAND_CHANNEL = 'commands';
-
-    for (const to of botNames) {
-        let textMessage = JSON.stringify({to, command});
-        publisher.publish(COMMAND_CHANNEL, textMessage);
-    }
-}
+const {publishCommand} = require('../modules/commands');
 
 module.exports = {
     async list(ctx) {

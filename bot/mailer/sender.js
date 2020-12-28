@@ -1,16 +1,17 @@
-const Telegram = require('telegraf/telegram');
-const {getDb} = require('../modules/Database');
-const Sender = require('./SenderClass');
+const {Sender} = require('./SenderClass');
 
 const [,, mailingId] = process.argv;
-const BOT_TOKEN = process.env.BOT_TOKEN;
 
 (async () => {
-    const db = await getDb();
-    const telegram = new Telegram(BOT_TOKEN);
-
-    const sender = new Sender(mailingId, db.collection('mailings'), telegram);
+    const sender = new Sender(mailingId);
     await sender.init();
+
+    process.on('message', async message => {
+        if (message.action === 'stop') {
+            await sender.stopSending();
+            process.exit();
+        }
+    });
 
     await sender.startSending();
 })();

@@ -137,6 +137,34 @@ services:
       - BOT_TOKEN=${FAMILYNAME_BOT_TOKEN}
     command: npm run familyname_bot_debug
 
+  mailer_bot:
+    image: node
+    container_name: 'mailer_bot'
+    ports:
+      - ${BOT_DEBUG_PORT}:9229
+    depends_on:
+      - mongo
+      - redis
+    volumes:
+      - ./bot:/var/www
+      - ./backend:/var/backend
+      - type: bind
+        source: ./docker-compose-prod.yml
+        target: /var/docker-compose.yml
+      - type: bind
+        source: ./.env
+        target: /var/.env
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=spambot_mongo
+      - REDIS_HOST=spambot_redis
+      - MONGO_DB=mailer_bot
+      - BOT_NAME=mailer_bot
+      - BOT_TOKEN=${MAILER_BOT_TOKEN}
+      - IMGBB_TOKEN=${IMGBB_TOKEN}
+    command: npm run mailer_bot_debug
+
   mongo:
     image: mongo
     container_name: 'spambot_mongo'
@@ -235,22 +263,24 @@ services:
     volumes:
       - ./bot:/var/bot
       - ./backend:/var/www
+      - ./backend:/var/backend
       - type: bind
         source: ./docker-compose-prod.yml
         target: /var/docker-compose.yml
       - type: bind
         source: ./.env
         target: /var/.env
-    working_dir: /var/www
+    working_dir: /var/backend
     environment:
       - NODE_ENV=development
-      #- MONGO_HOST=spambot_mongo
-      - MONGO_HOST=192.168.80.1
-      - MONGO_PORT=27272
+      - MONGO_HOST=spambot_mongo
+      #- MONGO_HOST=192.168.80.1
+      #- MONGO_PORT=27272
       - MONGO_DB=botofarmer
       - REDIS_HOST=spambot_redis
       - PG_HOST=${PG_HOST}
       - PG_PORT=${PG_PORT}
       - PG_USER=${PG_USER}
       - PG_PASS=${PG_PASS}
+      - IMGBB_TOKEN=${IMGBB_TOKEN}
     command: npm run debug

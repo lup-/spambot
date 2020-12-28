@@ -15,6 +15,9 @@
                         :loading="isLoading"
                         :items-per-page="50"
                 >
+                    <template v-slot:item.progress="{ item }">
+                        {{ (item.progress * 100).toFixed(2)+'%' }}
+                    </template>
                     <template v-slot:item.actions="{ item }">
                         <v-btn icon small @click="gotoMailingEdit(item.id)"><v-icon>mdi-pencil</v-icon></v-btn>
                         <v-btn icon small @click="copyMailing(item)"><v-icon>mdi-content-copy</v-icon></v-btn>
@@ -53,6 +56,10 @@
                     {text: 'Текст', value: 'preview'},
                     {text: 'Статус', value: 'status'},
                     {text: 'Прогресс', value: 'progress'},
+                    {text: 'Успешно', value: 'success'},
+                    {text: 'Ошибок', value: 'errors'},
+                    {text: 'Отправлено', value: 'processed'},
+                    {text: 'Очередь', value: 'total'},
                     {text: 'Действия', value: 'actions', sortable: false},
                 ]
             }

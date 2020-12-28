@@ -1522,6 +1522,9 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 
 
 function trimHTML(html) {
@@ -1549,6 +1552,18 @@ function clone(obj) {
       }, {
         text: 'Прогресс',
         value: 'progress'
+      }, {
+        text: 'Успешно',
+        value: 'success'
+      }, {
+        text: 'Ошибок',
+        value: 'errors'
+      }, {
+        text: 'Отправлено',
+        value: 'processed'
+      }, {
+        text: 'Очередь',
+        value: 'total'
       }, {
         text: 'Действия',
         value: 'actions',
@@ -4208,6 +4223,19 @@ var render = function() {
                   "items-per-page": 50
                 },
                 scopedSlots: _vm._u([
+                  {
+                    key: "item.progress",
+                    fn: function(ref) {
+                      var item = ref.item
+                      return [
+                        _vm._v(
+                          " " +
+                            _vm._s((item.progress * 100).toFixed(2) + "%") +
+                            " "
+                        )
+                      ]
+                    }
+                  },
                   {
                     key: "item.actions",
                     fn: function(ref) {

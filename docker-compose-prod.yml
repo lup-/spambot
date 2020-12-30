@@ -450,8 +450,6 @@ services:
     image: outrigger/https-proxy:1.0
     restart: always
     container_name: 'tgapi_proxy'
-    ports:
-      - ${HTTPS_API_PORT}:443
     depends_on:
       - tgapi
     environment:

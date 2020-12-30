@@ -12,7 +12,7 @@ const moment = require('moment');
 
 const MAILING_DB_NAME = 'botofarmer';
 
-const TEST_QUEUE_SIZE = 13;
+const TEST_QUEUE_SIZE = 13000;
 const TEST_BOT_ID = 'mailer_bot';
 const MAILER_BOT_ID = TEST_BOT_ID;
 const TEST_CHAT_ID = 483896081;
@@ -34,6 +34,8 @@ const MAILING_STATUS_FINISHED = 'finished';
 
 const IMGBB_TOKEN = process.env.IMGBB_TOKEN;
 
+const API_ROOT = process.env.TGAPI_ROOT || 'https://api.telegram.org'
+
 class Sender {
     constructor(mailingId = false, test = false) {
         this.id = mailingId;
@@ -52,6 +54,10 @@ class Sender {
             await this.loadMailing();
         }
         return this;
+    }
+
+    getTelegram(token) {
+        return new Telegram(token, {apiRoot: API_ROOT});
     }
 
     makeTestQueue() {
@@ -387,7 +393,7 @@ class Sender {
             return false;
         }
 
-        let telegram = new Telegram(bot.token);
+        let telegram = this.getTelegram(bot.token);
 
         try {
             let method = this.sendPlainTextMessage;

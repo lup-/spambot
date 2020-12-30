@@ -16,7 +16,7 @@
                         :items-per-page="50"
                 >
                     <template v-slot:item.progress="{ item }">
-                        {{ (item.progress * 100).toFixed(2)+'%' }}
+                        {{ item.progress ? (item.progress * 100).toFixed(2)+'%' : ''}}
                     </template>
                     <template v-slot:item.actions="{ item }">
                         <v-btn icon small @click="gotoMailingEdit(item.id)"><v-icon>mdi-pencil</v-icon></v-btn>
@@ -50,6 +50,8 @@
         name: "MailingsList",
         data() {
             return {
+                refreshSeconds: 15,
+                refreshIndervalId: false,
                 isLoading: false,
                 headers: [
                     {text: 'Дата начала', value: 'startAt'},
@@ -66,6 +68,10 @@
         },
         async mounted() {
             await this.loadMailings();
+            this.startRefreshing();
+        },
+        beforeDestroy() {
+            this.stopRefreshing();
         },
         methods: {
             async copyMailing(mailing) {
@@ -88,6 +94,9 @@
                 await this.$store.dispatch('loadMailings', {});
                 this.isLoading = false;
             },
+            async silentLoadMailings() {
+                await this.$store.dispatch('loadMailings', {});
+            },
             gotoMailingEdit(id) {
                 this.$router.push({name: 'mailingEdit', params: {id}});
             },
@@ -96,6 +105,16 @@
             },
             stopMailing(mailing) {
                 this.$store.dispatch('stopMailing', mailing);
+            },
+            startRefreshing() {
+                if (this.refreshSeconds > 0) {
+                    this.refreshIndervalId = setInterval(this.silentLoadMailings, this.refreshSeconds * 1000);
+                }
+            },
+            stopRefreshing() {
+                if (this.refreshIndervalId) {
+                    clearInterval(this.refreshIndervalId);
+                }
             }
         },
         computed: {

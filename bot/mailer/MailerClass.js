@@ -2,7 +2,10 @@ const moment = require('moment');
 
 const cp = require('child_process');
 const {getDb} = require('../modules/Database');
+const {wait} = require('../modules/Helpers');
 const {MAILING_DB_NAME, MAILING_STATUS_NEW, MAILING_STATUS_PROCESSING} = require('./SenderClass');
+
+const MAILINGS_CHECK_INTERVAL_SEC = 60;
 
 const eventLoopQueue = () => {
     return new Promise(resolve =>
@@ -34,6 +37,7 @@ module.exports = class Mailer {
     async startSending(mailing) {
         const subprocess = cp.fork(`${__dirname}/sender.js`, [mailing.id], {execArgv: []});
         subprocess.on('exit', () => this.clearProcess(mailing.id));
+        subprocess.on('data', data => console.log(`data: ${data}`));
         subprocess.on('error', error => console.log(error));
         this.activeMailings.push({mailing, subprocess});
     }
@@ -78,6 +82,7 @@ module.exports = class Mailer {
                 }
             }
 
+            await wait(MAILINGS_CHECK_INTERVAL_SEC * 1000);
             await eventLoopQueue();
         }
     }

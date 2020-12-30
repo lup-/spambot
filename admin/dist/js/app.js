@@ -1539,6 +1539,8 @@ function clone(obj) {
   name: "MailingsList",
   data: function data() {
     return {
+      refreshSeconds: 15,
+      refreshIndervalId: false,
       isLoading: false,
       headers: [{
         text: 'Дата начала',
@@ -1583,12 +1585,18 @@ function clone(obj) {
               return _this.loadMailings();
 
             case 2:
+              _this.startRefreshing();
+
+            case 3:
             case "end":
               return _context.stop();
           }
         }
       }, _callee);
     }))();
+  },
+  beforeDestroy: function beforeDestroy() {
+    this.stopRefreshing();
   },
   methods: {
     copyMailing: function copyMailing(mailing) {
@@ -1653,6 +1661,25 @@ function clone(obj) {
         }, _callee3);
       }))();
     },
+    silentLoadMailings: function silentLoadMailings() {
+      var _this4 = this;
+
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
+        return regeneratorRuntime.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                _context4.next = 2;
+                return _this4.$store.dispatch('loadMailings', {});
+
+              case 2:
+              case "end":
+                return _context4.stop();
+            }
+          }
+        }, _callee4);
+      }))();
+    },
     gotoMailingEdit: function gotoMailingEdit(id) {
       this.$router.push({
         name: 'mailingEdit',
@@ -1666,6 +1693,16 @@ function clone(obj) {
     },
     stopMailing: function stopMailing(mailing) {
       this.$store.dispatch('stopMailing', mailing);
+    },
+    startRefreshing: function startRefreshing() {
+      if (this.refreshSeconds > 0) {
+        this.refreshIndervalId = setInterval(this.silentLoadMailings, this.refreshSeconds * 1000);
+      }
+    },
+    stopRefreshing: function stopRefreshing() {
+      if (this.refreshIndervalId) {
+        clearInterval(this.refreshIndervalId);
+      }
     }
   },
   computed: {
@@ -4230,7 +4267,11 @@ var render = function() {
                       return [
                         _vm._v(
                           " " +
-                            _vm._s((item.progress * 100).toFixed(2) + "%") +
+                            _vm._s(
+                              item.progress
+                                ? (item.progress * 100).toFixed(2) + "%"
+                                : ""
+                            ) +
                             " "
                         )
                       ]

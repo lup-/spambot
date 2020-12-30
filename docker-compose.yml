@@ -163,6 +163,8 @@ services:
       - BOT_NAME=mailer_bot
       - BOT_TOKEN=${MAILER_BOT_TOKEN}
       - IMGBB_TOKEN=${IMGBB_TOKEN}
+      - TGAPI_ROOT=https://tgapi_proxy
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
     command: npm run mailer_bot_debug
 
   mongo:
@@ -232,6 +234,18 @@ services:
       - API_ID=${API_ID}
       - API_HASH=${API_HASH}
     command: npm run tglib
+
+  tgapi_proxy:
+    image: outrigger/https-proxy:1.0
+    container_name: 'tgapi_proxy'
+    ports:
+      - ${HTTPS_API_PORT}:443
+    depends_on:
+      - tgapi
+    environment:
+      UPSTREAM_DOMAIN: tgapi
+      UPSTREAM_PORT: 8081
+      PROXY_DOMAIN: tgapi_proxy
 
   tgapi:
     build:

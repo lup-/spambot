@@ -355,6 +355,7 @@ services:
     depends_on:
       - mongo
       - redis
+      - tgapi_proxy
     volumes:
       - ./backend:/var/backend
       - ./bot:/var/www
@@ -373,6 +374,8 @@ services:
       - BOT_TOKEN=${MAILER_BOT_TOKEN}
       - BOT_NAME=mailer_bot
       - IMGBB_TOKEN=${IMGBB_TOKEN}
+      - TGAPI_ROOT=https://tgapi_proxy
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
     command: npm run mailer_bot
 
   languagetool:
@@ -395,10 +398,12 @@ services:
 
   redis:
     image: redis
+    restart: always
     container_name: 'aquarium_redis'
 
   admin:
     image: nginx
+    restart: always
     container_name: 'bots_nginx'
     ports:
       - ${HTTP_PORT}:80
@@ -410,6 +415,7 @@ services:
 
   backend:
     image: node
+    restart: always
     container_name: 'bots_backend'
     ports:
       - ${BACKEND_PORT}:3000
@@ -439,3 +445,24 @@ services:
       - PG_PASS=${PG_PASS}
       - IMGBB_TOKEN=${IMGBB_TOKEN}
     command: npm run debug
+
+  tgapi_proxy:
+    image: outrigger/https-proxy:1.0
+    restart: always
+    container_name: 'tgapi_proxy'
+    ports:
+      - ${HTTPS_API_PORT}:443
+    depends_on:
+      - tgapi
+    environment:
+      UPSTREAM_DOMAIN: tgapi
+      UPSTREAM_PORT: 8081
+      PROXY_DOMAIN: tgapi_proxy
+
+  tgapi:
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_tgapi"
+    container_name: 'tgapi'
+    restart: always
+    command: telegram-bot-api --api-id ${API_ID} --api-hash ${API_HASH} --http-port=8081 --log=/proc/self/fd/1 --verbosity=4

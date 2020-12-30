@@ -50,7 +50,7 @@ module.exports = class Mailer {
         let mailingProcess = this.activeMailings.find(item => item.mailing.id === mailingId);
         return new Promise(resolve => {
             if (mailingProcess) {
-                mailingProcess.on('exit', exitCode => {
+                mailingProcess.subprocess.on('exit', exitCode => {
                     this.clearProcess(mailingId);
                     resolve(exitCode);
                 });

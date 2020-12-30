@@ -20,7 +20,8 @@ module.exports = function () {
             let actionFn = commands[message.command];
 
             if (actionFn) {
-                actionFn.call(this, message.args || []);
+                let args = message.args || [];
+                actionFn.apply(this, args);
             }
         },
 

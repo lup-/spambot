@@ -456,6 +456,8 @@ services:
       UPSTREAM_DOMAIN: tgapi
       UPSTREAM_PORT: 8081
       PROXY_DOMAIN: tgapi_proxy
+      RATE_LIMIT: 0
+      RATE_LIMIT_BURST_QUEUE: 0
 
   tgapi:
     build:

@@ -112,8 +112,8 @@ initManagers(['chat', 'bus']).then(async ({chat, bus}) => {
         );
     });
 
-    app.on('message', async ctx => {
-        let url = ctx.update && ctx.update.message ? ctx.update.message.text.trim() : '';
+    app.on('text', async ctx => {
+        let url = ctx.update && ctx.update.message && ctx.update.message.text ? ctx.update.message.text.trim() : '';
         let isValidUrl = url.indexOf('http') === 0;
 
         if (ctx.session.lastDownload) {

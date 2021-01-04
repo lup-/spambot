@@ -167,6 +167,24 @@ services:
       - NODE_TLS_REJECT_UNAUTHORIZED=0
     command: npm run mailer_bot_debug
 
+  monitor:
+    image: node
+    ports:
+      - ${MONITOR_PORT}:3000
+    volumes:
+      - ./monitor:/var/monitor
+      - type: bind
+        source: ./docker-compose-prod.yml
+        target: /var/monitor/docker-compose.yml
+      - type: bind
+        source: ./.env
+        target: /var/monitor/.env
+    working_dir: /var/monitor
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+    command: nodejs queue.js
+
   mongo:
     image: mongo
     container_name: 'spambot_mongo'

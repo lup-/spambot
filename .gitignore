@@ -197,3 +197,4 @@ fabric.properties
 .idea/_encodings.xml
 .idea/_vcs.xml
 database/
+/monitor/docker-compose.yml

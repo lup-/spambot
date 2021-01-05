@@ -23,7 +23,8 @@ function getDomain(link) {
 }
 
 function escapeHTML(html) {
-    let tags = html.match(/\<([^ \/>]*) *[^>]*>/gi).map(parsedTag => {
+    let hasTags = (/\<([^ \/>]*) *[^>]*>/gi).test(html);
+    let tags = hasTags ? html.match(/\<([^ \/>]*) *[^>]*>/gi).map(parsedTag => {
         let tagData = parsedTag.match(/<\/?([^ >]+)[^>]*>/i);
         if (tagData) {
             let tagName = tagData[1];
@@ -32,7 +33,7 @@ function escapeHTML(html) {
             }
         }
         return null;
-    }).filter(tag => tag !== null).filter((tag, index, allTags) => allTags.indexOf(tag) === index);
+    }).filter(tag => tag !== null).filter((tag, index, allTags) => allTags.indexOf(tag) === index) : [];
 
     let replaceTags = [{from: 'em', to: 'b'}];
     replaceTags.map(replaceData => {
@@ -49,6 +50,8 @@ function escapeHTML(html) {
     removeTags.map(tag => {
         html = html.replace( new RegExp('<\/?'+tag+'[^>]*>', 'g'), '');
     });
+
+    html = html.replace(/<(\s)/g, '&lt;$1');
 
     return html;
 }

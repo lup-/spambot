@@ -2,7 +2,7 @@ const { Telegraf } = require('telegraf');
 const {initManagers} = require('../managers');
 const wiki = require('wikijs').default;
 const moment = require('moment');
-const {catchErrors} = require('./helpers/common');
+const {catchErrors, escapeHTML} = require('./helpers/common');
 const {__} = require('../modules/Messages');
 
 const apiUrl = "https://ru.wikipedia.org/w/api.php";
@@ -18,7 +18,7 @@ async function loadPage(query) {
         let title = wikiPage.raw.title;
         let summary = await wikiPage.summary();
         let url = wikiPage.raw.canonicalurl;
-        let message = `<b>${title}</b>\n<a href="${url}">посмотреть статью</a>\n\n${summary}`;
+        let message = `<b>${title}</b>\n<a href="${url}">посмотреть статью</a>\n\n${escapeHTML(summary)}`;
 
         return {title, summary, message};
     }

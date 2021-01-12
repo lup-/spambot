@@ -16,7 +16,7 @@ function getMarkupButtons(buttons, columns = false) {
     });
 
     let columnButtons = [];
-    if (columns !== false) {
+    if (columns > 0) {
         let row = [];
         for (const button of markupButtons) {
 
@@ -47,6 +47,10 @@ function menu(buttons, columns = false, oneTime = false) {
         keyboard = keyboard.oneTime(true);
     }
 
+    return keyboard.extra();
+}
+function hMenu(buttonRows) {
+    let keyboard = Markup.inlineKeyboard(buttonRows.map(row => getMarkupButtons(row, false)));
     return keyboard.extra();
 }
 function menuWithControls(buttons, buttonColumns, controls) {
@@ -98,4 +102,4 @@ function buttonStep(actions = [], events = []) {
     return handler;
 }
 
-module.exports = {menu, yesNoMenu, buttonStep, urlButton, menuWithControls};
+module.exports = {menu, yesNoMenu, buttonStep, urlButton, menuWithControls, hMenu};

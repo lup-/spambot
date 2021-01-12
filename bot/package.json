@@ -47,6 +47,7 @@
   "dependencies": {
     "axios": "^0.21.0",
     "countries-list": "^2.5.6",
+    "crypto-js": "^4.0.0",
     "debugging-aid": "git+https://github.com/naugtur/debugging-aid.git",
     "form-data": "^3.0.0",
     "geo-tz": "^6.0.1",
@@ -58,10 +59,12 @@
     "jsdom": "^16.4.0",
     "languagetool-api": "^1.1.2",
     "lodash.flatten": "^4.4.0",
+    "mammoth": "^1.4.14",
     "moment": "^2.29.1",
     "moment-timezone": "^0.5.32",
     "mongodb": "^3.6.2",
     "node-themoviedb": "^0.2.5",
+    "pdf-parse": "^1.1.1",
     "qs": "^6.9.4",
     "redis": "^3.0.2",
     "shortid": "^2.2.16",
@@ -70,6 +73,7 @@
     "temp-write": "^4.0.0",
     "tglib": "^3.0.5",
     "tough-cookie": "^4.0.0",
+    "unoconv2": "^1.0.0",
     "wikijs": "^6.0.1",
     "xml-js": "^1.6.11"
   }

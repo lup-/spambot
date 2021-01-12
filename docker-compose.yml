@@ -115,6 +115,7 @@ services:
       - MONGO_DB=film_bot
       - BOT_NAME=film_bot
       - BOT_TOKEN=${FILM_BOT_TOKEN}
+      - TMDB_KEY=${TMDB_V3_KEY}
     command: npm run film_bot_debug
 
   familyname_bot:
@@ -203,6 +204,11 @@ services:
     working_dir: /LanguageTool-5.1
     command: "java -cp languagetool-server.jar  org.languagetool.server.HTTPServer --port 8010 --public --allow-origin '*'"
 
+  unoconv:
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_unoconv"
+
   redis:
     image: redis
     container_name: 'spambot_redis'
@@ -231,6 +237,32 @@ services:
       - DEBUG=*
       - NODE_TLS_REJECT_UNAUTHORIZED=0
     command: npm run podcast_bot_debug
+
+  bookie_bot:
+    image: node
+    container_name: 'bookie_bot'
+    ports:
+      - ${BOT_DEBUG_PORT}:9229
+    depends_on:
+      - mongo
+      - redis
+      - tgapi_proxy
+    volumes:
+      - ./bot:/var/www
+      - ./files:/var/www/files
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=spambot_mongo
+      - REDIS_HOST=spambot_redis
+      - MONGO_DB=bookie_bot
+      - BOT_NAME=bookie_bot
+      - BOT_TOKEN=${BOOKIE_BOT_TOKEN}
+      - TGAPI_ROOT=https://tgapi_proxy
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - FILES_LOCAL_PATH=/var/www/files
+      - FILES_REMOTE_PATH=/files
+    command: node --inspect=0.0.0.0 bots/books.js
 
   tglib:
     build:
@@ -270,7 +302,9 @@ services:
       context: "."
       dockerfile: "./build/Dockerfile_tgapi"
     container_name: 'tgapi'
-    command: telegram-bot-api --api-id ${API_ID} --api-hash ${API_HASH} --http-port=8081 --log=/proc/self/fd/1 --verbosity=4
+    volumes:
+      - ./files:/files
+    command: telegram-bot-api --api-id ${API_ID} --api-hash ${API_HASH} --http-port=8081 --log=/proc/self/fd/1 --local --verbosity=3
 
   admin:
     image: nginx

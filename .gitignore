@@ -198,3 +198,5 @@ fabric.properties
 .idea/_vcs.xml
 database/
 /monitor/docker-compose.yml
+/sql2json/*.sql
+/sql2json/*.json

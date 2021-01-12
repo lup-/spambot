@@ -9,6 +9,7 @@ const {catchErrors} = require('../helpers/common');
 
 const SafeReplyMiddleware = require('../../modules/SafeReplyMiddleware');
 const SaveActivityMiddleware = require('../../modules/SaveActivityMiddleware');
+const checkSubscriptionMiddleware = require('../../modules/CheckSubscriptionMiddleware');
 
 
 const {init} = require('../../managers');
@@ -16,6 +17,7 @@ const {init} = require('../../managers');
 class Injector {
         constructor(app) {
             this.app = app;
+            this.stage = false;
         }
 
         addSession() {
@@ -61,17 +63,42 @@ class Injector {
             return this;
         }
 
-        addScenes(code, params) {
-            const stage = new Stage();
+        addSubscription() {
+            this.app.use(checkSubscriptionMiddleware);
+            return this;
+        }
+
+        addScenes(code, params, exclude = []) {
+            const stage = this.stage ? this.stage : new Stage();
 
             let dir = `${__dirname}/../scenes/${code}/`;
             let filenames = fs.readdirSync(dir);
             filenames.forEach(file => {
+                if (exclude.indexOf(file) !== -1) {
+                    return;
+                }
+
                 let fullFilename = path.join(dir, file);
                 let scene = require(fullFilename);
                 stage.register(scene(params));
             });
 
+            this.app.use(stage.middleware());
+            this.stage = stage;
+
+            return this;
+        }
+
+        addScene(groupCode, sceneCode, params) {
+            const stage = this.stage ? this.stage : new Stage();
+
+            let filename = `${__dirname}/../scenes/${groupCode}/${sceneCode}.js`;
+            let canonicalFilename = path.normalize(filename);
+
+            let scene = require(canonicalFilename);
+            stage.register(scene(params));
+
+            this.stage = stage;
             this.app.use(stage.middleware());
             return this;
         }
@@ -95,8 +122,11 @@ class Injector {
             return this;
         }
 
-        addDefaultRoute(defaultRoute) {
-            this.app.start(defaultRoute);
+        addDefaultRoute(defaultRoute, addStart = true) {
+            if (addStart) {
+                this.app.start(defaultRoute);
+            }
+
             this.app.action(/.*/, defaultRoute);
             this.app.on('message', defaultRoute);
             return this;

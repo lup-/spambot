@@ -140,6 +140,16 @@ module.exports = function () {
             return tasks.find(filter).toArray();
         },
 
+        async subscribe(profileData, nextMessageTime) {
+            let {userId, chatId} = profileData;
+            return this.addCustomTaskInTime(userId, chatId, nextMessageTime);
+        },
+
+        async unsubscribe(profileData) {
+            let {userId} = profileData;
+            await this.setAllUserTasksComplete(userId);
+        },
+
         async stop() {
             runLoop = false;
         },

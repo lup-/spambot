@@ -35,6 +35,14 @@
                         <v-list-item-title>Админы</v-list-item-title>
                     </v-list-item-content>
                 </v-list-item>
+                <v-list-item link @click="$router.push({name: 'vacanciesList'})" :disabled="$route.name === 'vacanciesList'">
+                    <v-list-item-action>
+                        <v-icon>mdi-briefcase</v-icon>
+                    </v-list-item-action>
+                    <v-list-item-content>
+                        <v-list-item-title>Вакансии</v-list-item-title>
+                    </v-list-item-content>
+                </v-list-item>
             </v-list>
         </v-navigation-drawer>
 

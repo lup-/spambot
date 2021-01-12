@@ -60,9 +60,17 @@ function ChatManager() {
                     : false;
 
                 let hasRef = userId && ref;
+                let subref = false;
 
                 if (!hasRef) {
                     return next();
+                }
+
+                let hasSubrefs = ref.indexOf('=') !== -1;
+                if (hasSubrefs) {
+                    let parts = ref.split('=');
+                    ref = parts.shift();
+                    subref = parts.join('=');
                 }
 
                 const db = await getDb();
@@ -77,9 +85,14 @@ function ChatManager() {
                     date: moment().unix(),
                 }
 
+                if (subref) {
+                    refFields.subref = subref;
+                }
+
                 try {
                     await refs.findOneAndReplace({refId}, refFields, {upsert: true, returnOriginal: false});
-                } finally {
+                }
+                finally {
                 }
 
                 return next();

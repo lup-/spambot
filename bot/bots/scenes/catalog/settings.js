@@ -1,5 +1,6 @@
 const BaseScene = require('telegraf/scenes/base');
 const {menuWithControls} = require('../../helpers/wizard');
+const {clone} = require('../../helpers/common');
 
 function isSelectedRecursive(selectedCategoryIds, category) {
     let hasSelectedIds = selectedCategoryIds && selectedCategoryIds.length > 0;
@@ -104,6 +105,7 @@ module.exports = function ({getSettingsText, getSelectedCategoryIds, getAllCateg
 
         if (levelId) {
             ctx.scene.state.levels.push(levelId);
+            ctx.scene.state.page = 0;
         }
 
         return ctx.scene.reenter();
@@ -152,8 +154,9 @@ module.exports = function ({getSettingsText, getSelectedCategoryIds, getAllCateg
 
     scene.action('ready', async ctx => {
         if (ctx.session.profile) {
-            ctx.session.profile.category = ctx.session.category || [];
-            await saveSettings(ctx.session.profile, ctx);
+            let newProfile = clone(ctx.session.profile);
+            newProfile.category = ctx.session.category || [];
+            await saveSettings(newProfile, ctx);
         }
         return ctx.scene.enter('discover');
     });

@@ -6,6 +6,7 @@ import ads from "./modules/ads";
 import bots from "./modules/bots";
 import messages from "@/store/modules/messages";
 import mailing from "@/store/modules/mailing";
+import vacancy from "./modules/vacancy";
 
 Vue.use(Vuex);
 
@@ -15,7 +16,8 @@ export default new Vuex.Store({
         ads,
         mailing,
         bots,
-        messages
+        messages,
+        vacancy
     },
     state: {
         appError: false

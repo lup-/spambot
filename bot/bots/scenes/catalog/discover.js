@@ -1,9 +1,10 @@
 const BaseScene = require('telegraf/scenes/base');
 const {menu} = require('../../helpers/wizard');
+const {clone} = require('../../helpers/common');
 
 const EMPTY_FILE_ID = 'AgACAgIAAxkDAAIF3V-0xDwAAZxgtMPCLuAv-dYMDWkVvAACZbAxG68woEnFDINlmSGWEGdyGZguAAMBAAMCAANtAAMFLQMAAR4E';
 
-function itemMenu({hasPrev, hasNext, totalItems, isFavorite, item}, hasSubmenu, action) {
+function itemMenu({hasPrev, hasNext, totalItems, isFavorite, item}, hasSubmenu, action, hasFavorite = true, hasRandom = true) {
     let buttons = [];
 
     buttons.push(hasPrev
@@ -12,17 +13,21 @@ function itemMenu({hasPrev, hasNext, totalItems, isFavorite, item}, hasSubmenu, 
     );
 
     buttons.push(action.button);
-    buttons.push({code: 'favourite', text: isFavorite ? '☑ ⭐' : '⭐'});
+    if (hasFavorite) {
+        buttons.push({code: 'favourite', text: isFavorite ? '☑ ⭐' : '⭐'});
+    }
 
     buttons.push(hasNext
         ? {code: 'go_next', text: '▶' }
         : {code: '_skip', text: '➖' }
     );
 
-    buttons.push(totalItems > 1
-        ? {code: 'random', text: '🎲'}
-        : {code: '_skip', text: '➖' }
-    );
+    if (hasRandom) {
+        buttons.push(totalItems > 1
+            ? {code: 'random', text: '🎲'}
+            : {code: '_skip', text: '➖'}
+        );
+    }
 
     buttons.push(hasSubmenu
         ? {code: 'menu', text: '↩'}
@@ -31,12 +36,22 @@ function itemMenu({hasPrev, hasNext, totalItems, isFavorite, item}, hasSubmenu, 
 
     buttons.push({code: 'settings', text: '🔧'});
 
-    return menu(buttons, 4);
+    return menu(buttons, hasFavorite ? 4 : 3);
 }
 function noItemsMenu() {
     return menu([{code: 'settings', text: '🔧'}, {code: 'menu', text: '↩'}]);
 }
-async function replyWithItem(ctx, showNewMessage, {getItemAtIndex, getEmptyText, getItemDescription, getItemImage, getAction}) {
+async function replyWithItem(ctx, showNewMessage, withPhoto, params) {
+    let {getItemAtIndex, getEmptyText, getItemDescription, getItemImage, getAction} = params;
+
+    const hasFavorite = typeof (params.hasFavorite) !== 'undefined'
+        ? params.hasFavorite
+        : true;
+
+    const hasRandom = typeof (params.hasRandom) !== 'undefined'
+        ? params.hasRandom
+        : true;
+
     let currentIndex = ctx.session.index || 0;
     let favorites = ctx.session.profile.favorite || [];
     let category = ctx.session.profile.category || [];
@@ -47,8 +62,11 @@ async function replyWithItem(ctx, showNewMessage, {getItemAtIndex, getEmptyText,
         ctx.session.index = 0;
         if (currentIndex === 0) {
             let emptyExtra = noItemsMenu();
-            emptyExtra.caption = getEmptyText(ctx);
-            return ctx.replyWithPhoto(EMPTY_FILE_ID, emptyExtra)
+            let text = getEmptyText(ctx);
+            emptyExtra.caption = text;
+            return withPhoto
+                ? ctx.replyWithPhoto(EMPTY_FILE_ID, emptyExtra)
+                : ctx.replyWithHTML(text, noItemsMenu());
         }
         else {
             return ctx.scene.reenter();
@@ -60,42 +78,78 @@ async function replyWithItem(ctx, showNewMessage, {getItemAtIndex, getEmptyText,
 
     let imageUrl = getItemImage(results.item) || false;
     let action = await getAction(ctx);
-    let hasSubmenu = favorites.length > 0 || category.length > 0;
+    let hasSubmenu = hasFavorite
+        ? favorites.length > 0 || category.length > 0
+        : true;
 
-    let photoExtra = itemMenu(results, hasSubmenu, action);
+    let itemText = getItemDescription(results.item);
+    let messageMenu = itemMenu(results, hasSubmenu, action, hasFavorite, hasRandom);
+    let photoExtra = itemMenu(results, hasSubmenu, action, hasFavorite, hasRandom);
     photoExtra.parse_mode = 'html';
-    photoExtra.caption = getItemDescription(results.item);
+    photoExtra.caption = itemText;
 
-    let editExtra = itemMenu(results, hasSubmenu, action);
+    let editExtra = itemMenu(results, hasSubmenu, action, hasFavorite, hasRandom);
     editExtra.parse_mode = 'html';
 
     let media = imageUrl
         ? {url: imageUrl}
         : EMPTY_FILE_ID;
 
-    return ctx.safeReply(
-        ctx => {
-            return showNewMessage
-                ? ctx.replyWithPhoto(media, photoExtra)
-                : ctx.editMessageMedia({type: 'photo', media, caption: getItemDescription(results.item)}, photoExtra);
-        },
-        [
-            ctx => ctx.replyWithPhoto(media, photoExtra),
-            ctx => ctx.replyWithPhoto(EMPTY_FILE_ID, {caption: 'Ошибка загрузки данных'}, itemMenu(results, hasSubmenu, action)),
-        ],
-        ctx);
+    if (withPhoto) {
+        return ctx.safeReply(
+            ctx => {
+                return showNewMessage
+                    ? ctx.replyWithPhoto(media, photoExtra)
+                    : ctx.editMessageMedia({
+                        type: 'photo',
+                        media,
+                        caption: getItemDescription(results.item)
+                    }, photoExtra);
+            },
+            [
+                ctx => ctx.replyWithPhoto(media, photoExtra),
+                ctx => ctx.replyWithPhoto(EMPTY_FILE_ID, {caption: 'Ошибка загрузки данных'}, itemMenu(results, hasSubmenu, action, hasFavorite, hasRandom)),
+            ],
+            ctx);
+    }
+    else {
+        return ctx.safeReply(
+            ctx => {
+                return showNewMessage
+                    ? ctx.replyWithHTML(itemText, messageMenu)
+                    : ctx.editMessageText(itemText, editExtra);
+            },
+            ctx => ctx.replyWithHTML(itemText, messageMenu),
+            ctx);
+    }
 }
 
 module.exports = function (params) {
     const scene = new BaseScene('discover');
     const {getAction, toggleFavorite, getItemAtIndex} = params;
 
+    const withPhoto = typeof (params.withPhoto) !== 'undefined'
+        ? params.withPhoto
+        : true;
+
+    const additionalActions = typeof (params.additionalActions) !== 'undefined'
+        ? params.additionalActions
+        : false;
+
+    const discoverAction = typeof (params.discoverAction) !== 'undefined'
+        ? params.discoverAction
+        : false;
+
     scene.enter(async ctx => {
         let fromNav = typeof (ctx.session.nav) === 'boolean' ? ctx.session.nav : false;
         let showNewMessage = !fromNav;
         ctx.session.index = ctx.session.index || 0;
 
-        return replyWithItem(ctx, showNewMessage, params);
+        if (discoverAction) {
+            await discoverAction(ctx);
+        }
+
+        return replyWithItem(ctx, showNewMessage, withPhoto, params);
     });
 
     scene.action('go_prev', ctx => {
@@ -179,6 +233,12 @@ module.exports = function (params) {
     });
 
     scene.action('_skip', ctx => {});
+
+    if (additionalActions) {
+        for (const action of additionalActions) {
+            scene.action(action.code, action.callback);
+        }
+    }
 
     return scene;
 }

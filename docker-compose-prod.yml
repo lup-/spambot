@@ -348,6 +348,56 @@ services:
       - BOT_NAME=refs_bot
     command: npm run refs_bot
 
+  bookie_bot:
+    image: node
+    container_name: 'bookie_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+      - tgapi_proxy
+    volumes:
+      - ./bot:/var/www
+      - ./files:/var/www/files
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=bookie_bot
+      - BOT_NAME=bookie_bot
+      - BOT_TOKEN=${BOOKIE_BOT_TOKEN}
+      - TGAPI_ROOT=https://tgapi_proxy
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - FILES_LOCAL_PATH=/var/www/files
+      - FILES_REMOTE_PATH=/files
+    command: node bots/books.js
+
+  booksave_bot:
+    image: node
+    container_name: 'booksave_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+      - tgapi_proxy
+    volumes:
+      - ./bot:/var/www
+      - ./files:/var/www/files
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=booksave_bot
+      - BOT_NAME=booksave_bot
+      - BOT_TOKEN=${BOOKSAVE_BOT_TOKEN}
+      - TGAPI_ROOT=https://tgapi_proxy
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - FILES_LOCAL_PATH=/var/www/files
+      - FILES_REMOTE_PATH=/files
+    command: node bots/books.js
+
   mailer_bot:
     image: node
     container_name: 'mailer_bot'
@@ -464,8 +514,10 @@ services:
       context: "."
       dockerfile: "./build/Dockerfile_tgapi"
     container_name: 'tgapi'
+    volumes:
+      - ./files:/files
     restart: always
-    command: telegram-bot-api --api-id ${API_ID} --api-hash ${API_HASH} --http-port=8081 --log=/proc/self/fd/1 --verbosity=4
+    command: telegram-bot-api --api-id ${API_ID} --api-hash ${API_HASH} --http-port=8081 --log=/proc/self/fd/1 --local
 
   monitor:
     image: node

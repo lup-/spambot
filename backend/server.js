@@ -7,6 +7,7 @@ const ads = require('./routes/ads');
 const bots = require('./routes/bots');
 const messages = require('./routes/messages');
 const mailings = require('./routes/mailings');
+const vacancies = require('./routes/vacancies');
 
 const PORT = 3000;
 const HOST = '0.0.0.0';
@@ -44,10 +45,20 @@ router
     .post('/api/bots/list', bots.list)
     .post('/api/bots/restart', bots.restart)
     .post('/api/bots/reloadAds', bots.reloadAds)
-    .post('/api/bots/reloadMessages', bots.reloadMessages);
+    .post('/api/bots/reloadMessages', bots.reloadMessages)
+    .post('/api/bots/getSettings', bots.getSettings)
+    .post('/api/bots/saveSettings', bots.saveSettings)
+    .post('/api/bots/reloadAds', bots.reloadAds);
 
 router
     .post('/api/messages/list', messages.list);
+
+router
+    .post('/api/vacancy/list', vacancies.list)
+    .post('/api/vacancy/add', vacancies.add)
+    .post('/api/vacancy/update', vacancies.update)
+    .post('/api/vacancy/delete', vacancies.delete)
+    .post('/api/vacancy/categories', vacancies.categories);
 
 app
     .use(bodyParser({

@@ -26,6 +26,8 @@ let bookDiscoverParams = {
     sceneCode: 'bookDiscover',
     getFile: books.getBook.bind(books),
     backCode: 'intro',
+    backBookCode: 'bookSearch',
+    backAudioCode: 'audioSearch',
     isAudio: false,
     books,
     getChunkDescription(items) {
@@ -43,6 +45,8 @@ let audioDiscoverParams = {
     sceneCode: 'audioDiscover',
     getFile: books.getAudioBook.bind(books),
     backCode: 'intro',
+    backBookCode: 'bookSearch',
+    backAudioCode: 'audioSearch',
     isAudio: true,
     books,
     getChunkDescription(items) {
@@ -53,7 +57,8 @@ ${item.mainAuthor} ${item.genre ? '(' + item.genre + ')' : ''}
 }
 
 app = setupBot(app)
-    .addSession()
+    .blockNonPrivate()
+    .addSession({delaySubscribeCheck: true}, 3600)
     .addSafeReply()
     .addIdsToSession()
     .addRefSave()

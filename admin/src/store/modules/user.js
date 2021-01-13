@@ -48,14 +48,14 @@ export default {
                 let response = await axios.post(`/api/user/update`, {user});
                 let isSuccess = response && response.data && response.data.user && response.data.user.id;
                 if (isSuccess) {
-                    commit('setSuccessMessage', 'Данные сохранены!', null, { root: true });
+                    commit('setSuccessMessage', 'Данные сохранены!');
                 }
                 else {
-                    commit('setErrorMessage', 'Ошибка сохранения данных!', null, { root: true });
+                    commit('setErrorMessage', 'Ошибка сохранения данных!');
                 }
             }
             catch (e) {
-                commit('setErrorMessage', 'Ошибка сохранения данных!', null, { root: true })
+                commit('setErrorMessage', 'Ошибка сохранения данных!')
             }
 
             return dispatch('loadUsers', state.filter);

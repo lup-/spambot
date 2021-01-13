@@ -6,6 +6,10 @@ module.exports = async (ctx, next) => {
         return next();
     }
 
+    if (ctx && ctx.session && ctx.session.delaySubscribeCheck) {
+        return next();
+    }
+
     if (ctx && ctx.session && ctx.session.subscribtionSuccess) {
         return next();
     }

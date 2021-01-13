@@ -12,6 +12,14 @@ function audioBooks(ctx) {
     return ctx.scene.enter('audioSearch');
 }
 
+async function removeKeyboard(ctx) {
+    try {
+        let message = await ctx.reply('Куда дальше?', {reply_markup: {remove_keyboard: true}});
+        await ctx.deleteMessage(message.message_id);
+    }
+    catch (e) {}
+}
+
 module.exports = function (params) {
     const scene = new BaseScene('intro');
     const {disclaimer, onlyBooks} = params;
@@ -26,7 +34,13 @@ module.exports = function (params) {
                 buttons.push({code: 'book', text: 'Найти книгу'});
                 buttons.push({code: 'audiobook', text: 'Найти аудиокнигу'});
 
-                return ctx.reply('Куда дальше?', menu(buttons));
+                await removeKeyboard(ctx);
+
+                return ctx.safeReply(
+                    ctx => ctx.editMessageText('Куда дальше?', menu(buttons)),
+                    ctx => ctx.reply('Куда дальше?', menu(buttons)),
+                    ctx
+                );
             }
             else {
                 return books(ctx);
@@ -35,7 +49,8 @@ module.exports = function (params) {
 
         try {
             ctx.session.introShown = true;
-            return ctx.reply(__(disclaimer.text, disclaimer.tags), menu([{code: 'accept', text: 'Понятно'}]));
+            let extra = menu([{code: 'accept', text: 'Понятно'}]);
+            return ctx.reply(__(disclaimer.text, disclaimer.tags), extra);
         }
         catch (e) {
         }

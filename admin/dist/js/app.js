@@ -10902,13 +10902,9 @@ var LOGIN_TTL_SECONDS = 86400;
                 isSuccess = response && response.data && response.data.user && response.data.user.id;
 
                 if (isSuccess) {
-                  commit('setSuccessMessage', 'Данные сохранены!', null, {
-                    root: true
-                  });
+                  commit('setSuccessMessage', 'Данные сохранены!');
                 } else {
-                  commit('setErrorMessage', 'Ошибка сохранения данных!', null, {
-                    root: true
-                  });
+                  commit('setErrorMessage', 'Ошибка сохранения данных!');
                 }
 
                 _context4.next = 12;
@@ -10917,9 +10913,7 @@ var LOGIN_TTL_SECONDS = 86400;
               case 9:
                 _context4.prev = 9;
                 _context4.t0 = _context4["catch"](1);
-                commit('setErrorMessage', 'Ошибка сохранения данных!', null, {
-                  root: true
-                });
+                commit('setErrorMessage', 'Ошибка сохранения данных!');
 
               case 12:
                 return _context4.abrupt("return", dispatch('loadUsers', state.filter));

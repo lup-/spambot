@@ -124,7 +124,7 @@ function saveStream(fileName, stream) {
 async function sendDownload(ctx, fileLink, book, params) {
     const {getFile, isAudio, books} = params;
 
-    let extra = menu([{code: 'back', text: 'Найти другую книгу'}]);
+    let extra = menu([{code: 'back_book', text: 'Найти книгу'}, {code: 'back_audio', text: 'Найти аудиокнигу'}]);
     extra.caption = isAudio
         ? __(`<b>${book.title}</b>\n\nПриятного прослушивания!`, ['content', 'audio'], 'audio')
         : __(`<b>${book.title}</b>\n\nПриятного чтения!`, ['content', 'text']);
@@ -193,7 +193,7 @@ async function sendDownload(ctx, fileLink, book, params) {
 }
 
 module.exports = function (params) {
-    const {sceneCode, backCode} = params;
+    const {sceneCode, backCode, backBookCode, backAudioCode} = params;
     const scene = new BaseScene(sceneCode);
 
     scene.enter(async ctx => {
@@ -263,6 +263,16 @@ module.exports = function (params) {
         ctx.scene.state.index = 0;
         ctx.scene.state.nav = false;
         return ctx.scene.enter(backCode);
+    });
+    scene.action('back_book', ctx => {
+        ctx.scene.state.index = 0;
+        ctx.scene.state.nav = false;
+        return ctx.scene.enter(backBookCode);
+    });
+    scene.action('back_audio', ctx => {
+        ctx.scene.state.index = 0;
+        ctx.scene.state.nav = false;
+        return ctx.scene.enter(backAudioCode);
     });
     scene.action('book', ctx => ctx.scene.reenter());
     scene.action('_skip', () => {});

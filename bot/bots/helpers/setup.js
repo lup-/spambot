@@ -5,12 +5,11 @@ const Stage = require('telegraf/stage');
 const session = require('telegraf/session');
 
 const store = new Map();
-const {catchErrors} = require('../helpers/common');
+const {catchErrors, clone} = require('../helpers/common');
 
 const SafeReplyMiddleware = require('../../modules/SafeReplyMiddleware');
 const SaveActivityMiddleware = require('../../modules/SaveActivityMiddleware');
 const checkSubscriptionMiddleware = require('../../modules/CheckSubscriptionMiddleware');
-
 
 const {init} = require('../../managers');
 
@@ -20,8 +19,25 @@ class Injector {
             this.stage = false;
         }
 
-        addSession() {
-            this.app.use(session({store}));
+        addSession(initialState = {}, ttlSec = false) {
+            let opts = {store};
+            if (ttlSec && ttlSec > 0) {
+                opts.ttl = ttlSec;
+            }
+
+            this.app.use(session(opts));
+
+            let hasInitialState = initialState && Object.keys(initialState).length > 0;
+            if (hasInitialState) {
+                this.app.use((ctx, next) => {
+                    let hasEmptySession = ctx && ctx.session && typeof (ctx.session) === 'object' && Object.keys(ctx.session).length === 0;
+                    if (hasEmptySession) {
+                        ctx.session = clone(initialState);
+                    }
+
+                    return next();
+                });
+            }
             return this;
         }
 
@@ -65,6 +81,12 @@ class Injector {
 
         addSubscription() {
             this.app.use(checkSubscriptionMiddleware);
+            return this;
+        }
+
+        blockNonPrivate() {
+            let chat = init('chat');
+            this.app.use(chat.blockNonPrivate());
             return this;
         }
 

@@ -45,6 +45,16 @@ function ChatManager() {
                 return next();
             }
         },
+        blockNonPrivate() {
+            return async (ctx, next) => {
+                let skipThisUpdate = ctx.chat.type !== 'private';
+                if (skipThisUpdate) {
+                    return;
+                }
+
+                return next();
+            }
+        },
         saveRefMiddleware() {
             return async (ctx, next) => {
                 if (!this.isStartCommand(ctx)) {

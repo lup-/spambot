@@ -6,12 +6,17 @@ module.exports = function (params) {
     const scene = new BaseScene(sceneCode);
 
     scene.enter(async ctx => {
-        return ctx.reply('Напишите запрос и я поищу подходящие книги');
+        ctx.session.delaySubscribeCheck = false;
+        return ctx.safeReply(
+            ctx => ctx.editMessageText('Напишите запрос и я поищу подходящие книги'),
+            ctx => ctx.reply('Напишите запрос и я поищу подходящие книги'),
+            ctx
+        );
     });
 
     scene.on('text', async ctx => {
         let query = ctx.update.message && ctx.update.message.text
-            ? ctx.update.message.text.replace(/[^a-zа-яё ]/ig, '').trim()
+            ? ctx.update.message.text.replace(/[^a-zа-яё0-9 ]/ig, '').trim()
             : false;
 
         if (!query) {

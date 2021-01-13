@@ -62,9 +62,8 @@ module.exports = function () {
 
                     let books = [];
                     for (const bookEl of bookEls) {
-                        let authors = bookEl.innerHTML
-                            .match(/(?<!пер\. +)\<a href=\"\/a\/\d+\"\>(.*?)<\/a>/ig)
-                            .map(tag => tag.replace(/<.*?>/g, ''));
+                        let authors = bookEl.innerHTML.match(/(?<!пер\. +)\<a href=\"\/a\/\d+\"\>(.*?)<\/a>/ig);
+                        authors = authors ? authors.map(tag => tag.replace(/<.*?>/g, '')) : false;
 
                         let genreEls = bookEl.querySelectorAll('a.genre');
                         let downloadEls = bookEl.querySelectorAll('a[href^="/b/"]');

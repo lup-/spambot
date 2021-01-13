@@ -8,6 +8,7 @@ const bots = require('./routes/bots');
 const messages = require('./routes/messages');
 const mailings = require('./routes/mailings');
 const vacancies = require('./routes/vacancies');
+const users = require('./routes/users');
 
 const PORT = 3000;
 const HOST = '0.0.0.0';
@@ -59,6 +60,14 @@ router
     .post('/api/vacancy/update', vacancies.update)
     .post('/api/vacancy/delete', vacancies.delete)
     .post('/api/vacancy/categories', vacancies.categories);
+
+router
+    .post('/api/user/list', users.list)
+    .post('/api/user/add', users.add)
+    .post('/api/user/update', users.update)
+    .post('/api/user/delete', users.delete)
+    .post('/api/user/check', users.check)
+    .post('/api/user/login', users.login);
 
 app
     .use(bodyParser({

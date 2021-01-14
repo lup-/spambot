@@ -172,6 +172,7 @@ services:
     image: node
     ports:
       - ${MONITOR_PORT}:3000
+      - ${BOT_DEBUG_PORT}:9229
     volumes:
       - ./monitor:/var/monitor
       - type: bind
@@ -183,8 +184,10 @@ services:
     working_dir: /var/monitor
     environment:
       - NODE_ENV=development
+      - TGAPI_ROOT=https://tgapi_proxy
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
       - PORT=3000
-    command: nodejs queue.js
+    command: nodejs --inspect=0.0.0.0 queue.js
 
   mongo:
     image: mongo

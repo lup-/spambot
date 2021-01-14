@@ -535,5 +535,7 @@ services:
     working_dir: /var/monitor
     environment:
       - NODE_ENV=development
+      - TGAPI_ROOT=https://tgapi_proxy
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
       - PORT=3000
     command: nodejs queue.js

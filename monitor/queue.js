@@ -4,6 +4,8 @@ const Prometheus = require('prom-client');
 const Koa = require('koa');
 const Telegram = require('telegraf/telegram');
 
+const API_ROOT = process.env.TGAPI_ROOT;
+
 function parseEnvVars(varLines) {
     let vars = {};
     for (const line of varLines) {
@@ -39,10 +41,12 @@ async function botList() {
             let tokenVar = botEnv['BOT_TOKEN'].replace(/[$\{\}]/g,'');
             let containerName = botConfig.container_name;
             let botName = botEnv['BOT_NAME'];
+            let localApiLink = botEnv['TGAPI_ROOT'] || false;
+            let isLocal = localApiLink && localApiLink.length > 0 && localApiLink.indexOf('http') === 0;
             let token = envVars[tokenVar];
 
             bots.push({
-                id, containerName, botName, token
+                id, containerName, botName, token, isLocal
             });
         }
     }
@@ -102,14 +106,19 @@ const eventLoopQueue = () => {
     while (run) {
         for (const bot of bots) {
             try {
-                let telegram = new Telegram(bot.token);
-                let webhookData = await telegram.getWebhookInfo();
-                let updatesCount = webhookData.pending_update_count;
+                if (bot.token) {
+                    let telegram = bot.isLocal
+                        ? new Telegram(bot.token, {apiRoot: API_ROOT})
+                        : new Telegram(bot.token);
+                    let webhookData = await telegram.getWebhookInfo();
+                    let updatesCount = webhookData.pending_update_count;
 
-                let g = gauges[bot.id];
-                g.set(updatesCount);
+                    let g = gauges[bot.id];
+                    g.set(updatesCount);
+                }
             }
             catch (e) {
+                let error = e;
             }
         }
 

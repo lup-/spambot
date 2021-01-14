@@ -394,6 +394,59 @@ services:
       - BOT_TOKEN=${BOOKSAVE_BOT_TOKEN}
       - TGAPI_ROOT=https://tgapi_proxy
       - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - PERF_MONITOR=1
+      - FILES_LOCAL_PATH=/var/www/files
+      - FILES_REMOTE_PATH=/files
+    command: node bots/books.js
+
+  b3okie_bot:
+    image: node
+    container_name: 'b3okie_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+      - tgapi_proxy
+    volumes:
+      - ./bot:/var/www
+      - ./files:/var/www/files
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=b3okie_bot
+      - BOT_NAME=b3okie_bot
+      - BOT_TOKEN=${B3OKIE_BOT_TOKEN}
+      - TGAPI_ROOT=https://tgapi_proxy
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - PERF_MONITOR=0
+      - FILES_LOCAL_PATH=/var/www/files
+      - FILES_REMOTE_PATH=/files
+    command: node bots/books.js
+
+  booksforfree_bot:
+    image: node
+    container_name: 'booksforfree_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+      - tgapi_proxy
+    volumes:
+      - ./bot:/var/www
+      - ./files:/var/www/files
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=booksforfree_bot
+      - BOT_NAME=booksforfree_bot
+      - BOT_TOKEN=${BOOKSFORFREE_BOT_TOKEN}
+      - TGAPI_ROOT=https://tgapi_proxy
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - PERF_MONITOR=0
       - FILES_LOCAL_PATH=/var/www/files
       - FILES_REMOTE_PATH=/files
     command: node bots/books.js

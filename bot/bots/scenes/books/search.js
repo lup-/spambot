@@ -7,11 +7,14 @@ module.exports = function (params) {
 
     scene.enter(async ctx => {
         ctx.session.delaySubscribeCheck = false;
-        return ctx.safeReply(
+        ctx.perfStart('searchIntro');
+        await ctx.safeReply(
             ctx => ctx.editMessageText('Напишите запрос и я поищу подходящие книги'),
             ctx => ctx.reply('Напишите запрос и я поищу подходящие книги'),
             ctx
         );
+        ctx.perfStop('searchIntro');
+        await ctx.perfCommit();
     });
 
     scene.on('text', async ctx => {
@@ -23,9 +26,19 @@ module.exports = function (params) {
             return ctx.scene.reenter();
         }
 
+        ctx.perfStart('searchMsg');
         let message = await ctx.reply('Ищу...');
+        ctx.perfStop('searchMsg');
+
+        ctx.perfStart('queryBookList');
         let items = await getBookList(query);
+        ctx.perfStop('queryBookList');
+
+        ctx.perfStart('deleteSearchMsg');
         await ctx.deleteMessage(message.message_id);
+        ctx.perfStop('deleteSearchMsg');
+
+        await ctx.perfCommit();
 
         if (items.length > 0) {
             return ctx.scene.enter(discoverSceneCode, {items, backCode: sceneCode});

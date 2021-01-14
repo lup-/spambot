@@ -13,6 +13,9 @@ async function getData(dbName) {
         case 'bookie_bot':
         case 'bookie_bot_old':
         case 'book_savebot':
+        case 'boookie_bot_new':
+        case 'book_savebot_new':
+        case 'books_for_free_bott_new':
             let oldUsers = await db.collection('public.bot_user').find({}).toArray();
             users = oldUsers.map(oldUser => {
                 let startedAt;
@@ -45,6 +48,25 @@ async function getData(dbName) {
                     "updated": startedAt
                 };
             });
+
+            let refDate = moment().subtract('1', 'd').startOf('d').unix();
+            let oldRefs = await db.collection('public.post_model').find({}).toArray();
+            refs = oldRefs.reduce((records, oldRef) => {
+                let refRecords = Array(oldRef.amountOfViews).fill(false).map(() => {
+                    let ref = 'p'+oldRef.id;
+                    let userId = 0;
+
+                    return {
+                        "refId" : `${userId}:${ref}`,
+                        "userId" : userId,
+                        "ref" : ref,
+                        "date" : refDate
+                    }
+                });
+
+                records = records.concat(refRecords);
+                return records;
+            }, []);
         break;
     }
 

@@ -101,7 +101,8 @@ async function replyWithChunk(ctx, showNewMessage, params) {
     let editExtra = chunkMenu(results, hasSubmenu);
     editExtra.parse_mode = 'html';
 
-    return ctx.safeReply(
+    ctx.perfStart('replyWithChunk');
+    await ctx.safeReply(
         ctx => {
             return showNewMessage
                 ? ctx.replyWithHTML(itemText, messageMenu)
@@ -110,6 +111,8 @@ async function replyWithChunk(ctx, showNewMessage, params) {
         ctx => ctx.replyWithHTML(itemText, messageMenu),
         ctx
     );
+    ctx.perfStop('replyWithChunk');
+    await ctx.perfCommit();
 }
 function saveStream(fileName, stream) {
     return new Promise(resolve => {
@@ -136,12 +139,17 @@ async function sendDownload(ctx, fileLink, book, params) {
         ? 'mp3'
         : fileLink.replace(/^.*\//, '');
 
+    ctx.perfStart('getFile');
     let savedFile = await books.getFile(platform, bookId, format);
+    ctx.perfStop('getFile');
 
     if (savedFile) {
-        return isAudio
+        ctx.perfStart('dbReply');
+        let dbMessage = isAudio
             ? ctx.replyWithAudio(savedFile.file.file_id, extra)
             : ctx.replyWithDocument(savedFile.file.file_id, extra);
+        ctx.perfStop();
+        return dbMessage;
     }
 
     let file;
@@ -154,9 +162,12 @@ async function sendDownload(ctx, fileLink, book, params) {
         let fileStream = await getFile(fileLink);
         let fileName = bookId + '.' + format;
 
+        ctx.perfStart('saveStream');
         let {localPath, remotePath} = await saveStream(fileName, fileStream);
         localFile = localPath;
+        ctx.perfStop('saveStream');
 
+        ctx.perfStart('sendDownloaded');
         if (isAudio) {
             let fileMessage = await ctx.replyWithAudio(remotePath, extra)
             file = fileMessage.audio;
@@ -164,6 +175,7 @@ async function sendDownload(ctx, fileLink, book, params) {
             let fileMessage = await ctx.replyWithDocument(remotePath, extra);
             file = fileMessage.document;
         }
+        ctx.perfStop('sendDownloaded');
     }
     catch (e) {
         if (localFile) {
@@ -178,7 +190,9 @@ async function sendDownload(ctx, fileLink, book, params) {
     }
 
     if (file) {
+        ctx.perfStart('cacheDownload');
         await books.saveFile(platform, bookId, format, file);
+        ctx.perfStop('cacheDownload');
     }
 
     await ctx.deleteMessage(message.message_id);
@@ -188,8 +202,12 @@ async function sendDownload(ctx, fileLink, book, params) {
         return ctx.reply('Не удалось скачать эту книгу. Попробуйте позже или посмотрите другие.', menu([{code: 'book', text: 'Посмотреть другие'}]));
     }
     else {
+        ctx.perfStart('cacheDownload');
         await books.saveDownload(platform, bookId, format, ctx.session.userId);
+        ctx.perfStop('cacheDownload');
     }
+
+    await ctx.perfCommit();
 }
 
 module.exports = function (params) {

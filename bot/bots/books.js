@@ -58,6 +58,7 @@ ${item.mainAuthor} ${item.genre ? '(' + item.genre + ')' : ''}
 
 app = setupBot(app)
     .blockNonPrivate()
+    .addPerformance()
     .addSession({delaySubscribeCheck: true}, 3600)
     .addSafeReply()
     .addIdsToSession()

@@ -14,149 +14,155 @@ const checkSubscriptionMiddleware = require('../../modules/CheckSubscriptionMidd
 const {init} = require('../../managers');
 
 class Injector {
-        constructor(app) {
-            this.app = app;
-            this.stage = false;
+    constructor(app) {
+        this.app = app;
+        this.stage = false;
+    }
+
+    addSession(initialState = {}, ttlSec = false) {
+        let opts = {store};
+        if (ttlSec && ttlSec > 0) {
+            opts.ttl = ttlSec;
         }
 
-        addSession(initialState = {}, ttlSec = false) {
-            let opts = {store};
-            if (ttlSec && ttlSec > 0) {
-                opts.ttl = ttlSec;
-            }
+        this.app.use(session(opts));
 
-            this.app.use(session(opts));
-
-            let hasInitialState = initialState && Object.keys(initialState).length > 0;
-            if (hasInitialState) {
-                this.app.use((ctx, next) => {
-                    let hasEmptySession = ctx && ctx.session && typeof (ctx.session) === 'object' && Object.keys(ctx.session).length === 0;
-                    if (hasEmptySession) {
-                        ctx.session = clone(initialState);
-                    }
-
-                    return next();
-                });
-            }
-            return this;
-        }
-
-        addSafeReply() {
-            let safeReply = new SafeReplyMiddleware();
-            safeReply.setDefaultFallback(catchErrors);
-
-            this.app.use(safeReply.getMiddleware());
-            this.app.catch(catchErrors);
-            return this;
-        }
-
-        addIdsToSession() {
-            let chat = init('chat');
-            this.app.use(chat.initIdsMiddleware());
-            return this;
-        }
-
-        addRefSave() {
-            let chat = init('chat');
-            this.app.use(chat.saveRefMiddleware());
-            return this;
-        }
-
-        addUserSave() {
-            let chat = init('chat');
-            this.app.use(chat.saveUserMiddleware());
-            return this;
-        }
-
-        addProfile() {
-            let profile = init('profile');
-            this.app.use(profile.initSessionProfileMiddleware());
-            return this;
-        }
-
-        addSaveActivity() {
-            this.app.use(SaveActivityMiddleware);
-            return this;
-        }
-
-        addSubscription() {
-            this.app.use(checkSubscriptionMiddleware);
-            return this;
-        }
-
-        blockNonPrivate() {
-            let chat = init('chat');
-            this.app.use(chat.blockNonPrivate());
-            return this;
-        }
-
-        addScenes(code, params, exclude = []) {
-            const stage = this.stage ? this.stage : new Stage();
-
-            let dir = `${__dirname}/../scenes/${code}/`;
-            let filenames = fs.readdirSync(dir);
-            filenames.forEach(file => {
-                if (exclude.indexOf(file) !== -1) {
-                    return;
+        let hasInitialState = initialState && Object.keys(initialState).length > 0;
+        if (hasInitialState) {
+            this.app.use((ctx, next) => {
+                let hasEmptySession = ctx && ctx.session && typeof (ctx.session) === 'object' && Object.keys(ctx.session).length === 0;
+                if (hasEmptySession) {
+                    ctx.session = clone(initialState);
                 }
 
-                let fullFilename = path.join(dir, file);
-                let scene = require(fullFilename);
-                stage.register(scene(params));
+                return next();
             });
-
-            this.app.use(stage.middleware());
-            this.stage = stage;
-
-            return this;
         }
+        return this;
+    }
 
-        addScene(groupCode, sceneCode, params) {
-            const stage = this.stage ? this.stage : new Stage();
+    addSafeReply() {
+        let safeReply = new SafeReplyMiddleware();
+        safeReply.setDefaultFallback(catchErrors);
 
-            let filename = `${__dirname}/../scenes/${groupCode}/${sceneCode}.js`;
-            let canonicalFilename = path.normalize(filename);
+        this.app.use(safeReply.getMiddleware());
+        this.app.catch(catchErrors);
+        return this;
+    }
 
-            let scene = require(canonicalFilename);
+    addIdsToSession() {
+        let chat = init('chat');
+        this.app.use(chat.initIdsMiddleware());
+        return this;
+    }
+
+    addRefSave() {
+        let chat = init('chat');
+        this.app.use(chat.saveRefMiddleware());
+        return this;
+    }
+
+    addUserSave() {
+        let chat = init('chat');
+        this.app.use(chat.saveUserMiddleware());
+        return this;
+    }
+
+    addProfile() {
+        let profile = init('profile');
+        this.app.use(profile.initSessionProfileMiddleware());
+        return this;
+    }
+
+    addSaveActivity() {
+        this.app.use(SaveActivityMiddleware);
+        return this;
+    }
+
+    addSubscription() {
+        this.app.use(checkSubscriptionMiddleware);
+        return this;
+    }
+
+    blockNonPrivate() {
+        let chat = init('chat');
+        this.app.use(chat.blockNonPrivate());
+        return this;
+    }
+
+    addScenes(code, params, exclude = []) {
+        const stage = this.stage ? this.stage : new Stage();
+
+        let dir = `${__dirname}/../scenes/${code}/`;
+        let filenames = fs.readdirSync(dir);
+        filenames.forEach(file => {
+            if (exclude.indexOf(file) !== -1) {
+                return;
+            }
+
+            let fullFilename = path.join(dir, file);
+            let scene = require(fullFilename);
             stage.register(scene(params));
+        });
 
-            this.stage = stage;
-            this.app.use(stage.middleware());
-            return this;
-        }
+        this.app.use(stage.middleware());
+        this.stage = stage;
 
-        addDisclaimer(text, afterAccept) {
-            this.app.start(async ctx => {
-                let messageShown = ctx && ctx.session && ctx.session.introShown;
-                if (messageShown) {
-                    return afterAccept(ctx);
-                }
+        return this;
+    }
 
-                try {
-                    ctx.session.introShown = true;
-                    return ctx.reply(__(text, ['content', 'intro']), menu([{code: '_accept', text: 'Понятно'}]));
-                }
-                catch (e) {
-                }
-            });
+    addScene(groupCode, sceneCode, params) {
+        const stage = this.stage ? this.stage : new Stage();
 
-            this.app.action('_accept', afterAccept);
-            return this;
-        }
+        let filename = `${__dirname}/../scenes/${groupCode}/${sceneCode}.js`;
+        let canonicalFilename = path.normalize(filename);
 
-        addDefaultRoute(defaultRoute, addStart = true) {
-            if (addStart) {
-                this.app.start(defaultRoute);
+        let scene = require(canonicalFilename);
+        stage.register(scene(params));
+
+        this.stage = stage;
+        this.app.use(stage.middleware());
+        return this;
+    }
+
+    addDisclaimer(text, afterAccept) {
+        this.app.start(async ctx => {
+            let messageShown = ctx && ctx.session && ctx.session.introShown;
+            if (messageShown) {
+                return afterAccept(ctx);
             }
 
-            this.app.action(/.*/, defaultRoute);
-            this.app.on('message', defaultRoute);
-            return this;
+            try {
+                ctx.session.introShown = true;
+                return ctx.reply(__(text, ['content', 'intro']), menu([{code: '_accept', text: 'Понятно'}]));
+            }
+            catch (e) {
+            }
+        });
+
+        this.app.action('_accept', afterAccept);
+        return this;
+    }
+
+    addDefaultRoute(defaultRoute, addStart = true) {
+        if (addStart) {
+            this.app.start(defaultRoute);
         }
 
-        get() {
-            return this.app;
-        }
+        this.app.action(/.*/, defaultRoute);
+        this.app.on('message', defaultRoute);
+        return this;
+    }
+
+    addPerformance() {
+        let perf = init('performance');
+        this.app.use(perf.getMiddleware());
+        return this;
+    }
+
+    get() {
+        return this.app;
+    }
 }
 
 

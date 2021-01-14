@@ -16,6 +16,7 @@ const BusinessManager = require('./Business');
 const VacanciesManager = require('./Vacancies');
 const BooksManager = require('./Books');
 const MessageBus = require('./MessageBus');
+const PerformanceManager = require('./Perfomance');
 
 let instances = {};
 
@@ -59,6 +60,8 @@ function init(manager, params = {}) {
             return new BooksManager();
         case 'bus':
             return new MessageBus();
+        case 'performance':
+            return new PerformanceManager();
 
         default:
             return null;

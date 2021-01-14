@@ -1,8 +1,6 @@
 const BaseScene = require('telegraf/scenes/base');
 const {menu} = require('../../helpers/wizard');
 const {__} = require('../../../modules/Messages');
-const {init} = require('../../../managers');
-const booksManager = init('books');
 
 function books(ctx) {
     return ctx.scene.enter('bookSearch');
@@ -34,13 +32,18 @@ module.exports = function (params) {
                 buttons.push({code: 'book', text: 'Найти книгу'});
                 buttons.push({code: 'audiobook', text: 'Найти аудиокнигу'});
 
+                ctx.perfStart('removeKeyboard');
                 await removeKeyboard(ctx);
+                ctx.perfStop('removeKeyboard');
 
-                return ctx.safeReply(
+                ctx.perfStart('introReply');
+                await ctx.safeReply(
                     ctx => ctx.editMessageText('Куда дальше?', menu(buttons)),
                     ctx => ctx.reply('Куда дальше?', menu(buttons)),
                     ctx
                 );
+                ctx.perfStop('introReply');
+                return await ctx.perfCommit();
             }
             else {
                 return books(ctx);

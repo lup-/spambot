@@ -13,10 +13,6 @@ async function catchErrors(err, ctx) {
     catch (e) {
         sendError = e;
         if (sendError && sendError.code) {
-            if (!this.id) {
-                throw sendError;
-            }
-
             if (sendError.code === 403) {
                 blockUser = true;
             }

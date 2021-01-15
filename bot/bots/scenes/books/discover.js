@@ -171,7 +171,8 @@ async function sendDownload(ctx, fileLink, book, params) {
         if (isAudio) {
             let fileMessage = await ctx.replyWithAudio(remotePath, extra)
             file = fileMessage.audio;
-        } else {
+        }
+        else {
             let fileMessage = await ctx.replyWithDocument(remotePath, extra);
             file = fileMessage.document;
         }

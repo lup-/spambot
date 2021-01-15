@@ -53,6 +53,15 @@ module.exports = function (proxyMgr) {
             return this.proxyMgr.getAgentRoundRobin();
         },
 
+        async checkProxyAndThrowError(proxyAgent, url, error, src) {
+            if (proxyAgent && proxyAgent.inputProxy) {
+                await this.proxyMgr.excludeProxyOnError(proxyAgent.inputProxy, url, error);
+            }
+
+            console.log(src, error);
+            throw error;
+        },
+
         async getBookPage(searchText, sort, page = 1) {
             let params = {'ab': 'ab1', 't': searchText, sort, page: page-1};
             let query = Object.keys(params).map(key => {
@@ -63,6 +72,7 @@ module.exports = function (proxyMgr) {
             let url = `${FLIBUSTA_SEARCH_URL}?${query}`;
             let proxyAgent = await this.getProxyAgent();
 
+            let error;
             try {
                 let result = await parseUrl(url, {
                     books(document) {
@@ -130,13 +140,17 @@ module.exports = function (proxyMgr) {
                 return result;
             }
             catch (e) {
-                await this.proxyMgr.excludeProxyOnError(proxyAgent.inputProxy, url, e);
-                throw e;
+                error = e;
+            }
+
+            if (error) {
+                await this.checkProxyAndThrowError(proxyAgent, url, error, 'Books.js:147');
             }
         },
         async getAudioBookPage(searchText, page = 1) {
             let url = `${AUDIOBOOKS_SEARCH_URL}/page${page}/?q=${encodeURIComponent(searchText)}`;
             let proxyAgent = await this.getProxyAgent();
+            let error;
             try {
                 let result = parseUrl(url, {
                 books(document) {
@@ -213,8 +227,11 @@ module.exports = function (proxyMgr) {
                 return result;
             }
             catch (e) {
-                await this.proxyMgr.excludeProxyOnError(proxyAgent.proxy, url, e);
-                throw e;
+                error = e;
+            }
+
+            if (error) {
+                await this.checkProxyAndThrowError(proxyAgent, url, error, 'Books.js:243');
             }
         },
 
@@ -224,13 +241,18 @@ module.exports = function (proxyMgr) {
             let fetchedBooks = [];
 
             while ((totalPages === false || currentPage < totalPages) && fetchedBooks.length < MAX_RESULTS) {
-                let {books, pageCount} = await this.getBookPage(searchText, sort, currentPage);
-                if (totalPages === false) {
-                    totalPages = pageCount || 1;
-                }
+                try {
+                    let {books, pageCount} = await this.getBookPage(searchText, sort, currentPage);
+                    if (totalPages === false) {
+                        totalPages = pageCount || 1;
+                    }
 
-                currentPage++;
-                fetchedBooks = fetchedBooks.concat(books);
+                    currentPage++;
+                    fetchedBooks = fetchedBooks.concat(books);
+                }
+                catch (e) {
+                    return false;
+                }
             }
 
             return fetchedBooks;
@@ -241,13 +263,18 @@ module.exports = function (proxyMgr) {
             let fetchedBooks = [];
 
             while ((totalPages === false || currentPage < totalPages) && fetchedBooks.length < MAX_RESULTS) {
-                let {books, pageCount} = await this.getAudioBookPage(searchText, currentPage);
-                if (totalPages === false) {
-                    totalPages = pageCount || 1;
-                }
+                try {
+                    let {books, pageCount} = await this.getAudioBookPage(searchText, currentPage);
+                    if (totalPages === false) {
+                        totalPages = pageCount || 1;
+                    }
 
-                currentPage++;
-                fetchedBooks = fetchedBooks.concat(books);
+                    currentPage++;
+                    fetchedBooks = fetchedBooks.concat(books);
+                }
+                catch (e) {
+                    return false;
+                }
             }
 
             return fetchedBooks;
@@ -261,13 +288,17 @@ module.exports = function (proxyMgr) {
                 options.httpsAgent = proxyAgent;
             }
 
+            let error;
             try {
                 let {data} = await axios.get(mediaUrl, options);
                 return data;
             }
             catch (e) {
-                await this.proxyMgr.excludeProxyOnError(proxyAgent.proxy, mediaUrl, e);
-                throw e;
+                error = e;
+            }
+
+            if (error) {
+                await this.checkProxyAndThrowError(proxyAgent, mediaUrl, error, 'Books.js:291');
             }
         },
         async getAudioBook(link) {
@@ -277,6 +308,7 @@ module.exports = function (proxyMgr) {
             let cookieJar;
             let bookId;
             let lsKey;
+            let error;
             try {
                 let result = await parseUrl(link, {
                     bookId(document) {
@@ -306,8 +338,11 @@ module.exports = function (proxyMgr) {
                 lsKey = result.lsKey;
             }
             catch (e) {
-                await this.proxyMgr.excludeProxyOnError(proxyAgent.proxy, link, e);
-                throw e;
+                error = e;
+            }
+
+            if (error) {
+                await this.checkProxyAndThrowError(proxyAgent, link, error, 'Books.js:335');
             }
 
             let dataLink = `https://akniga.org/ajax/b/${bookId}`;
@@ -333,8 +368,11 @@ module.exports = function (proxyMgr) {
                 response = await got.post(dataLink, gotOptions);
             }
             catch (e) {
-                await this.proxyMgr.excludeProxyOnError(proxyAgent.proxy, dataLink, e);
-                throw e;
+                error = e;
+            }
+
+            if (error) {
+                await this.checkProxyAndThrowError(proxyAgent, dataLink, error, 'Books.js:365');
             }
 
             let params;
@@ -363,8 +401,11 @@ module.exports = function (proxyMgr) {
                 return data;
             }
             catch (e) {
-                await this.proxyMgr.excludeProxyOnError(proxyAgent.proxy, mediaUrl, e);
-                throw e;
+                error = e;
+            }
+
+            if (error) {
+                await this.checkProxyAndThrowError(proxyAgent, mediaUrl, error, 'Books.js:398');
             }
 
             return false;

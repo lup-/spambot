@@ -194,14 +194,18 @@ module.exports = class Proxy {
     }
 
     async excludeProxyOnError(proxy, failedUrl, error) {
-        let isBlockingError = error && /(timed* *out|rejected|hang *up)/ig.test(error.toString());
+        let isBlockingError = error && /(timed* *out|reject|hang *up)/ig.test(error.toString());
         if (!isBlockingError) {
+            return;
+        }
+
+        if (!proxy._id) {
             return;
         }
 
         let db = await getDb(PROXY_DB_NAME);
         await db.collection('proxies').findOneAndUpdate(
-            {host: proxy.host, port: proxy.port},
+            {_id: proxy._id},
             {$set: {usageCheck: false, failedUrl, lastError: error.toString()}},
             {upsert: true, returnOriginal: false}
         );

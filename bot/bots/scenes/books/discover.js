@@ -178,13 +178,6 @@ async function sendDownload(ctx, fileLink, book, params) {
         ctx.perfStop('sendDownloaded');
     }
     catch (e) {
-        if (localFile) {
-            try {
-                fs.unlinkSync(localFile);
-            }
-            catch (e) {}
-
-        }
         error = e;
         file = false;
     }

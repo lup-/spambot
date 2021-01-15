@@ -1,12 +1,43 @@
 const he = require('he');
+const {getDb} = require('../../modules/Database');
+const {init} = require('../../managers');
+const moment = require('moment');
 
 async function catchErrors(err, ctx) {
-    console.log(err);
+    let sendError = false;
+
     try {
         await ctx.reply('Похоже, что-то пошло не по плану.\nПопробуйте начать заново /start.');
     }
     catch (e) {
+        sendError = e;
+        if (sendError && sendError.code) {
+            if (!this.id) {
+                throw sendError;
+            }
+
+            if (sendError.code === 403) {
+                let chat = init('chat');
+                await chat.addUserBlock(ctx, 'reply');
+                return false;
+            }
+        }
     }
+
+    try {
+        let db = await getDb();
+        let {from, chat} = ctx;
+        let userId = from.id || chat.id || false;
+        let errorRecord = {
+            date: moment().unix(),
+            userId,
+            error: err.toString(),
+            sendError: sendError.toString()
+        }
+
+        await db.collection('errors').insertOne(errorRecord);
+    }
+    catch (e) {}
 
     return;
 }

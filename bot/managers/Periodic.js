@@ -19,8 +19,11 @@ module.exports = function () {
             runTask = newRunTask;
         },
 
-        setRepeatingTask(taskFn, periodSecs) {
+        setRepeatingTask(taskFn, periodSecs, callOnStart = false) {
             repeatInterval = setInterval(taskFn, periodSecs * 1000);
+            if (callOnStart) {
+                taskFn();
+            }
         },
 
         stopRepeatingTask() {

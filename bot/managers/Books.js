@@ -13,39 +13,44 @@ const FLIBUSTA_SEARCH_URL = 'http://flibusta.is/makebooklist';
 const AUDIOBOOKS_SEARCH_URL = 'https://akniga.org/search/books';
 const MAX_RESULTS = 50;
 
-module.exports = function () {
+module.exports = function (proxyMgr) {
     return {
+        proxyMgr,
         getHash(LIVESTREET_SECURITY_KEY) {
-        const CryptoJSAesJson = {
-            stringify(e) {
-                let a = {
-                    ct: e.ciphertext.toString(CryptoJS.enc.Base64)
-                };
-                if (e.iv)
-                    a.iv = e.iv.toString();
-                if (e.salt)
-                    a.s = e.salt.toString();
-                return JSON.stringify(a);
-            },
-            parse(e) {
-                let a = JSON.parse(e)
-                let t = CryptoJS.lib.CipherParams.create({
-                    ciphertext: CryptoJS.enc.Base64.parse(a.ct)
-                });
-                if (a.iv)
-                    t.iv = CryptoJS.enc.Hex.parse(a.iv);
-                if (a.s)
-                    t.salt = CryptoJS.enc.Hex.parse(a.s);
-                return t;
-            }
-        };
+            const CryptoJSAesJson = {
+                stringify(e) {
+                    let a = {
+                        ct: e.ciphertext.toString(CryptoJS.enc.Base64)
+                    };
+                    if (e.iv)
+                        a.iv = e.iv.toString();
+                    if (e.salt)
+                        a.s = e.salt.toString();
+                    return JSON.stringify(a);
+                },
+                parse(e) {
+                    let a = JSON.parse(e)
+                    let t = CryptoJS.lib.CipherParams.create({
+                        ciphertext: CryptoJS.enc.Base64.parse(a.ct)
+                    });
+                    if (a.iv)
+                        t.iv = CryptoJS.enc.Hex.parse(a.iv);
+                    if (a.s)
+                        t.salt = CryptoJS.enc.Hex.parse(a.s);
+                    return t;
+                }
+            };
 
-        return CryptoJS.AES.encrypt(JSON.stringify(LIVESTREET_SECURITY_KEY), 'EKxtcg46V', {
-            format: CryptoJSAesJson
-        }).toString();
-    },
+            return CryptoJS.AES.encrypt(JSON.stringify(LIVESTREET_SECURITY_KEY), 'EKxtcg46V', {
+                format: CryptoJSAesJson
+            }).toString();
+        },
         getPlatform(isAudio) {
             return isAudio ? 'akniga.org' : 'flibusta.is';
+        },
+
+        getProxyAgent() {
+            return this.proxyMgr.getAgentRoundRobin();
         },
 
         async getBookPage(searchText, sort, page = 1) {
@@ -56,74 +61,84 @@ module.exports = function () {
             }).join('&');
 
             let url = `${FLIBUSTA_SEARCH_URL}?${query}`;
-            return parseUrl(url, {
-                books(document) {
-                    let bookEls = document.querySelectorAll('form div');
+            let proxyAgent = await this.getProxyAgent();
 
-                    let books = [];
-                    for (const bookEl of bookEls) {
-                        let authors = bookEl.innerHTML.match(/(?<!пер\. +)\<a href=\"\/a\/\d+\"\>(.*?)<\/a>/ig);
-                        authors = authors ? authors.map(tag => tag.replace(/<.*?>/g, '')) : false;
+            try {
+                let result = await parseUrl(url, {
+                    books(document) {
+                        let bookEls = document.querySelectorAll('form div');
 
-                        let genreEls = bookEl.querySelectorAll('a.genre');
-                        let downloadEls = bookEl.querySelectorAll('a[href^="/b/"]');
-                        let sizeEl = bookEl.querySelector('[style="size"]');
+                        let books = [];
+                        for (const bookEl of bookEls) {
+                            let authors = bookEl.innerHTML.match(/(?<!пер\. +)\<a href=\"\/a\/\d+\"\>(.*?)<\/a>/ig);
+                            authors = authors ? authors.map(tag => tag.replace(/<.*?>/g, '')) : false;
 
-                        let genres = [];
-                        for (const genreEl of genreEls) {
-                            genres.push(genreEl.innerHTML.trim());
-                        }
+                            let genreEls = bookEl.querySelectorAll('a.genre');
+                            let downloadEls = bookEl.querySelectorAll('a[href^="/b/"]');
+                            let sizeEl = bookEl.querySelector('[style="size"]');
 
-                        let id = false;
-                        let title = false;
-                        let link = false;
-                        let downloads = [];
-                        for (const downloadEl of downloadEls) {
-                            let uri = downloadEl.getAttribute('href');
-                            let url = FLIBUSTA_BASE + uri;
-                            let urlParts = uri.split('/');
-                            let format = urlParts[3] || false;
+                            let genres = [];
+                            for (const genreEl of genreEls) {
+                                genres.push(genreEl.innerHTML.trim());
+                            }
 
-                            if (format) {
-                                if (format !== 'read') {
-                                    downloads.push({url, format});
+                            let id = false;
+                            let title = false;
+                            let link = false;
+                            let downloads = [];
+                            for (const downloadEl of downloadEls) {
+                                let uri = downloadEl.getAttribute('href');
+                                let url = FLIBUSTA_BASE + uri;
+                                let urlParts = uri.split('/');
+                                let format = urlParts[3] || false;
+
+                                if (format) {
+                                    if (format !== 'read') {
+                                        downloads.push({url, format});
+                                    }
+                                } else {
+                                    id = parseInt(uri.replace('/b/', ''));
+                                    title = trimHTML(downloadEl.innerHTML.trim());
+                                    link = url;
                                 }
                             }
-                            else {
-                                id = parseInt( uri.replace('/b/', '') );
-                                title = trimHTML(downloadEl.innerHTML.trim());
-                                link = url;
-                            }
+
+                            let size = sizeEl ? sizeEl.innerHTML.trim() : false;
+                            let mainAuthor = authors ? authors[authors.length - 1] : false;
+
+                            books.push({id, title, authors, mainAuthor, genres, link, size, downloads});
                         }
 
-                        let size = sizeEl ? sizeEl.innerHTML.trim() : false;
-                        let mainAuthor = authors ? authors[authors.length-1] : false;
+                        return books;
+                    },
+                    pageCount(document) {
+                        let lastPageEl = document.querySelector('.pager-last a');
+                        if (!lastPageEl) {
+                            return false;
+                        }
 
-                        books.push( {id, title, authors, mainAuthor, genres, link, size, downloads} );
+                        try {
+                            let uri = lastPageEl.getAttribute('href');
+                            let pageNum = parseInt(uri.replace(/[^\d]/g, ''));
+                            return pageNum;
+                        } catch (e) {
+                            return false;
+                        }
                     }
+                }, false, false, proxyAgent);
 
-                    return books;
-                },
-                pageCount(document) {
-                    let lastPageEl = document.querySelector('.pager-last a');
-                    if (!lastPageEl) {
-                        return false;
-                    }
-
-                    try {
-                        let uri = lastPageEl.getAttribute('href');
-                        let pageNum = parseInt(uri.replace(/[^\d]/g, ''));
-                        return pageNum;
-                    }
-                    catch (e) {
-                        return false;
-                    }
-                }
-            });
+                return result;
+            }
+            catch (e) {
+                await this.proxyMgr.excludeProxyOnError(proxyAgent.inputProxy, url, e);
+                throw e;
+            }
         },
         async getAudioBookPage(searchText, page = 1) {
             let url = `${AUDIOBOOKS_SEARCH_URL}/page${page}/?q=${encodeURIComponent(searchText)}`;
-            return parseUrl(url, {
+            let proxyAgent = await this.getProxyAgent();
+            try {
+                let result = parseUrl(url, {
                 books(document) {
                     let bookEls = document.querySelectorAll('.content__main__articles--item');
 
@@ -194,7 +209,13 @@ module.exports = function () {
                         return false;
                     }
                 }
-            });
+            }, false, false, proxyAgent);
+                return result;
+            }
+            catch (e) {
+                await this.proxyMgr.excludeProxyOnError(proxyAgent.proxy, url, e);
+                throw e;
+            }
         },
 
         async getBookList(searchText, sort) {
@@ -233,37 +254,64 @@ module.exports = function () {
         },
 
         async getBook(mediaUrl) {
-            let {data} = await axios.get(mediaUrl, {responseType: 'stream'});
-            return data;
+            let options = {responseType: 'stream'};
+            let proxyAgent = await this.getProxyAgent();
+            if (proxyAgent) {
+                options.httpAgent = proxyAgent;
+                options.httpsAgent = proxyAgent;
+            }
+
+            try {
+                let {data} = await axios.get(mediaUrl, options);
+                return data;
+            }
+            catch (e) {
+                await this.proxyMgr.excludeProxyOnError(proxyAgent.proxy, mediaUrl, e);
+                throw e;
+            }
         },
         async getAudioBook(link) {
+            let proxyAgent = await this.getProxyAgent();
             const USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36';
-            let {cookieJar, bookId, lsKey} = await parseUrl(link, {
-                bookId(document) {
-                    let articleEl = document.querySelector('article[data-bid]');
-                    return articleEl
-                        ? articleEl.getAttribute('data-bid')
-                        : false;
-                },
-                lsKey(document) {
-                    let scriptEls = document.querySelectorAll('script');
-                    let lsKey = false;
-                    for (const scriptEl of scriptEls) {
-                        let hasLsKey = scriptEl.innerHTML.indexOf('LIVESTREET_SECURITY_KEY') !== -1;
-                        if (hasLsKey) {
-                            let matches = scriptEl.innerHTML.match(/LIVESTREET_SECURITY_KEY *= *\\*'*([^\\',]+)/);
-                            if (matches && matches[1]) {
-                                lsKey = matches[1];
+
+            let cookieJar;
+            let bookId;
+            let lsKey;
+            try {
+                let result = await parseUrl(link, {
+                    bookId(document) {
+                        let articleEl = document.querySelector('article[data-bid]');
+                        return articleEl
+                            ? articleEl.getAttribute('data-bid')
+                            : false;
+                    },
+                    lsKey(document) {
+                        let scriptEls = document.querySelectorAll('script');
+                        let lsKey = false;
+                        for (const scriptEl of scriptEls) {
+                            let hasLsKey = scriptEl.innerHTML.indexOf('LIVESTREET_SECURITY_KEY') !== -1;
+                            if (hasLsKey) {
+                                let matches = scriptEl.innerHTML.match(/LIVESTREET_SECURITY_KEY *= *\\*'*([^\\',]+)/);
+                                if (matches && matches[1]) {
+                                    lsKey = matches[1];
+                                }
                             }
                         }
-                    }
 
-                    return lsKey;
-                }
-            }, new CookieJar(), USER_AGENT);
+                        return lsKey;
+                    }
+                }, new CookieJar(), USER_AGENT, proxyAgent);
+                cookieJar = result.cookieJar;
+                bookId = result.bookId;
+                lsKey = result.lsKey;
+            }
+            catch (e) {
+                await this.proxyMgr.excludeProxyOnError(proxyAgent.proxy, link, e);
+                throw e;
+            }
 
             let dataLink = `https://akniga.org/ajax/b/${bookId}`;
-            let response = await got.post(dataLink, {
+            let gotOptions = {
                 headers: {
                     'user-agent': USER_AGENT,
                     'content-type': 'application/x-www-form-urlencoded'
@@ -274,7 +322,20 @@ module.exports = function () {
                     security_ls_key: lsKey,
                 }),
                 cookieJar
-            });
+            };
+
+            if (proxyAgent) {
+                gotOptions.agent = {http: proxyAgent, https: proxyAgent};
+            }
+
+            let response;
+            try {
+                response = await got.post(dataLink, gotOptions);
+            }
+            catch (e) {
+                await this.proxyMgr.excludeProxyOnError(proxyAgent.proxy, dataLink, e);
+                throw e;
+            }
 
             let params;
             try {
@@ -297,8 +358,16 @@ module.exports = function () {
                 mediaUrl = params.preview_url;
             }
 
-            let {data} = await axios.get(mediaUrl, {responseType: 'stream'});
-            return data;
+            try {
+                let {data} = await axios.get(mediaUrl, {responseType: 'stream'});
+                return data;
+            }
+            catch (e) {
+                await this.proxyMgr.excludeProxyOnError(proxyAgent.proxy, mediaUrl, e);
+                throw e;
+            }
+
+            return false;
         },
 
         async saveFile(platform, bookId, format, file) {

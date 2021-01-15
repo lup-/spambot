@@ -23,7 +23,7 @@ module.exports = function () {
         stop(code) {
             let ctx = this;
 
-            if (hasPerformance(ctx, code)) {
+            if (code && hasPerformance(ctx, code)) {
                 let perf = ctx._performance[code];
                 perf.stop = new Date;
                 perf.timeMs = perf.stop - perf.start;

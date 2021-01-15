@@ -245,7 +245,7 @@ services:
     image: node
     container_name: 'bookie_bot'
     ports:
-      - ${BOT_DEBUG_PORT}:9229
+      - 9200:9229
     depends_on:
       - mongo
       - redis
@@ -307,7 +307,7 @@ services:
     container_name: 'tgapi'
     volumes:
       - ./files:/files
-    command: telegram-bot-api --api-id ${API_ID} --api-hash ${API_HASH} --http-port=8081 --log=/proc/self/fd/1 --local --verbosity=3
+    command: telegram-bot-api --api-id ${API_ID} --api-hash ${API_HASH} --http-port=8081 --log=/proc/self/fd/1 --local --verbosity=2
 
   admin:
     image: nginx

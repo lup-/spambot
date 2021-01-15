@@ -2,7 +2,7 @@ const got = require('got');
 const { JSDOM } = require("jsdom");
 const Iconv = require('iconv').Iconv;
 
-async function parseUrl(url, queries, cookieJar = false, ua = false) {
+async function parseUrl(url, queries, cookieJar = false, ua = false, agent = false) {
     let params = {responseType: 'buffer'};
     if (cookieJar) {
         params.cookieJar = cookieJar;
@@ -12,6 +12,10 @@ async function parseUrl(url, queries, cookieJar = false, ua = false) {
         params.headers = {
             'user-agent': ua
         }
+    }
+
+    if (agent) {
+        params.agent = {http: agent, https: agent};
     }
 
     const response = await got(url, params);

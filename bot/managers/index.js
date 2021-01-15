@@ -17,6 +17,7 @@ const VacanciesManager = require('./Vacancies');
 const BooksManager = require('./Books');
 const MessageBus = require('./MessageBus');
 const PerformanceManager = require('./Perfomance');
+const ProxyManager = require('./Proxy');
 
 let instances = {};
 
@@ -57,12 +58,13 @@ function init(manager, params = {}) {
         case 'vacancies':
             return new VacanciesManager();
         case 'books':
-            return new BooksManager();
+            return new BooksManager(params.proxy);
         case 'bus':
             return new MessageBus();
         case 'performance':
             return new PerformanceManager();
-
+        case 'proxy':
+            return new ProxyManager();
         default:
             return null;
     }
@@ -70,6 +72,14 @@ function init(manager, params = {}) {
 
 module.exports = {
     init,
+    getManagerSync(manager, params) {
+        if (instances && instances[manager]) {
+            return instances[manager];
+        }
+
+        instances[manager] = init(manager, params);
+        return instances[manager];
+    },
     getManager: async function (manager) {
         if (instances && instances[manager]) {
             return instances[manager];

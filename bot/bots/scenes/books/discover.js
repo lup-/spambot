@@ -179,14 +179,21 @@ async function sendDownload(ctx, fileLink, book, params) {
     }
     catch (e) {
         if (localFile) {
-            fs.unlinkSync(localFile);
+            try {
+                fs.unlinkSync(localFile);
+            }
+            catch (e) {}
+
         }
         error = e;
         file = false;
     }
 
     if (localFile) {
-        fs.unlinkSync(localFile);
+        try {
+            fs.unlinkSync(localFile);
+        }
+        catch (e) {}
     }
 
     if (file) {
@@ -249,6 +256,12 @@ module.exports = function (params) {
     scene.action(/^download_([^_]+)$/i, async ctx => {
         let itemId = ctx.match[1];
         let item = await getItemById(itemId, ctx);
+
+        if (!item) {
+            await ctx.reply('Не могу найти нужную книгу');
+            return ctx.scene.enter(backCode);
+        }
+
         let hasManyFormats = item.downloads && item.downloads.length > 0;
 
         if (hasManyFormats) {

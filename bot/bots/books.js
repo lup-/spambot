@@ -1,13 +1,19 @@
 const { Telegraf } = require('telegraf');
 const setupBot = require('./helpers/setup');
-const {init} = require('../managers');
+const {getManagerSync: manager} = require('../managers');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
+const WEBHOOK_DOMAIN = process.env.BOT_NAME;
+const WEBHOOK_PORT = 8081;
+const WEBHOOK_CONNECTIONS = 1000;
+
 let app = new Telegraf(BOT_TOKEN, {
     telegram: {apiRoot: process.env.TGAPI_ROOT}
 });
-let bus = init('bus');
-let books = init('books');
+let bus = manager('bus');
+let proxy = manager('proxy');
+let books = manager('books', {proxy});
+let periodic = manager('periodic');
 
 let introParams = {
     disclaimer: {text: `Привет 😊
@@ -75,5 +81,15 @@ app = setupBot(app)
     .addDefaultRoute(ctx => ctx.scene.enter('intro'))
     .get();
 
-app.launch();
+periodic.setRepeatingTask(async () => {
+    await proxy.updateProxyList();
+    await proxy.recheckUsageFailed();
+}, 1*3600);
+
 bus.listenCommands();
+
+(async () => {
+    await app.launch({webhook: {domain: WEBHOOK_DOMAIN, hookPath: `/${WEBHOOK_DOMAIN}`, tlsOptions: null, port: WEBHOOK_PORT}});
+    await app.telegram.deleteWebhook();
+    await app.telegram.setWebhook(`http://${WEBHOOK_DOMAIN}:${WEBHOOK_PORT}/${WEBHOOK_DOMAIN}`, null, WEBHOOK_CONNECTIONS);
+})();

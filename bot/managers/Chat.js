@@ -108,6 +108,29 @@ function ChatManager() {
                 return next();
             }
         },
+        async addUserBlock(ctx, source) {
+            let {from, chat} = ctx;
+            let id = from.id || chat.id || false;
+            if (!id) {
+                return;
+            }
+
+            const db = await getDb();
+            let user = await db.collection('users').findOne({id});
+            if (user) {
+                user.blocked = true;
+                if (!user.blocks) {
+                    user.blocks = [];
+                }
+
+                user.blocks.push({
+                    time: moment().unix(),
+                    source
+                });
+
+                await db.collection('users').findOneAndReplace({id}, user);
+            }
+        },
         saveUserMiddleware: function () {
             return async (ctx, next) => {
 

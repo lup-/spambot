@@ -89,7 +89,11 @@ periodic.setRepeatingTask(async () => {
 bus.listenCommands();
 
 (async () => {
+    console.log('Запуск...');
     await app.launch({webhook: {domain: WEBHOOK_DOMAIN, hookPath: `/${WEBHOOK_DOMAIN}`, tlsOptions: null, port: WEBHOOK_PORT}});
-    await app.telegram.deleteWebhook();
-    await app.telegram.setWebhook(`http://${WEBHOOK_DOMAIN}:${WEBHOOK_PORT}/${WEBHOOK_DOMAIN}`, null, WEBHOOK_CONNECTIONS);
+    setTimeout(async () => {
+        console.log("Переустановка вебхука...");
+        await app.telegram.deleteWebhook();
+        await app.telegram.setWebhook(`http://${WEBHOOK_DOMAIN}:${WEBHOOK_PORT}/${WEBHOOK_DOMAIN}`, null, WEBHOOK_CONNECTIONS);
+    }, 2000);
 })();

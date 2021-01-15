@@ -32,10 +32,6 @@ module.exports = function (params) {
                 buttons.push({code: 'book', text: 'Найти книгу'});
                 buttons.push({code: 'audiobook', text: 'Найти аудиокнигу'});
 
-                ctx.perfStart('removeKeyboard');
-                await removeKeyboard(ctx);
-                ctx.perfStop('removeKeyboard');
-
                 ctx.perfStart('introReply');
                 await ctx.safeReply(
                     ctx => ctx.editMessageText('Куда дальше?', menu(buttons)),

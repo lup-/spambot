@@ -1,10 +1,11 @@
 const he = require('he');
 const {getDb} = require('../../modules/Database');
-const {init} = require('../../managers');
+const {getManagerSync} = require('../../managers');
 const moment = require('moment');
 
 async function catchErrors(err, ctx) {
     let sendError = false;
+    let blockUser = false;
 
     try {
         await ctx.reply('Похоже, что-то пошло не по плану.\nПопробуйте начать заново /start.');
@@ -17,10 +18,18 @@ async function catchErrors(err, ctx) {
             }
 
             if (sendError.code === 403) {
-                let chat = init('chat');
-                await chat.addUserBlock(ctx, 'reply');
-                return false;
+                blockUser = true;
             }
+        }
+    }
+
+    if (blockUser) {
+        try {
+            let chat = getManagerSync('chat');
+            await chat.addUserBlock(ctx, 'reply');
+            return false;
+        }
+        catch (e) {
         }
     }
 

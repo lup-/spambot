@@ -194,7 +194,7 @@ module.exports = class Proxy {
     }
 
     async excludeProxyOnError(proxy, failedUrl, error) {
-        let isBlockingError = error && /(timed* *out|rejected)/ig.test(error.toString());
+        let isBlockingError = error && /(timed* *out|rejected|hang *up)/ig.test(error.toString());
         if (!isBlockingError) {
             return;
         }

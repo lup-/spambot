@@ -7,6 +7,7 @@ const {__} = require('../../../modules/Messages');
 const FILES_LOCAL_PATH = process.env.FILES_LOCAL_PATH || __dirname;
 const FILES_REMOTE_PATH = process.env.FILES_REMOTE_PATH || '/files';
 const CHUNK_SIZE = 5;
+const MAX_RETRIES = 5;
 
 function chunkMenu({hasPrev, hasNext, chunk}, hasSubmenu) {
     let downloadButtons = [];
@@ -124,7 +125,7 @@ function saveStream(fileName, stream) {
         writeStream.on('finish', () => resolve({localPath, remotePath}));
     });
 }
-async function sendDownload(ctx, fileLink, book, params) {
+async function sendDownload(ctx, fileLink, book, params, retry = 1, message = false) {
     const {getFile, isAudio, books} = params;
 
     let extra = menu([{code: 'back_book', text: 'Найти книгу'}, {code: 'back_audio', text: 'Найти аудиокнигу'}]);
@@ -153,12 +154,13 @@ async function sendDownload(ctx, fileLink, book, params) {
     }
 
     let file;
-    let message;
     let error = false;
     let localFile = false;
 
     try {
-        message = await ctx.reply('Идет загрузка...');
+        if (retry === 1) {
+            message = await ctx.reply('Идет загрузка...');
+        }
         let fileStream = await getFile(fileLink);
         let fileName = bookId + '.' + format;
 
@@ -196,11 +198,21 @@ async function sendDownload(ctx, fileLink, book, params) {
         ctx.perfStop('cacheDownload');
     }
 
-    await ctx.deleteMessage(message.message_id);
+    if (message && message.message_id) {
+        await ctx.deleteMessage(message.message_id);
+    }
 
     if (error) {
-        console.log(error);
-        return ctx.reply('Не удалось скачать эту книгу. Попробуйте позже или посмотрите другие.', menu([{code: 'book', text: 'Посмотреть другие'}]));
+        if (retry < MAX_RETRIES) {
+            return sendDownload(ctx, fileLink, book, params, ++retry, message);
+        }
+        else {
+            console.log(error);
+            return ctx.reply('Не удалось скачать эту книгу. Попробуйте позже или посмотрите другие.', menu([{
+                code: 'book',
+                text: 'Посмотреть другие'
+            }]));
+        }
     }
     else {
         ctx.perfStart('cacheDownload');
@@ -292,12 +304,12 @@ module.exports = function (params) {
     scene.action('back_book', ctx => {
         ctx.scene.state.index = 0;
         ctx.scene.state.nav = false;
-        return ctx.scene.enter(backBookCode);
+        return ctx.scene.enter(backBookCode, {newMessage: true});
     });
     scene.action('back_audio', ctx => {
         ctx.scene.state.index = 0;
         ctx.scene.state.nav = false;
-        return ctx.scene.enter(backAudioCode);
+        return ctx.scene.enter(backAudioCode, {newMessage: true});
     });
     scene.action('book', ctx => ctx.scene.reenter());
     scene.action('_skip', () => {});

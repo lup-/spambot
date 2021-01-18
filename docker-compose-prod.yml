@@ -451,6 +451,127 @@ services:
       - FILES_REMOTE_PATH=/files
     command: node bots/books.js
 
+  allbooks_bot:
+    image: node
+    container_name: 'allbooks_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+      - tgapi_proxy
+    volumes:
+      - ./bot:/var/www
+      - ./files:/var/www/files
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=allbooks_bot
+      - BOT_NAME=allbooks_bot
+      - BOT_TOKEN=${ALLBOOKS_BOT_TOKEN}
+      - TGAPI_ROOT=https://tgapi_proxy
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - PERF_MONITOR=0
+      - FILES_LOCAL_PATH=/var/www/files
+      - FILES_REMOTE_PATH=/files
+    command: node bots/books.js
+
+  freereading_bot:
+    image: node
+    container_name: 'freereading_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+      - tgapi_proxy
+    volumes:
+      - ./bot:/var/www
+      - ./files:/var/www/files
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=freereading_bot
+      - BOT_NAME=freereading_bot
+      - BOT_TOKEN=${FREEREADING_BOT_TOKEN}
+      - TGAPI_ROOT=https://tgapi_proxy
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - PERF_MONITOR=0
+      - FILES_LOCAL_PATH=/var/www/files
+      - FILES_REMOTE_PATH=/files
+    command: node bots/books.js
+
+  bookdow_bot:
+    image: node
+    container_name: 'bookdow_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+      - tgapi_proxy
+    volumes:
+      - ./bot:/var/www
+      - ./files:/var/www/files
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=bookdow_bot
+      - BOT_NAME=bookdow_bot
+      - BOT_TOKEN=${BOOKDOW_BOT_TOKEN}
+      - TGAPI_ROOT=https://tgapi_proxy
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - PERF_MONITOR=0
+      - FILES_LOCAL_PATH=/var/www/files
+      - FILES_REMOTE_PATH=/files
+    command: node bots/books.js
+
+  workhant_bot:
+    image: node
+    container_name: 'workhant_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+    volumes:
+      - ./bot:/var/www
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=workhant_bot
+      - BOT_NAME=workhant_bot
+      - BOT_TOKEN=${WORKHANT_BOT_TOKEN}
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - HH_FILTER={}
+    command: node bots/vacancies.js
+
+  #{"schedule": "remote", "text": "NOT МТС"}
+  traineeship_bot:
+    image: node
+    container_name: 'traineeship_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+    volumes:
+      - ./bot:/var/www
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=traineeship_bot
+      - BOT_NAME=traineeship_bot
+      - BOT_TOKEN=${TRAINEESHIP_BOT_TOKEN}
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - 'HH_FILTER={"employment": "probation", "text": "NOT МТС"}'
+    command: node bots/vacancies.js
+
   mailer_bot:
     image: node
     container_name: 'mailer_bot'

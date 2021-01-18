@@ -529,6 +529,32 @@ services:
       - FILES_REMOTE_PATH=/files
     command: node bots/books.js
 
+  dowread_bot:
+    image: node
+    container_name: 'dowread_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+      - tgapi_proxy
+    volumes:
+      - ./bot:/var/www
+      - ./files:/var/www/files
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=dowread_bot
+      - BOT_NAME=dowread_bot
+      - BOT_TOKEN=${DOWREAD_BOT_TOKEN}
+      - TGAPI_ROOT=https://tgapi_proxy
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - PERF_MONITOR=0
+      - FILES_LOCAL_PATH=/var/www/files
+      - FILES_REMOTE_PATH=/files
+    command: node bots/books.js
+
   workhant_bot:
     image: node
     container_name: 'workhant_bot'

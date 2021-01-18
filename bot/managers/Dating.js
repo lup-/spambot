@@ -41,12 +41,12 @@ module.exports = function () {
             }
 
             if (settings.age === 'lt') {
-                filter.age = {$gte: currentUserProfile.age};
+                filter.age = {$lte: currentUserProfile.age};
             }
 
             if (settings.age === 'approx') {
                 filter['$and'].push({age: {$gte: currentUserProfile.age-5}});
-                filter['$and'].push({age: {$gte: currentUserProfile.age+5}});
+                filter['$and'].push({age: {$lte: currentUserProfile.age+5}});
             }
 
             let profile = await profiles.findOne(filter);

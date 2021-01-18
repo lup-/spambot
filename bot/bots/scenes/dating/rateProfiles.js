@@ -11,7 +11,9 @@ function rateMenu(ctx, profile) {
     ]);
 }
 
-module.exports = function (datingManager, userFansList = false, telegram) {
+module.exports = function (params) {
+    let {datingManager, userFansList, telegram} = params;
+
     const sceneName = userFansList
         ? 'rateFans'
         : 'rateProfiles';
@@ -41,9 +43,11 @@ module.exports = function (datingManager, userFansList = false, telegram) {
         let extra = rateMenu(ctx, profileToRate);
         extra.caption = __(profileText, ['content', 'profile'], 'photo');
 
-        return ctx.safeReply(async ctx => {
-            return ctx.replyWithPhoto(profileToRate.photo.file_id, extra);
-        }, ctx => ctx.scene.reenter(), ctx);
+        return ctx.safeReply(
+            ctx => ctx.replyWithPhoto(profileToRate.photo.file_id, extra),
+            ctx => ctx.scene.reenter(),
+            ctx
+        );
     });
 
     scene.action(/like_(.*)/, async ctx => {

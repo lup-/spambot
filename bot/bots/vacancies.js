@@ -4,7 +4,7 @@ const {init} = require('../managers');
 const {menu} = require('./helpers/wizard');
 const {__} = require('../modules/Messages');
 
-const catalogParams = require('./actions/remote_vacancies');
+const catalogParams = require('./actions/vacancies');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 let app = new Telegraf(BOT_TOKEN);

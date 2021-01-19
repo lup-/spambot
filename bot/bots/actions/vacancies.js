@@ -7,7 +7,10 @@ const moment = require('moment');
 let vacancies = init('vacancies');
 let periodic = init('periodic');
 let profileManager = init('profile');
-const hhFilter = {schedule: 'remote', text: 'NOT МТС'};
+
+const hhFilter = process.env.HH_FILTER
+    ? JSON.parse(process.env.HH_FILTER)
+    : {};
 
 async function showVacancy(item, ctx) {
     let fullVacancy = item;

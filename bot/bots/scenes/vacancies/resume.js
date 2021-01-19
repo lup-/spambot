@@ -27,6 +27,10 @@ function getContacts(candidate) {
 }
 
 function getResumeCard(candidate) {
+    let link = candidate.link
+        ? `\n<a href="${candidate.link}">Ссылка на ортфолио</a>`
+        : '';
+
     return `<b>${candidate.name || 'Имя не указано'}</b>
 
 <b>Город:</b>
@@ -40,7 +44,7 @@ ${candidate.salary ? candidate.salary.value + ' ' + (candidate.salary.currency ?
 
 <b>Контакты:</b>
 ${getContacts(candidate) || 'не указаны'}
-`;
+${link}`;
 }
 
 function editMenu(ctx) {
@@ -51,6 +55,7 @@ function editMenu(ctx) {
         {code: 'position', text: 'Редактировать позицию'},
         {code: 'salary', text: 'Редактировать зарплату'},
         {code: 'contacts', text: 'Редактировать контакты'},
+        {code: 'link', text: 'Ссылка на портфолио'},
         {code: 'upload', text: ctx.scene.state.document ? 'Загрузить другое' : 'Загрузить файл'},
         {code: 'cancel', text: 'Отмена'},
     ], 1);
@@ -115,6 +120,9 @@ module.exports = function ({vacancies}) {
             case 'contacts':
                 ctx.scene.state.candidate.contacts = extractContacts(text);
                 break;
+            case 'link':
+                ctx.scene.state.candidate.link = text;
+                break;
         }
 
         let candidate = ctx.scene.state.candidate;
@@ -155,6 +163,10 @@ module.exports = function ({vacancies}) {
     scene.action('contacts', ctx => {
         ctx.scene.state.messageTarget = 'contacts';
         return ctx.reply('Напиши свои контакты. Хотя-бы почту и телефон.\n\nНапример:\nnoop@hello.com\n+7 (999) 123-45-56\n Telegram: @BeemBam_bot');
+    });
+    scene.action('link', ctx => {
+        ctx.scene.state.messageTarget = 'link';
+        return ctx.reply('Пришлите ссылку на ваше портфолио.\n\nНапример: https://www.behance.net/byvalia');
     });
     scene.action('no_file', ctx => {
         ctx.scene.state.candidate = {};

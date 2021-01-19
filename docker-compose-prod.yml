@@ -573,7 +573,7 @@ services:
       - BOT_NAME=workhant_bot
       - BOT_TOKEN=${WORKHANT_BOT_TOKEN}
       - NODE_TLS_REJECT_UNAUTHORIZED=0
-      - HH_FILTER={}
+      - 'HH_FILTER={"text": "NOT МТС"}'
     command: node bots/vacancies.js
 
   #{"schedule": "remote", "text": "NOT МТС"}
@@ -636,6 +636,11 @@ services:
     restart: always
     working_dir: /LanguageTool-5.1
     command: "java -cp languagetool-server.jar  org.languagetool.server.HTTPServer --port 8010 --public --allow-origin '*'"
+
+  unoconv:
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_unoconv"
 
   mongo:
     image: mongo

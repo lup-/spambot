@@ -26,7 +26,7 @@ function getTables(dump) {
 function getRecords(dump) {
     let recordsRegex = /INSERT INTO ([^ ]+) \(.*?\) VALUES \(.*?\);/gms;
     let recordRegex = /INSERT INTO ([^ ]+) \((.*?)\) VALUES \((.*?)\);/ms;
-    let valuesRegex = /([\"\'].+?[\'\"]|[\da-z]+?)(?=,|$)/gi;
+    let valuesRegex = /([\"\'].+?[\'\"]|[\da-z]+?)(?=,|$)/gsi;
     let recordMatches = dump.match(recordsRegex);
 
     let records = [];

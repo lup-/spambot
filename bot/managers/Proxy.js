@@ -91,9 +91,6 @@ module.exports = class Proxy {
         return proxies;
     }
 
-    decryptFreeproxylistIp(encryptedText) {
-        return '1.1.1.1';
-    }
     async fetchFreeproxylists() {
         let url = 'http://proxydb.net/?protocol=https&protocol=socks4&protocol=socks5&country=';
         let {proxies} = await parseUrl(url, {
@@ -265,7 +262,8 @@ module.exports = class Proxy {
             agent = new SocksProxyAgent({
                 host: proxy.host,
                 port: parseInt(proxy.port),
-                type: proxy.type === 'socks5' ? 5 : 4
+                type: proxy.type === 'socks5' ? 5 : 4,
+                timeout: REQUEST_TIMEOUT
             });
         }
 

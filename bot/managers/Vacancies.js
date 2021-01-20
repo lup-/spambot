@@ -52,6 +52,10 @@ module.exports = function () {
                 query['remote'] = true;
             }
 
+            if (params && params.employment && params.employment === 'probation') {
+                query['internship'] = true;
+            }
+
             let vacancies = await db.collection('vacancies').aggregate([
                 {$match: query},
                 {$sort: {created: -1}}

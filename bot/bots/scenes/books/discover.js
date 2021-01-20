@@ -161,6 +161,9 @@ async function sendDownload(ctx, fileLink, book, params, retry = 1, message = fa
         if (retry === 1) {
             message = await ctx.reply('Идет загрузка...');
         }
+        else {
+            console.log(`Загрузка, попытка ${retry}`);
+        }
         let fileStream = await getFile(fileLink);
         let fileName = bookId + '.' + format;
 

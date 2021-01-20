@@ -18,6 +18,9 @@ async function textSearch(ctx, params, retry = 1, message = false) {
         message = await ctx.reply('Ищу...');
         ctx.perfStop('searchMsg');
     }
+    else {
+        console.log(`Поиск, попытка ${retry}`);
+    }
 
     ctx.perfStart('queryBookList');
     let items = await getBookList(query);

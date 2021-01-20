@@ -5549,7 +5549,7 @@ var render = function() {
                                   1
                                 )
                               : _vm._e(),
-                            item.status === "paused"
+                            item.status === "paused" && !item.archived
                               ? _c(
                                   "v-btn",
                                   {
@@ -5563,7 +5563,9 @@ var render = function() {
                                   [_c("v-icon", [_vm._v("mdi-play")])],
                                   1
                                 )
-                              : item.dateStarted && item.status !== "finished"
+                              : item.dateStarted &&
+                                item.status !== "finished" &&
+                                !item.archived
                               ? _c(
                                   "v-btn",
                                   {

@@ -29,8 +29,8 @@
                             <v-btn icon small @click="copyMailing(item)"><v-icon>mdi-content-copy</v-icon></v-btn>
                             <v-btn icon small @click="archiveMailing(item)" v-if="item.dateStarted && !item.archived"><v-icon>mdi-archive-arrow-down</v-icon></v-btn>
                             <v-btn icon small @click="deleteMailing(item)" v-if="!item.dateStarted"><v-icon>mdi-delete</v-icon></v-btn>
-                            <v-btn icon small @click="startMailing(item)" v-if="item.status === 'paused'"><v-icon>mdi-play</v-icon></v-btn>
-                            <v-btn icon small @click="stopMailing(item)" v-else-if="item.dateStarted && item.status !== 'finished'"><v-icon>mdi-pause</v-icon></v-btn>
+                            <v-btn icon small @click="startMailing(item)" v-if="item.status === 'paused' && !item.archived"><v-icon>mdi-play</v-icon></v-btn>
+                            <v-btn icon small @click="stopMailing(item)" v-else-if="item.dateStarted && item.status !== 'finished' && !item.archived"><v-icon>mdi-pause</v-icon></v-btn>
                         </div>
                     </template>
                 </v-data-table>

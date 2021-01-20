@@ -10,7 +10,7 @@ const PROXY_DB_NAME = 'botofarmer';
 const PROXY_SOURCE_URL = 'https://scrapingant.com/free-proxies/';
 const CHECK_URL = 'https://google.com';
 const CHECK_TIMEOUT = 5000;
-const REQUEST_TIMEOUT = 10000;
+const REQUEST_TIMEOUT = 5000;
 
 module.exports = class Proxy {
     constructor() {

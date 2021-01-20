@@ -28,7 +28,7 @@ function getContacts(candidate) {
 
 function getResumeCard(candidate) {
     let link = candidate.link
-        ? `\n<a href="${candidate.link}">Ссылка на ортфолио</a>`
+        ? `\n<a href="${candidate.link}">Ссылка на портфолио</a>`
         : '';
 
     return `<b>${candidate.name || 'Имя не указано'}</b>

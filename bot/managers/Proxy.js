@@ -35,8 +35,7 @@ module.exports = class Proxy {
         }
     }
 
-    async fetchNewList() {
-        let allProxies = [];
+    async fetchScrapingant() {
         let {proxies} = await parseUrl(PROXY_SOURCE_URL, {
             proxies(document) {
                 let proxyRows = document.querySelectorAll('.proxies-table tr');
@@ -59,13 +58,12 @@ module.exports = class Proxy {
                 return proxies;
             }
         });
+        return proxies;
+    }
 
-        if (proxies && proxies.length) {
-            allProxies = allProxies.concat(proxies);
-        }
-
-        let {freeproxies} = await parseUrl('https://freeproxyip.net/', {
-            freeproxies(document) {
+    async fetchFreeproxyip() {
+        let {proxies} = await parseUrl('https://freeproxyip.net/', {
+            proxies(document) {
                 let proxyRows = document.querySelectorAll('#best table tr');
 
                 let proxies = [];
@@ -90,9 +88,54 @@ module.exports = class Proxy {
                 return proxies;
             }
         });
+        return proxies;
+    }
 
-        if (freeproxies && freeproxies.length) {
-            allProxies = allProxies.concat(freeproxies);
+    decryptFreeproxylistIp(encryptedText) {
+        return '1.1.1.1';
+    }
+    async fetchFreeproxylists() {
+        let url = 'http://proxydb.net/?protocol=https&protocol=socks4&protocol=socks5&country=';
+        let {proxies} = await parseUrl(url, {
+            proxies(document) {
+                let proxyRows = document.querySelectorAll('table.table tbody tr');
+
+                let proxies = [];
+                for (let proxyRow of proxyRows) {
+                    const dataEls = proxyRow.querySelectorAll('td');
+
+                    let hostEl = dataEls[0].querySelector('a');
+                    let hostPort = hostEl ? hostEl.innerHTML.toLowerCase() : false;
+                    let [host, port] = hostPort ? hostPort.split(':') : [false, false];
+                    let type = dataEls[4] ? dataEls[4].innerHTML.toLowerCase().trim() : false;
+
+                    proxies.push({host, port, type})
+                }
+
+                return proxies;
+            }
+        }, false, 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36');
+        return proxies;
+    }
+
+    async fetchNewList() {
+        let allProxies = [];
+
+        let proxies = await this.fetchScrapingant();
+
+        if (proxies && proxies.length) {
+            allProxies = allProxies.concat(proxies);
+        }
+
+        proxies = await this.fetchFreeproxyip();
+
+        if (proxies && proxies.length) {
+            allProxies = allProxies.concat(proxies);
+        }
+
+        proxies = await this.fetchFreeproxylists();
+        if (proxies && proxies.length) {
+            allProxies = allProxies.concat(proxies);
         }
 
         return allProxies;

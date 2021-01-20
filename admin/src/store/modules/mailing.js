@@ -27,8 +27,14 @@ export default {
             await axios.post(`/api/mailing/update`, {mailing});
             return dispatch('loadMailings', state.filter);
         },
-        async deleteMailing({dispatch, state}, mailing) {
+        async deleteMailing({dispatch, commit, state}, mailing) {
             await axios.post(`/api/mailing/delete`, {mailing});
+            commit('setSuccessMessage', 'Рассылка удалена!');
+            return dispatch('loadMailings', state.filter);
+        },
+        async archiveMailing({dispatch, commit, state}, mailing) {
+            await axios.post(`/api/mailing/archive`, {mailing});
+            commit('setSuccessMessage', 'Рассылка архивирована!');
             return dispatch('loadMailings', state.filter);
         },
         async startMailing({dispatch}, mailing) {

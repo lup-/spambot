@@ -155,6 +155,11 @@ function ChatManager() {
                         user.user = from;
                         user.chat = chat;
                         user.updated = moment().unix();
+                        if (user.blocked) {
+                            user.blocked = false;
+                            user.lastBlockCheck = moment().unix();
+                        }
+
                     } else {
                         user = {id, user: from, chat, registered: moment().unix(), updated: moment().unix()};
                     }

@@ -15,7 +15,7 @@ function routeToNextStep(ctx, sceneId = 'discover') {
     catch (e) {}
 }
 
-module.exports = function ({disclaimer, periodic, vacancies, saveSettings}) {
+module.exports = function ({getDisclaimer, periodic, vacancies, saveSettings}) {
     const scene = new BaseScene('intro');
 
     scene.enter(async ctx => {
@@ -47,6 +47,7 @@ module.exports = function ({disclaimer, periodic, vacancies, saveSettings}) {
         }
 
         try {
+            let disclaimer = await getDisclaimer(ctx);
             ctx.session.introShown = true;
             return ctx.reply(__(disclaimer.text, disclaimer.tags), menu([{code: 'accept', text: 'Понятно'}]));
         }

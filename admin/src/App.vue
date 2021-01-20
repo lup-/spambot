@@ -1,7 +1,7 @@
 <template>
     <v-app id="botofarmer">
         <v-alert type="error" v-model="showError" dismissible tile class="global-error">{{appError}}</v-alert>
-        <v-navigation-drawer v-model="drawer" app clipped v-if="routes && routes.length > 0">
+        <v-navigation-drawer v-model="drawer" app clipped v-if="isLoggedIn">
             <v-list dense>
                 <v-list-item v-for="route in routes" :key="route.code"
                     link
@@ -85,6 +85,9 @@
             },
             routes() {
                 return this.$store.getters.allowedRoutes;
+            },
+            isLoggedIn() {
+                return this.$store.getters.isLoggedIn;
             }
         }
     }

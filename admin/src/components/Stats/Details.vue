@@ -211,7 +211,7 @@
                     case 'year':
                         this.scale = 'M';
                         this.range = {
-                            start: moment().startOf('y').unix(),
+                            start: moment().startOf('d').subtract(365, 'd').unix(),
                             end: moment().endOf('d').unix()
                         };
                         break;

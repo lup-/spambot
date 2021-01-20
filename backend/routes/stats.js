@@ -138,6 +138,7 @@ module.exports = {
             ]).toArray();
 
             let usersResult = await users.aggregate([
+                {$match: {blocked: {$in: [null, false]}}},
                 {$match: {$and: [{registered: {$gte: range.start}}, {registered: {$lt: range.end}}]}},
                 {$set: {registered_date: {$toDate: {$multiply: ["$registered", 1000]}}}},
                 {$set: {

@@ -14,16 +14,24 @@
                         :items="mailings"
                         :loading="isLoading"
                         :items-per-page="50"
+                        :item-class="itemClass"
+                        multi-sort
+                        :sort-by="['archived', 'created']"
+                        :sort-desc="[false, true]"
+                        locale="ru"
                 >
                     <template v-slot:item.progress="{ item }">
                         {{ item.progress ? (item.progress * 100).toFixed(2)+'%' : ''}}
                     </template>
                     <template v-slot:item.actions="{ item }">
-                        <v-btn icon small @click="gotoMailingEdit(item.id)"><v-icon>mdi-pencil</v-icon></v-btn>
-                        <v-btn icon small @click="copyMailing(item)"><v-icon>mdi-content-copy</v-icon></v-btn>
-                        <v-btn icon small @click="deleteMailing(item)" v-if="!item.dateStarted"><v-icon>mdi-delete</v-icon></v-btn>
-                        <v-btn icon small @click="startMailing(item)" v-if="item.status === 'paused'"><v-icon>mdi-play</v-icon></v-btn>
-                        <v-btn icon small @click="stopMailing(item)" v-else><v-icon>mdi-pause</v-icon></v-btn>
+                        <div class="actions d-flex flex-row">
+                            <v-btn icon small @click="gotoMailingEdit(item.id)" v-if="!item.archived"><v-icon>mdi-pencil</v-icon></v-btn>
+                            <v-btn icon small @click="copyMailing(item)"><v-icon>mdi-content-copy</v-icon></v-btn>
+                            <v-btn icon small @click="archiveMailing(item)" v-if="item.dateStarted && !item.archived"><v-icon>mdi-archive-arrow-down</v-icon></v-btn>
+                            <v-btn icon small @click="deleteMailing(item)" v-if="!item.dateStarted"><v-icon>mdi-delete</v-icon></v-btn>
+                            <v-btn icon small @click="startMailing(item)" v-if="item.status === 'paused'"><v-icon>mdi-play</v-icon></v-btn>
+                            <v-btn icon small @click="stopMailing(item)" v-else-if="item.dateStarted && item.status !== 'finished'"><v-icon>mdi-pause</v-icon></v-btn>
+                        </div>
                     </template>
                 </v-data-table>
             </v-col>
@@ -59,6 +67,7 @@
                     {text: 'Статус', value: 'status'},
                     {text: 'Прогресс', value: 'progress'},
                     {text: 'Успешно', value: 'success'},
+                    {text: 'Блокировок', value: 'blocks'},
                     {text: 'Ошибок', value: 'errors'},
                     {text: 'Отправлено', value: 'processed'},
                     {text: 'Очередь', value: 'total'},
@@ -89,6 +98,9 @@
             deleteMailing(mailing) {
                 this.$store.dispatch('deleteMailing', mailing);
             },
+            archiveMailing(mailing) {
+                this.$store.dispatch('archiveMailing', mailing);
+            },
             async loadMailings() {
                 this.isLoading = true;
                 await this.$store.dispatch('loadMailings', {});
@@ -115,6 +127,9 @@
                 if (this.refreshIndervalId) {
                     clearInterval(this.refreshIndervalId);
                 }
+            },
+            itemClass(item) {
+                return item.archived && item.archived > 0 ? 'row-archived' : '';
             }
         },
         computed: {
@@ -122,7 +137,7 @@
                 return this.isLoading ? [] : this.$store.state.mailing.list.map(mailing => {
                     let newMailing = clone(mailing);
                     newMailing.startAt = mailing.startAt ? moment.unix(mailing.startAt).format('DD.MM.YYYY HH:mm') : '-';
-                    newMailing.preview = trimHTML(mailing.text).substring(0, 50)+'...';
+                    newMailing.preview = Array.from(trimHTML(mailing.text)).slice(0, 50).join('')+'...';
                     return newMailing;
                 });
             },
@@ -133,6 +148,6 @@
     }
 </script>
 
-<style scoped>
-
+<style>
+    .row-archived {color: darkgray}
 </style>

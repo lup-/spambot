@@ -66,7 +66,7 @@ module.exports = {
         let passwordHash = md5(ctx.request.body.password);
 
         let db = await getDb();
-        let user = await db.collection('users').findOne({login, passwordHash});
+        let user = await db.collection('users').findOne({login, passwordHash, deleted: {$in: [null, false]}});
         let isLoaded = Boolean(user);
 
         if (isLoaded) {

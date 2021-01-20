@@ -73,23 +73,101 @@ module.exports = {
     },
     async delete(ctx) {
         const db = await getDb();
-        const mailingsCollection = db.collection('mailings');
+        let mailingFields = ctx.request.body.mailing;
+        let id = mailingFields.id;
+
+        let updateResult = await db.collection('mailings').findOneAndUpdate({id}, {$set: {deleted: moment().unix()}}, {returnOriginal: false});
+        let mailing = updateResult.value || false;
+        
+        let queueDeleteResult = await db.collection('mailingQueue').delete({mailing: id});
+        let statsDeleteResult = await db.collection('mailingStats').delete({mailing: id});
+
+        ctx.body = {
+            mailing,
+            queueCleared: queueDeleteResult.deletedCount,
+            statsCleared: statsDeleteResult.deletedCount
+        };
+    },
+    async archive(ctx) {
+        const db = await getDb();
 
         let mailingFields = ctx.request.body.mailing;
         let id = mailingFields.id;
 
-        if (mailingFields._id) {
-            delete mailingFields._id;
+        let updateResult = await db.collection('mailings').findOneAndUpdate({id}, {$set: {archived: moment().unix()}}, {returnOriginal: false});
+        let mailing = updateResult.value || false;
+        
+        let stats = await db.collection('mailingQueue').aggregate([
+            {$match: {mailing: id}},
+            {$group: {
+                _id: {$concat: ["$bot", ":", "$status"]},
+                bot: {$first: "$bot"},
+                status: {$first: "$status"},
+                count: {$sum: 1},
+                errors: {$addToSet: {$concat: ["[", {$toString: "$error.code"}, "] ", "$error.description"]}}
+            }},
+            {$project: {
+                bot: 1,
+                status: 1,
+                count: 1,
+                errors: { "$setDifference": [ "$errors", [null] ] }
+            }}
+        ]).toArray();
+
+        let insertResult = false;
+        if (stats && stats.length > 0) {
+            stats = stats.map(stat => {
+                if (stat.errors.length === 0) {
+                    delete stat.errors;
+                }
+
+                if (stat._id) {
+                    delete stat._id;
+                }
+
+                return stat;
+            });
+
+            insertResult = await db.collection('mailingStats').insertOne({mailing: id, stats});
         }
 
-        mailingFields = Object.assign(mailingFields, {
-            deleted: moment().unix(),
-        });
+        let blockDate = mailing.dateFinished || mailing.dateStarted;
+        
+        if (blockDate && blockDate > 0) {
+            let blockedUsers = await db.collection('mailingQueue').aggregate([
+                {$match: {mailing: id, status: 'blocked'}},
+                {
+                    $group: {
+                        "_id": "$bot",
+                        botId: {$first: "$bot"},
+                        userIds: {$addToSet: "$userId"}
+                    }
+                }
+            ]).toArray();
+            let botList = await config.botList();
 
-        let updateResult = await mailingsCollection.findOneAndReplace({id}, mailingFields, {returnOriginal: false});
-        let mailing = updateResult.value || false;
+            for (const blockedInBot of blockedUsers) {
+                let bot = botList.find(bot => bot.id === blockedInBot.botId)
+                let botDb = await getDb(bot.dbName);
 
-        ctx.body = {mailing};
+                await botDb.collection('users').updateMany({id: {$in: blockedInBot.userIds}}, {$set: {blocked: true, lastBlockCheck: blockDate}});
+            }
+        }
+
+        let queueDeleteResult = await db.collection('mailingQueue').deleteMany({mailing: id});
+
+        ctx.body = {
+            mailing,
+            queueCleared: queueDeleteResult.deletedCount,
+            statsInserted: insertResult ? insertResult.insertedCount : 0
+        };
+    },
+    async archiveStats(ctx) {
+        const db = await getDb();
+
+        let mailingId = ctx.request.body.mailingId;
+        let stats = await db.collection('mailingStats').findOne({mailing: mailingId});
+        ctx.body = {stats}
     },
     async start(ctx) {
         let mailingFields = ctx.request.body.mailing;

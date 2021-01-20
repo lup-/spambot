@@ -576,7 +576,6 @@ services:
       - 'HH_FILTER={"text": "NOT МТС"}'
     command: node bots/vacancies.js
 
-  #{"schedule": "remote", "text": "NOT МТС"}
   traineeship_bot:
     image: node
     container_name: 'traineeship_bot'
@@ -596,6 +595,27 @@ services:
       - BOT_TOKEN=${TRAINEESHIP_BOT_TOKEN}
       - NODE_TLS_REJECT_UNAUTHORIZED=0
       - 'HH_FILTER={"employment": "probation", "text": "NOT МТС"}'
+    command: node bots/vacancies.js
+
+  beembam_bot:
+    image: node
+    container_name: 'beembam_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+    volumes:
+      - ./bot:/var/www
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=beembam_bot
+      - BOT_NAME=beembam_bot
+      - BOT_TOKEN=${BEEMBAM_BOT_TOKEN}
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - 'HH_FILTER={"schedule": "remote", "text": "NOT МТС"}'
     command: node bots/vacancies.js
 
   mailer_bot:

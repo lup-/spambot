@@ -96,6 +96,7 @@ module.exports = function ({getSettingsText, getSelectedCategoryIds, getAllCateg
         );
     });
 
+    scene.start(ctx => ctx.scene.enter('intro'));
     scene.action(/level_(.*)/, async ctx => {
         let levelId = ctx.match[1] ? ctx.match[1] : false;
 

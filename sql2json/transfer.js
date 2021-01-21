@@ -219,14 +219,14 @@ async function getData(dbName) {
 
             let remoteRefDate = moment().subtract('1', 'd').startOf('d').unix();
             refs = oldVacancies.reduce((records, oldRef) => {
-                let refRecords = Array(oldRef.amountOfViews).fill(false).map(() => {
+                let refRecords = Array(oldRef.amountOfClicks).fill(false).map(() => {
                     let ref = oldRef.vacancyId;
                     let userId = 0;
 
                     return {
                         "refId" : `${userId}:${ref}`,
                         "userId" : userId,
-                        "ref" : ref,
+                        "ref" : ref.toString(),
                         "date" : remoteRefDate
                     }
                 });
@@ -263,7 +263,7 @@ async function getData(dbName) {
     if (cvs && cvs.length > 0) {
         let vDb = await getDb(VACANCIES_DB);
         console.log(`Сохранение резюме в ${VACANCIES_DB}`);
-        await vDb.collection('resume').insertMany(cvs);
+        await vDb.collection('resumes').insertMany(cvs);
     }
 
     process.exit();

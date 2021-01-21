@@ -175,6 +175,14 @@
                                         v-model="mailing.photoAsLink"
                                         label="Фото внизу"
                                     ></v-checkbox>
+                                    <v-checkbox
+                                            v-model="mailing.disablePreview"
+                                            label="Отключить предпросмотр ссылок"
+                                    ></v-checkbox>
+                                    <v-checkbox
+                                            v-model="mailing.disableNotification"
+                                            label="Отключить оповещения"
+                                    ></v-checkbox>
                                 </v-col>
                             </v-row>
                             <v-row class="mt-4">
@@ -256,7 +264,7 @@
             return {
                 mailing: {},
                 predictedUsers: false,
-                defaultMailing: {},
+                defaultMailing: {disablePreview: true},
                 photos: [],
                 buttons: [],
                 target: [],
@@ -479,7 +487,10 @@
             async sendPreview() {
                 let mailing = this.getMailingToSend();
                 let chatId = this.testUser;
-                return axios.post(`/api/mailing/preview`, {mailing, chatId});
+                let response = await axios.post(`/api/mailing/preview`, {mailing, chatId});
+                if (response && response.data && response.data.error) {
+                    this.$store.commit('setErrorMessage', response.data.error.description);
+                }
             }
         },
         computed: {

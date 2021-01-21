@@ -152,6 +152,7 @@ module.exports = function (params) {
         return replyWithItem(ctx, showNewMessage, withPhoto, params);
     });
 
+    scene.start(ctx => ctx.scene.enter('intro'));
     scene.action('go_prev', ctx => {
         let index = ctx.session.index || 0;
         if (index > 0) {

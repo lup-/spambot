@@ -37,6 +37,9 @@
                 if (!this.storeSettings) {
                     await this.$store.dispatch('loadSettings', this.botName);
                 }
+                else {
+                    this.settings = this.storeSettings;
+                }
             }
         },
         watch: {

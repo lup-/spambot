@@ -239,6 +239,14 @@ class Sender {
             extra = Markup.inlineKeyboard(buttons).extra();
         }
 
+        if (this.mailing.disablePreview) {
+            extra.disable_web_page_preview = true;
+        }
+
+        if (this.mailing.disableNotification) {
+            extra.disable_notification = true;
+        }
+
         extra.parse_mode = 'HTML';
         return extra;
     }
@@ -307,7 +315,7 @@ class Sender {
         let options = this.getExtra();
         options['caption'] = this.getMessage();
 
-        if (this.mailing.cachedImage) {
+        if (this.mailing.cachedImage && this.mailing.cachedImage.file_id) {
             return telegram.sendPhoto(chatId, this.mailing.cachedImage.file_id, options);
         }
         else {

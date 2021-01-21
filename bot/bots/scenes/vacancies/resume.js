@@ -27,23 +27,23 @@ function getContacts(candidate) {
 }
 
 function getResumeCard(candidate) {
-    let link = candidate.link
+    let link = candidate && candidate.link
         ? `\n<a href="${candidate.link}">Ссылка на портфолио</a>`
         : '';
 
-    return `<b>${candidate.name || 'Имя не указано'}</b>
+    return `<b>${candidate && candidate.name || 'Имя не указано'}</b>
 
 <b>Город:</b>
-${candidate.city || 'не указан'}
+${candidate && candidate.city || 'не указан'}
 
 <b>Желаемая позиция:</b>
-${candidate.position || 'не указана'}
+${candidate && candidate.position || 'не указана'}
 
 <b>Пожелания по зарплате:</b>
-${candidate.salary ? candidate.salary.value + ' ' + (candidate.salary.currency ? candidate.salary.currency : '') : 'не указаны'}
+${candidate && candidate.salary ? candidate.salary.value + ' ' + (candidate.salary.currency ? candidate.salary.currency : '') : 'не указаны'}
 
 <b>Контакты:</b>
-${getContacts(candidate) || 'не указаны'}
+${candidate && getContacts(candidate) || 'не указаны'}
 ${link}`;
 }
 
@@ -67,9 +67,10 @@ module.exports = function ({vacancies}) {
     scene.enter(async ctx => {
         return ctx.reply(`Пожалуйста пришлите файл со своим резюме или заполните поля. Это необходимо для того, чтобы отправлять отклики под вакансиями и рекрутер мог сразу узнать о вас всю необходимую информацию.
 
-Для загрузки поддерживаются форматы: pdf, docx, doc, odt, rtf, txt`, menu([{code: 'no_file', text: 'У меня нет файла'}]));
+Для загрузки поддерживаются форматы: pdf, docx, doc, odt, rtf, txt`, menu([{code: 'no_file', text: 'У меня нет файла'}, {code: 'cancel', text: 'Отмена'}]));
     });
 
+    scene.start(ctx => ctx.scene.enter('intro'));
     scene.on('document', async ctx => {
         let document = ctx.update.message && ctx.update.message.document
             ? ctx.update.message.document
@@ -89,7 +90,8 @@ module.exports = function ({vacancies}) {
         let type = document.mime_type;
 
         let {candidate, docText} = await parseFile({name, type, buffer});
-        ctx.scene.state.candidate = candidate;
+        let oldCandidate = ctx.scene.state.candidate || {};
+        ctx.scene.state.candidate = Object.assign(candidate, oldCandidate);
         ctx.scene.state.docText = docText;
         ctx.scene.state.document = document;
 
@@ -115,7 +117,25 @@ module.exports = function ({vacancies}) {
                 ctx.scene.state.candidate.position = text;
                 break;
             case 'salary':
-                ctx.scene.state.candidate.salary = extractSalary(text);
+                let salary = false;
+
+                try {
+                    salary = extractSalary(text);
+                }
+                catch (e) {}
+
+                if (!salary) {
+                    try {
+                        let currency = 'руб';
+                        salary = {
+                            value: parseInt(text.replace(/\D+/, '')),
+                            currency
+                        }
+                    }
+                    catch (e) {}
+                }
+
+                ctx.scene.state.candidate.salary = salary;
                 break;
             case 'contacts':
                 ctx.scene.state.candidate.contacts = extractContacts(text);
@@ -162,7 +182,7 @@ module.exports = function ({vacancies}) {
     });
     scene.action('contacts', ctx => {
         ctx.scene.state.messageTarget = 'contacts';
-        return ctx.reply('Напиши свои контакты. Хотя-бы почту и телефон.\n\nНапример:\nnoop@hello.com\n+7 (999) 123-45-56\n Telegram: @BeemBam_bot');
+        return ctx.reply('Напиши свои контакты. Хотя-бы почту и телефон.\n\nНапример:\nnoop@hello.com\n+7 (999) 123-45-56\nTelegram: @BeemBam_bot');
     });
     scene.action('link', ctx => {
         ctx.scene.state.messageTarget = 'link';

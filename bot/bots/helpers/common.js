@@ -37,7 +37,7 @@ async function catchErrors(err, ctx) {
             date: moment().unix(),
             userId,
             error: err.toString(),
-            stact: err.stack || false,
+            stack: err.stack || false,
             sendError: sendError.toString()
         }
 

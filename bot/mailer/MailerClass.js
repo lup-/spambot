@@ -34,12 +34,24 @@ module.exports = class Mailer {
         return allMailings.filter(mailing => mailingIdsInWork.indexOf(mailing.id) === -1);
     }
 
-    async startSending(mailing) {
-        const subprocess = cp.fork(`${__dirname}/sender.js`, [mailing.id], {execArgv: []});
-        subprocess.on('exit', () => this.clearProcess(mailing.id));
-        subprocess.on('data', data => console.log(`data: ${data}`));
-        subprocess.on('error', error => console.log(error));
-        this.activeMailings.push({mailing, subprocess});
+    getActiveMailing(mailingId) {
+        return this.activeMailings.find(item => item.mailing.id === mailingId) || false;
+    }
+
+    startSending(mailing) {
+        let activeMailing = this.getActiveMailing(mailing.id);
+        if (activeMailing && activeMailing.id) {
+            return false;
+        }
+
+        return new Promise(resolve => {
+            const subprocess = cp.fork(`${__dirname}/sender.js`, [mailing.id], {execArgv: []});
+            subprocess.on('spawn', resolve);
+            subprocess.on('exit', () => this.clearProcess(mailing.id));
+            subprocess.on('data', data => console.log(`data: ${data}`));
+            subprocess.on('error', error => console.log(error));
+            this.activeMailings.push({mailing, subprocess});
+        });
     }
 
     stop() {
@@ -47,7 +59,7 @@ module.exports = class Mailer {
     }
 
     stopMailing(mailingId) {
-        let mailingProcess = this.activeMailings.find(item => item.mailing.id === mailingId);
+        let mailingProcess = this.getActiveMailing(mailingId);
         return new Promise(resolve => {
             if (mailingProcess) {
                 mailingProcess.subprocess.on('exit', exitCode => {

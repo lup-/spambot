@@ -81,4 +81,4 @@ app = setupBot(app)
 
 app.launch();
 bus.listenCommands();
-periodic.launch();
+//periodic.launch();

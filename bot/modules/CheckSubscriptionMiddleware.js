@@ -1,4 +1,30 @@
 const {getDb} = require('./Database');
+const {wait} = require('./Helpers');
+
+const MAX_WAIT_TIMEOUT_SEC = 10 * 60;
+
+async function checkSubscribe(ctx, chat, userId) {
+    let subscriber = await ctx.tg.getChatMember(chat, userId);
+    let isSubscriber = subscriber && subscriber.status && ["creator", "administrator", "member"].indexOf(subscriber.status) !== -1;
+    return isSubscriber;
+}
+
+async function waitForSubscription(ctx, chat, userId) {
+    let timeout = MAX_WAIT_TIMEOUT_SEC * 1000;
+    let checkStepTime = 1000;
+    let isSubscriber = false;
+
+    for (let time = 0; time < timeout; time += checkStepTime) {
+        isSubscriber = await checkSubscribe(ctx, chat, userId);
+        if (isSubscriber) {
+            break;
+        }
+
+        await wait(checkStepTime);
+    }
+
+    return isSubscriber;
+}
 
 module.exports = async (ctx, next) => {
     let skipThisUpdate = ctx.chat.type !== 'private';
@@ -28,8 +54,7 @@ module.exports = async (ctx, next) => {
 
         if (userId) {
             try {
-                let subscriber = await ctx.tg.getChatMember(chatUsername, userId);
-                isSubscriber = subscriber && subscriber.status && ["creator", "administrator", "member"].indexOf(subscriber.status) !== -1;
+                isSubscriber = await checkSubscribe(ctx, chatUsername, userId);
             }
             catch (e) {
                 isSubscriber = true;
@@ -38,7 +63,14 @@ module.exports = async (ctx, next) => {
 
         if (!isSubscriber) {
             try {
-                return ctx.reply('Сначала необходимо подписаться на '+chatUsername);
+                await ctx.reply('Сначала необходимо подписаться на '+chatUsername);
+                isSubscriber = await waitForSubscription(ctx, chatUsername, userId);
+                if (isSubscriber) {
+                    return next();
+                }
+                else {
+                    return;
+                }
             }
             catch (e) {
                 return;

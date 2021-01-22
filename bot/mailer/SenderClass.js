@@ -492,7 +492,7 @@ class Sender {
         let mailingDb = await getDb(MAILING_DB_NAME);
 
         let finishedCount = await mailingDb.collection('mailingQueue').countDocuments({mailing: this.id, status: {'$in': STATUSES_SUCCESS}});
-        let failsCount = await mailingDb.collection('mailingQueue').countDocuments({mailing: this.id, STATUS_FAILED});
+        let failsCount = await mailingDb.collection('mailingQueue').countDocuments({mailing: this.id, status: STATUS_FAILED});
         let blocksCount = await mailingDb.collection('mailingQueue').countDocuments({mailing: this.id, status: STATUS_BLOCKED});
         let finishedTotal = finishedCount + failsCount + blocksCount;
 

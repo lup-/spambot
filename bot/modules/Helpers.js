@@ -5,6 +5,12 @@ function wait(msec) {
     return new Promise(resolve => setTimeout(resolve, msec));
 }
 
+const eventLoopQueue = () => {
+    return new Promise(resolve =>
+        setImmediate(resolve)
+    );
+}
+
 function capitalize(str) {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
@@ -44,6 +50,7 @@ module.exports = {
     md: Telegraf.Extra.markdown(),
     html: Telegraf.Extra.HTML(),
     wait,
+    eventLoopQueue,
     capitalize,
     trimHTML,
     truncateString,

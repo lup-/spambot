@@ -21,6 +21,9 @@ bus.registerCommand('stopMailing', async mailingId => {
 });
 app.start(ctx => ctx.reply('О.К. Ты знаешь, что делать'));
 
-app.launch();
-bus.listenCommands();
-mailer.launch();
+(async () => {
+    app.launch();
+    bus.listenCommands();
+    await mailer.launch();
+    process.exit();
+})();

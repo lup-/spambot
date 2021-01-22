@@ -45,8 +45,17 @@ module.exports = class Mailer {
         }
 
         return new Promise(resolve => {
-            const subprocess = cp.fork(`${__dirname}/sender.js`, [mailing.id], {execArgv: []});
-            subprocess.on('spawn', resolve);
+            let execArgv = process.env.DEBUG_CHILDREN
+                ? ['--inspect-brk=0.0.0.0:9200']
+                : [];
+
+            const subprocess = cp.fork(`${__dirname}/sender.js`, [mailing.id], {execArgv});
+            subprocess.on('message', message => {
+                if (message && message.action && message.action === 'started') {
+                    resolve();
+                }
+            });
+            subprocess.on('spawn', () => resolve());
             subprocess.on('exit', () => this.clearProcess(mailing.id));
             subprocess.on('data', data => console.log(`data: ${data}`));
             subprocess.on('error', error => console.log(error));

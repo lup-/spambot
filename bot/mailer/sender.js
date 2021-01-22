@@ -4,6 +4,7 @@ const mailingId = process.argv[2];
 const isTest = process.argv[3] === 'test';
 
 (async () => {
+    process.send({action: 'started'});
     const sender = new Sender(mailingId, isTest);
     await sender.init();
 
@@ -15,4 +16,5 @@ const isTest = process.argv[3] === 'test';
     });
 
     await sender.startSending();
+    process.exit();
 })();

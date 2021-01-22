@@ -150,6 +150,13 @@ module.exports = {
                 let bot = botList.find(bot => bot.id === blockedInBot.botId)
                 let botDb = await getDb(bot.dbName);
 
+                await botDb.collection('users').updateMany({
+                    id: {$in: blockedInBot.userIds},
+                    $or: [
+                        {blocked: false},
+                        {blockSince: {$exists : false}}
+                    ]
+                }, {$set: {blocked: true, blockSince: blockDate}});
                 await botDb.collection('users').updateMany({id: {$in: blockedInBot.userIds}}, {$set: {blocked: true, lastBlockCheck: blockDate}});
             }
         }

@@ -1,7 +1,7 @@
 const {getDb} = require('./Database');
 const {wait, eventLoopQueue} = require('./Helpers');
 
-const MAX_WAIT_TIMEOUT_SEC = 10 * 60;
+const MAX_WAIT_TIMEOUT_SEC = 5 * 60;
 
 async function checkSubscribe(ctx, chat, userId) {
     let subscriber = await ctx.tg.getChatMember(chat, userId);

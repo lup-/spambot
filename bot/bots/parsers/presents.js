@@ -1,9 +1,11 @@
 const {parseUrl} = require('../helpers/parser');
 const {getDb} = require('../../modules/Database');
 const {capitalize} = require('../../modules/Helpers');
+const moment = require('moment');
 
 const CATALOG_URL = 'https://www.pichshop.ru/catalog/gift/';
 const BASE_URL = 'https://www.pichshop.ru';
+const NOW = moment().unix();
 
 getDb().then(async () => {
     const db = await getDb();
@@ -29,12 +31,17 @@ getDb().then(async () => {
         }
     });
 
-    await categoriesCollection.insertMany(categories);
+    let categoryTitles = categories.map(category => category.title);
+    await db.collection('presents').updateMany({title: {$nin: categoryTitles}}, {$set: {disabled: NOW}});
+    for (const category of categories) {
+        await categoriesCollection.updateOne({title: category.title}, {$set: category}, {upsert: true});
+    }
 
-    let startFromCategory = '14 февраля';
+    /*let startFromCategory = '14 февраля';
     let categoryIndex = categories.findIndex(item => item.title === startFromCategory);
-    categories.splice(0, categoryIndex);
+    categories.splice(0, categoryIndex);*/
 
+    let allPresents = [];
     for (const category of categories) {
         console.log(category.title);
         let {lastUrl} = await parseUrl(category.url, {
@@ -71,14 +78,20 @@ getDb().then(async () => {
                         let id = el.getAttribute('scrollid');
 
                         if (addedIds.indexOf(id) === -1) {
+                            let url = el.getAttribute('data-href');
+                            if (url.indexOf('http') !== 0) {
+                                url = BASE_URL + url;
+                            }
+                            url = url.replace(/^http:/i, 'https:');
+
                             presents.push({
                                 id,
                                 name: el.getAttribute('name'),
                                 price: parseFloat(el.getAttribute('price')),
                                 brand: el.getAttribute('brand'),
                                 category: el.getAttribute('category').split('/').map(capitalize),
-                                url: BASE_URL + el.getAttribute('data-href'),
-                                image: el.getAttribute('data-image').replace(/^\/\//, 'https://'),
+                                url,
+                                image: el.getAttribute('data-image').replace(/^\/\//, 'https://').replace(/^http:/i, 'https:'),
                                 description
                             });
 
@@ -91,11 +104,18 @@ getDb().then(async () => {
             });
 
             if (presents && presents.length > 0) {
-                await presentsCollection.insertMany(presents);
+                allPresents = allPresents.concat(presents);
             }
         }
 
     }
 
+    if (allPresents && allPresents.length > 0) {
+        let presentIds = allPresents.map(present => present.id);
+        await db.collection('presents').updateMany({id: {$nin: presentIds}}, {$set: {disabled: NOW}});
+        for (const present of allPresents) {
+            await db.collection('presents').updateOne({id: present.id}, {$set: present});
+        }
+    }
 
 });

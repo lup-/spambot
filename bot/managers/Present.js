@@ -12,7 +12,8 @@ module.exports = function () {
             const presentsCollection = db.collection('presents');
 
             let presents = await presentsCollection.find({
-                category: {$elemMatch: {$eq: category.title}}
+                category: {$elemMatch: {$eq: category.title}},
+                disabled: {$in: [null, false]},
             }).toArray();
 
             let present = presents[index];
@@ -27,6 +28,30 @@ module.exports = function () {
             const likes = db.collection('likes');
 
             return likes.insertOne({userId, chatId, present});
+        },
+        async saveImageId(present, mediaMessage) {
+            const db = await getDb();
+            let imageId = false;
+
+            if (mediaMessage.photo && mediaMessage.photo.length > 0) {
+                let maxPhoto = mediaMessage.photo.reduce((max, current) => {
+                    if (!max) {
+                        return current;
+                    }
+
+                    return max.file_size < current.file_size
+                        ? current
+                        : max;
+                }, false);
+
+                if (maxPhoto) {
+                    imageId = maxPhoto.file_id;
+                }
+            }
+
+            if (imageId) {
+                await db.collection('presents').updateOne({id: present.id}, {$set: {imageId}});
+            }
         }
     }
 }

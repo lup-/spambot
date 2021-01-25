@@ -12,7 +12,7 @@ const moment = require('moment');
 
 const MAILING_DB_NAME = 'botofarmer';
 
-const TEST_QUEUE_SIZE = 13000;
+const TEST_QUEUE_SIZE = 1000;
 const TEST_BOT_ID = 'mailer_bot';
 const MAILER_BOT_ID = TEST_BOT_ID;
 const TEST_CHAT_ID = 483896081;
@@ -35,13 +35,14 @@ const MAILING_STATUS_FINISHED = 'finished';
 const IMGBB_TOKEN = process.env.IMGBB_TOKEN;
 
 const API_ROOT = process.env.TGAPI_ROOT || 'https://api.telegram.org'
+const SIG_STOPPED = 10;
 
 class Sender {
-    constructor(mailingId = false, test = false) {
+    constructor(mailingId = false, botId = false) {
         this.id = mailingId;
+        this.botId = botId;
         this.chunkSize = 5;
         this.bots = false;
-        this.isTest = test;
         this.stop = false;
         this.stopResolve = false;
     }
@@ -58,142 +59,6 @@ class Sender {
 
     getTelegram(token) {
         return new Telegram(token, {apiRoot: API_ROOT});
-    }
-
-    makeTestQueue() {
-        if (!this.id) {
-            return false;
-        }
-
-        return Array(TEST_QUEUE_SIZE).fill(false).map(_ => ({
-            mailing: this.id,
-            bot: TEST_BOT_ID,
-            userId: TEST_USER_ID,
-            chatId: TEST_CHAT_ID,
-            status: STATUS_NEW
-        }));
-    }
-
-    async makeQueue() {
-        if (this.isTest) {
-            return this.makeTestQueue();
-        }
-
-        let bots = await this.getBots();
-        let hasTarget = this.mailing.target && this.mailing.target.length > 0;
-        let cmpToMongo = {'>': '$gt', '<': '$lt', '=': '$eq', '!=': '$ne'};
-
-        if (hasTarget) {
-            let targetBotIds = this.mailing.target.reduce((bots, target) => {
-                if (target.type === 'bots') {
-                    if (!bots) {
-                        bots = [];
-                    }
-
-                    bots = bots.concat(target.value).filter((botId, index, allBots) => allBots.indexOf(botId) === index);
-                }
-
-                return bots;
-            }, false);
-
-            if (targetBotIds) {
-                bots = bots.filter(bot => targetBotIds.indexOf(bot.id) !== -1);
-            }
-
-        }
-
-        let queue = [];
-        for (const bot of bots) {
-            let db = await getDb(bot.dbName);
-            let matchConditions = [];
-            let queueIsEmpty = false;
-
-            if (hasTarget) {
-                for (const target of this.mailing.target) {
-                    let mongoCmp = {};
-                    if (target.type !== 'bots' && target.cmp) {
-                        mongoCmp[ cmpToMongo[target.cmp] ] = moment(target.value).unix();
-                    }
-
-                    if (target.type === 'activity') {
-                        let activityCount = await db.collection('activity').countDocuments();
-                        let hasActivity = activityCount > 0;
-
-                        if (hasActivity) {
-                            let activeUsers = await db.collection('activity').aggregate([
-                                {$match: {date: mongoCmp}},
-                                {$group: {"_id": "$userId"}}
-                            ]).toArray();
-
-                            let hasActiveUsersInPeriod = activeUsers && activeUsers.length > 0;
-                            if (!hasActiveUsersInPeriod) {
-                                queueIsEmpty = true;
-                                break;
-                            }
-
-                            let activeUsersIds = activeUsers.map(user => user._id);
-                            matchConditions.push({id: {$in: activeUsersIds}});
-                        }
-                    }
-
-                    if (target.type === 'register') {
-                        matchConditions.push({registered: mongoCmp});
-                    }
-
-                    if (target.type === 'mailing') {
-                        let mailingDb = await getDb(MAILING_DB_NAME);
-                        let mailingUsers = await mailingDb.collection('mailingQueue').aggregate([
-                            {$match: {sentAt: mongoCmp, status: {$in: STATUSES_SUCCESS, bot: bot.id}}},
-                            {$group: {"_id": "$userId"}}
-                        ]).toArray();
-
-                        let hasMailingUsersInPeriod = mailingUsers && mailingUsers.length > 0;
-                        if (!hasMailingUsersInPeriod) {
-                            queueIsEmpty = true;
-                            break;
-                        }
-
-                        let mailingUsersIds = mailingUsers.map(user => user._id);
-                        matchConditions.push({id: {$in: mailingUsersIds}});
-                    }
-                }
-            }
-
-            if (!queueIsEmpty) {
-                let pipe = matchConditions.map(cond => ({'$match': cond}));
-                let foundUsers = await db.collection('users').aggregate(pipe).toArray();
-                queue = queue.concat(foundUsers.map(user => ({
-                    mailing: this.id,
-                    bot: bot.id,
-                    userId: user.user.id,
-                    chatId: user.chat.id,
-                    status: STATUS_NEW
-                })));
-            }
-        }
-
-        return queue;
-    }
-
-    async initQueue() {
-        if (!this.id) {
-            return false;
-        }
-
-        let mailingDb = await getDb(MAILING_DB_NAME);
-        let queueCount = await mailingDb.collection('mailingQueue').countDocuments({mailing: this.id});
-        if (queueCount > 0) {
-            return;
-        }
-
-        let queue = await this.makeQueue();
-
-        if (queue.length > 0) {
-            let result = await mailingDb.collection('mailingQueue').insertMany(queue);
-            return result && result.result && result.result.ok;
-        }
-
-        return false;
     }
 
     async loadMailing() {
@@ -222,6 +87,7 @@ class Sender {
         let db = await getDb(MAILING_DB_NAME);
         let chats = await db.collection('mailingQueue').find({
             mailing: this.id,
+            bot: this.botId,
             status: STATUS_NEW,
         }).limit(chunkSize).toArray();
         return chats;
@@ -263,7 +129,8 @@ class Sender {
         }
 
         let db = await getDb(MAILING_DB_NAME);
-        return db.collection('mailingQueue').updateOne({_id: chat._id}, {$set: {status: STATUS_BLOCKED}});
+        await db.collection('mailingQueue').updateOne({_id: chat._id}, {$set: {status: STATUS_BLOCKED}});
+        return this.updateCounters('blocks');
     }
 
     async setChatFailed(chat, error) {
@@ -272,7 +139,8 @@ class Sender {
         }
 
         let db = await getDb(MAILING_DB_NAME);
-        return db.collection('mailingQueue').updateOne({_id: chat._id}, {$set: {status: STATUS_FAILED, error}});
+        await db.collection('mailingQueue').updateOne({_id: chat._id}, {$set: {status: STATUS_FAILED, error}});
+        return this.updateCounters('errors');
     }
 
     async setChatFinished(chat, messageId) {
@@ -281,7 +149,16 @@ class Sender {
         }
 
         let db = await getDb(MAILING_DB_NAME);
-        return db.collection('mailingQueue').updateOne({_id: chat._id}, {$set: {status: STATUS_FINISHED, messageId}});
+        await db.collection('mailingQueue').updateOne({_id: chat._id}, {$set: {status: STATUS_FINISHED, messageId}});
+        return this.updateCounters('success');
+    }
+
+    async updateCounters(counterCode) {
+        let query = {processed: 1};
+        query[counterCode] = 1;
+
+        let mailingDb = await getDb(MAILING_DB_NAME);
+        return mailingDb.collection('mailings').updateOne({id: this.id}, {$inc: query});
     }
 
     dataUriToBuffer(uri) {
@@ -455,54 +332,6 @@ class Sender {
         return response;
     }
 
-    async saveMailingState() {
-        if (!this.id) {
-            return false;
-        }
-
-        const db = await getDb(MAILING_DB_NAME);
-        const mailings = db.collection('mailings');
-
-        if (!this.mailing.id) {
-            this.mailing.id = shortid.generate();
-        }
-
-        if (this.mailing._id) {
-            delete this.mailing['_id'];
-        }
-
-        let updateResult = await mailings.findOneAndReplace({id: this.mailing.id}, this.mailing, {upsert: true, returnOriginal: false});
-        return updateResult.value || false;
-    }
-
-    async initProgress() {
-        if (!this.mailing.total) {
-            this.mailing.dateStarted = moment().unix();
-            this.mailing.status = MAILING_STATUS_PROCESSING;
-
-            let mailingDb = await getDb(MAILING_DB_NAME);
-            let queueCount = await mailingDb.collection('mailingQueue').countDocuments({mailing: this.id});
-            this.mailing.total = queueCount;
-
-            return this.saveMailingState();
-        }
-    }
-
-    async updateProgress() {
-        let mailingDb = await getDb(MAILING_DB_NAME);
-
-        let finishedCount = await mailingDb.collection('mailingQueue').countDocuments({mailing: this.id, status: {'$in': STATUSES_SUCCESS}});
-        let failsCount = await mailingDb.collection('mailingQueue').countDocuments({mailing: this.id, status: STATUS_FAILED});
-        let blocksCount = await mailingDb.collection('mailingQueue').countDocuments({mailing: this.id, status: STATUS_BLOCKED});
-        let finishedTotal = finishedCount + failsCount + blocksCount;
-
-        this.mailing.success = finishedCount;
-        this.mailing.errors = failsCount;
-        this.mailing.blocks = blocksCount;
-        this.mailing.processed = finishedTotal;
-        this.mailing.progress = this.mailing.total ? finishedTotal / this.mailing.total : 0;
-    }
-
     stopSending() {
         this.stop = true;
         return new Promise(resolve => {
@@ -515,11 +344,9 @@ class Sender {
             return false;
         }
 
-        await this.initQueue();
-        await this.initProgress();
-
         let firstChunk = true;
-        while (!this.isFinished()) {
+        let isFinished = false;
+        while (!isFinished) {
             if (firstChunk) {
                 await this.sendNextChunk(1);
                 firstChunk = false;
@@ -527,29 +354,32 @@ class Sender {
             else {
                 await this.sendNextChunk();
             }
-            await this.updateProgress();
-            await this.saveMailingState();
+
+            isFinished = await this.checkFinished();
         }
 
         if (this.stop) {
-            this.mailing.datePaused = moment().unix();
-            this.mailing.status = MAILING_STATUS_PAUSED;
-            await this.saveMailingState();
             if (this.stopResolve) {
                 this.stopResolve();
             }
         }
         else {
-            this.mailing.dateFinished = moment().unix();
-            this.mailing.status = MAILING_STATUS_FINISHED;
-            await this.saveMailingState();
-            process.exit();
+            process.exit(SIG_STOPPED);
         }
     }
 
-    isFinished() {
-        return (this.mailing.processed === this.mailing.total) || this.stop;
+    async checkFinished() {
+        let chats = await this.getNextChats();
+        let hasChats = chats && chats.length > 0;
+        let noChatsLeft = !hasChats;
+        return noChatsLeft || this.stop;
     }
 }
 
-module.exports = {Sender, MAILING_DB_NAME, MAILING_STATUS_NEW, MAILING_STATUS_PROCESSING, MAILING_STATUS_PAUSED, TEST_BOT_ID, MAILER_BOT_ID, STATUS_NEW};
+module.exports = {
+    Sender, MAILING_DB_NAME, MAILING_STATUS_NEW, MAILING_STATUS_PROCESSING, MAILING_STATUS_PAUSED, MAILING_STATUS_FINISHED,
+    MAILER_BOT_ID,
+    TEST_QUEUE_SIZE, TEST_BOT_ID, TEST_USER_ID, TEST_CHAT_ID,
+    STATUS_NEW, STATUSES_SUCCESS,
+    SIG_STOPPED
+};

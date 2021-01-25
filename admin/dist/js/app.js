@@ -1086,6 +1086,10 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -1727,7 +1731,7 @@ function clone(obj) {
             switch (_context2.prev = _context2.next) {
               case 0:
                 newMailing = {};
-                allowedFields = ['target', 'photos', 'buttons', 'text', 'photoAsLink'];
+                allowedFields = ['target', 'photos', 'buttons', 'text', 'photoAsLink', 'isTest'];
 
                 for (_i = 0, _allowedFields = allowedFields; _i < _allowedFields.length; _i++) {
                   field = _allowedFields[_i];
@@ -5211,6 +5215,16 @@ var render = function() {
                                       },
                                       expression: "mailing.disableNotification"
                                     }
+                                  }),
+                                  _c("v-checkbox", {
+                                    attrs: { label: "Пробная рассылка" },
+                                    model: {
+                                      value: _vm.mailing.isTest,
+                                      callback: function($$v) {
+                                        _vm.$set(_vm.mailing, "isTest", $$v)
+                                      },
+                                      expression: "mailing.isTest"
+                                    }
                                   })
                                 ],
                                 1
@@ -5530,8 +5544,10 @@ var render = function() {
                         _vm._v(
                           " " +
                             _vm._s(
-                              item.progress
-                                ? (item.progress * 100).toFixed(2) + "%"
+                              item.processed && item.total
+                                ? ((item.processed / item.total) * 100).toFixed(
+                                    2
+                                  ) + "%"
                                 : ""
                             ) +
                             " "
@@ -10215,11 +10231,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var core_js_modules_es_array_filter__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_filter__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.array.find */ "./node_modules/core-js/modules/es.array.find.js");
 /* harmony import */ var core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
-/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var core_js_modules_es_object_to_string__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core-js/modules/es.object.to-string */ "./node_modules/core-js/modules/es.object.to-string.js");
+/* harmony import */ var core_js_modules_es_object_to_string__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_object_to_string__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var core_js_modules_es_regexp_to_string__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core-js/modules/es.regexp.to-string */ "./node_modules/core-js/modules/es.regexp.to-string.js");
+/* harmony import */ var core_js_modules_es_regexp_to_string__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_regexp_to_string__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
+/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_6__);
+
+
 
 
 
@@ -10234,7 +10256,7 @@ __webpack_require__.r(__webpack_exports__);
   actions: {
     loadMailings: function loadMailings(_ref) {
       var _arguments = arguments;
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
         var commit, filter, response;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
@@ -10243,7 +10265,7 @@ __webpack_require__.r(__webpack_exports__);
                 commit = _ref.commit;
                 filter = _arguments.length > 1 && _arguments[1] !== undefined ? _arguments[1] : {};
                 _context.next = 4;
-                return axios__WEBPACK_IMPORTED_MODULE_4___default.a.post("/api/mailing/list", {
+                return axios__WEBPACK_IMPORTED_MODULE_6___default.a.post("/api/mailing/list", {
                   filter: filter
                 });
 
@@ -10264,7 +10286,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     setCurrentMailing: function setCurrentMailing(_ref2, mailingId) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
         var commit, state, mailing;
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
@@ -10288,7 +10310,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     newMailing: function newMailing(_ref3, mailing) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
         var dispatch, state, result;
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
@@ -10296,7 +10318,7 @@ __webpack_require__.r(__webpack_exports__);
               case 0:
                 dispatch = _ref3.dispatch, state = _ref3.state;
                 _context3.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_4___default.a.post("/api/mailing/add", {
+                return axios__WEBPACK_IMPORTED_MODULE_6___default.a.post("/api/mailing/add", {
                   mailing: mailing
                 });
 
@@ -10314,7 +10336,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     editMailing: function editMailing(_ref4, mailing) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
         var dispatch, state;
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
@@ -10322,7 +10344,7 @@ __webpack_require__.r(__webpack_exports__);
               case 0:
                 dispatch = _ref4.dispatch, state = _ref4.state;
                 _context4.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_4___default.a.post("/api/mailing/update", {
+                return axios__WEBPACK_IMPORTED_MODULE_6___default.a.post("/api/mailing/update", {
                   mailing: mailing
                 });
 
@@ -10338,7 +10360,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     deleteMailing: function deleteMailing(_ref5, mailing) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee5() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee5() {
         var dispatch, commit, state;
         return regeneratorRuntime.wrap(function _callee5$(_context5) {
           while (1) {
@@ -10346,7 +10368,7 @@ __webpack_require__.r(__webpack_exports__);
               case 0:
                 dispatch = _ref5.dispatch, commit = _ref5.commit, state = _ref5.state;
                 _context5.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_4___default.a.post("/api/mailing/delete", {
+                return axios__WEBPACK_IMPORTED_MODULE_6___default.a.post("/api/mailing/delete", {
                   mailing: mailing
                 });
 
@@ -10363,7 +10385,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     archiveMailing: function archiveMailing(_ref6, mailing) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee6() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee6() {
         var dispatch, commit, state;
         return regeneratorRuntime.wrap(function _callee6$(_context6) {
           while (1) {
@@ -10371,7 +10393,7 @@ __webpack_require__.r(__webpack_exports__);
               case 0:
                 dispatch = _ref6.dispatch, commit = _ref6.commit, state = _ref6.state;
                 _context6.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_4___default.a.post("/api/mailing/archive", {
+                return axios__WEBPACK_IMPORTED_MODULE_6___default.a.post("/api/mailing/archive", {
                   mailing: mailing
                 });
 
@@ -10388,53 +10410,89 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     startMailing: function startMailing(_ref7, mailing) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee7() {
-        var dispatch;
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee7() {
+        var dispatch, commit, response;
         return regeneratorRuntime.wrap(function _callee7$(_context7) {
           while (1) {
             switch (_context7.prev = _context7.next) {
               case 0:
-                dispatch = _ref7.dispatch;
-                _context7.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_4___default.a.post("/api/mailing/play", {
+                dispatch = _ref7.dispatch, commit = _ref7.commit;
+                _context7.prev = 1;
+                _context7.next = 4;
+                return axios__WEBPACK_IMPORTED_MODULE_6___default.a.post("/api/mailing/play", {
                   mailing: mailing
                 });
 
-              case 3:
-                _context7.next = 5;
+              case 4:
+                response = _context7.sent;
+
+                if (response && response.data && response.data.success) {
+                  commit('setSuccessMessage', 'Рассылка запущена!');
+                } else {
+                  commit('setErrorMessage', 'Ошибка запуска рассылки!');
+                }
+
+                _context7.next = 11;
+                break;
+
+              case 8:
+                _context7.prev = 8;
+                _context7.t0 = _context7["catch"](1);
+                commit('setErrorMessage', 'Ошибка запуска рассылки! ' + _context7.t0.toString());
+
+              case 11:
+                _context7.next = 13;
                 return dispatch('loadMailings');
 
-              case 5:
+              case 13:
               case "end":
                 return _context7.stop();
             }
           }
-        }, _callee7);
+        }, _callee7, null, [[1, 8]]);
       }))();
     },
     stopMailing: function stopMailing(_ref8, mailing) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee8() {
-        var dispatch;
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee8() {
+        var dispatch, commit, response;
         return regeneratorRuntime.wrap(function _callee8$(_context8) {
           while (1) {
             switch (_context8.prev = _context8.next) {
               case 0:
-                dispatch = _ref8.dispatch;
-                _context8.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_4___default.a.post("/api/mailing/pause", {
+                dispatch = _ref8.dispatch, commit = _ref8.commit;
+                _context8.prev = 1;
+                _context8.next = 4;
+                return axios__WEBPACK_IMPORTED_MODULE_6___default.a.post("/api/mailing/pause", {
                   mailing: mailing
                 });
 
-              case 3:
-                _context8.next = 5;
+              case 4:
+                response = _context8.sent;
+
+                if (response && response.data && response.data.success) {
+                  commit('setSuccessMessage', 'Рассылка остановлена!');
+                } else {
+                  commit('setErrorMessage', 'Ошибка остановки рассылки!');
+                }
+
+                _context8.next = 11;
+                break;
+
+              case 8:
+                _context8.prev = 8;
+                _context8.t0 = _context8["catch"](1);
+                commit('setErrorMessage', 'Ошибка остановки рассылки! ' + _context8.t0.toString());
+
+              case 11:
+                _context8.next = 13;
                 return dispatch('loadMailings');
 
-              case 5:
+              case 13:
               case "end":
                 return _context8.stop();
             }
           }
-        }, _callee8);
+        }, _callee8, null, [[1, 8]]);
       }))();
     }
   },

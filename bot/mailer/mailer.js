@@ -16,10 +16,22 @@ app = setupBot(app)
     .get();
 
 bus.registerCommand('stopMailing', async mailingId => {
-    let exitCode = await mailer.stopMailing(mailingId);
-    bus.publishReply(exitCode);
+    let exitCodes = await mailer.stopMailing(mailingId);
+    bus.publishReply(exitCodes);
 });
+
 app.start(ctx => ctx.reply('О.К. Ты знаешь, что делать'));
+app.on('message', async ctx => {
+    let savedMailing = mailer.createMailing(ctx);
+    if (savedMailing) {
+        return ctx.reply('Черновик рассылки сохранен');
+    }
+
+    return ctx.reply('Ошибка сохранения черновика рассылки');
+});
+
+// process.once('SIGINT', () => app.stop());
+// process.once('SIGTERM', () => app.stop());
 
 (async () => {
     app.launch();

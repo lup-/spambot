@@ -183,6 +183,10 @@
                                             v-model="mailing.disableNotification"
                                             label="Отключить оповещения"
                                     ></v-checkbox>
+                                    <v-checkbox
+                                            v-model="mailing.isTest"
+                                            label="Пробная рассылка"
+                                    ></v-checkbox>
                                 </v-col>
                             </v-row>
                             <v-row class="mt-4">

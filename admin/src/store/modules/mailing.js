@@ -37,12 +37,34 @@ export default {
             commit('setSuccessMessage', 'Рассылка архивирована!');
             return dispatch('loadMailings', state.filter);
         },
-        async startMailing({dispatch}, mailing) {
-            await axios.post(`/api/mailing/play`, {mailing});
+        async startMailing({dispatch, commit}, mailing) {
+            try {
+                let response = await axios.post(`/api/mailing/play`, {mailing});
+                if (response && response.data && response.data.success) {
+                    commit('setSuccessMessage', 'Рассылка запущена!');
+                }
+                else {
+                    commit('setErrorMessage', 'Ошибка запуска рассылки!');
+                }
+            }
+            catch (e) {
+                commit('setErrorMessage', 'Ошибка запуска рассылки! '+e.toString());
+            }
             await dispatch('loadMailings');
         },
-        async stopMailing({dispatch}, mailing) {
-            await axios.post(`/api/mailing/pause`, {mailing});
+        async stopMailing({dispatch, commit}, mailing) {
+            try {
+                let response = await axios.post(`/api/mailing/pause`, {mailing});
+                if (response && response.data && response.data.success) {
+                    commit('setSuccessMessage', 'Рассылка остановлена!');
+                }
+                else {
+                    commit('setErrorMessage', 'Ошибка остановки рассылки!');
+                }
+            }
+            catch (e) {
+                commit('setErrorMessage', 'Ошибка остановки рассылки! '+e.toString());
+            }
             await dispatch('loadMailings');
         },
     },

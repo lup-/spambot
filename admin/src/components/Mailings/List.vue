@@ -21,7 +21,7 @@
                         locale="ru"
                 >
                     <template v-slot:item.progress="{ item }">
-                        {{ item.progress ? (item.progress * 100).toFixed(2)+'%' : ''}}
+                        {{ item.processed && item.total ? (item.processed / item.total * 100).toFixed(2)+'%' : ''}}
                     </template>
                     <template v-slot:item.actions="{ item }">
                         <div class="actions d-flex flex-row">
@@ -85,7 +85,7 @@
         methods: {
             async copyMailing(mailing) {
                 let newMailing = {};
-                const allowedFields = ['target', 'photos', 'buttons', 'text', 'photoAsLink'];
+                const allowedFields = ['target', 'photos', 'buttons', 'text', 'photoAsLink', 'isTest'];
                 for (const field of allowedFields) {
                     if (typeof(mailing[field]) !== 'undefined') {
                         newMailing[field] = mailing[field];

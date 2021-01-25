@@ -38,6 +38,7 @@ router
     .post('/api/mailing/delete', mailings.delete)
     .post('/api/mailing/archive', mailings.archive)
     .post('/api/mailing/archiveStats', mailings.archiveStats)
+    .post('/api/mailing/play', mailings.start)
     .post('/api/mailing/pause', mailings.pause)
     .post('/api/mailing/testUsers', mailings.testUsers)
     .post('/api/mailing/predictUsers', mailings.predictUsers)

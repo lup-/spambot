@@ -12,19 +12,26 @@ async function checkSubscribe(ctx, chat, userId) {
 async function waitForSubscription(ctx, chat, userId) {
     let timeout = MAX_WAIT_TIMEOUT_SEC * 1000;
     let checkStepTime = 1000;
-    let isSubscriber = false;
 
-    for (let time = 0; time < timeout; time += checkStepTime) {
-        isSubscriber = await checkSubscribe(ctx, chat, userId);
-        if (isSubscriber) {
-            break;
-        }
+    return new Promise(resolve => {
+        let checkIntervalId;
+        let doCheck = async () => {
+            let isSubscriber = await checkSubscribe(ctx, chat, userId);
+            if (isSubscriber) {
+                clearInterval(checkIntervalId);
+                resolve(isSubscriber);
+            }
+        };
 
-        await wait(checkStepTime);
-        await eventLoopQueue();
-    }
+        checkIntervalId = setInterval(doCheck, checkStepTime);
+        doCheck();
 
-    return isSubscriber;
+        setTimeout(async () => {
+            clearInterval(checkIntervalId);
+            let isSubscriber = await checkSubscribe(ctx, chat, userId);
+            resolve(isSubscriber);
+        }, timeout);
+    });
 }
 
 module.exports = async (ctx, next) => {
@@ -63,19 +70,18 @@ module.exports = async (ctx, next) => {
         }
 
         if (!isSubscriber) {
-            try {
-                await ctx.reply('Сначала необходимо подписаться на '+chatUsername);
-                isSubscriber = await waitForSubscription(ctx, chatUsername, userId);
-                if (isSubscriber) {
-                    return next();
+            setTimeout(async () => {
+                try {
+                    await ctx.reply('Сначала необходимо подписаться на '+chatUsername);
+                    isSubscriber = await waitForSubscription(ctx, chatUsername, userId);
+                    if (isSubscriber) {
+                        await ctx.reply('Спасибо, что подписались! Продолжаю работу...');
+                        return next();
+                    }
                 }
-                else {
-                    return;
-                }
-            }
-            catch (e) {
-                return;
-            }
+                catch (e) {}
+            }, 0);
+            return;
         }
     }
 

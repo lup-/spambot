@@ -2,16 +2,26 @@ const qs = require('qs');
 const got = require('got');
 const axios = require('axios');
 const CryptoJS = require('crypto-js');
+const fs = require('fs');
+const path = require('path');
+const { Readable } = require('stream');
+const unzipper = require('unzipper');
+const convert = require('ebook-convert')
+
 const {getDb} = require('../modules/Database');
 const {CookieJar} = require('tough-cookie');
 const {parseUrl} = require('../bots/helpers/parser');
 const {trimHTML} = require('../modules/Helpers');
 
+const BOOKS_DB = "botofarmer";
 const FLIBUSTA_BASE = 'http://flibusta.is';
 const FLIBUSTA_SEARCH_URL = 'http://flibusta.is/makebooklist';
 
 const AUDIOBOOKS_SEARCH_URL = 'https://akniga.org/search/books';
 const MAX_RESULTS = 50;
+
+const FILES_LOCAL_PATH = process.env.FILES_LOCAL_PATH || __dirname;
+const LIB_PATH = process.env.LIB_PATH;
 
 module.exports = function (proxyMgr) {
     return {
@@ -235,7 +245,37 @@ module.exports = function (proxyMgr) {
             }
         },
 
+        async getLocalBookList(searchText) {
+            const db = await getDb(BOOKS_DB);
+            let books = await db.collection('books')
+                .find({ $text: { $search: searchText, $caseSensitive: false } })
+                .project({ score: { $meta: "textScore" } })
+                .sort({ score: { $meta:"textScore" } })
+                .toArray();
+
+            books = books.map(book => {
+                book.downloads = [
+                    {url: false, format: 'fb2'},
+                    {url: false, format: 'epub'},
+                    {url: false, format: 'mobi'},
+                ];
+                return book;
+            })
+
+            return books;
+        },
+        async localExists(book) {
+            const db = await getDb(BOOKS_DB);
+            let countLocal = await db.collection('books').countDocuments({id: book.id});
+            return countLocal > 0;
+        },
+
         async getBookList(searchText, sort) {
+            let localBooks = await this.getLocalBookList(searchText);
+            if (localBooks && localBooks.length > 0) {
+                return localBooks;
+            }
+
             let currentPage = 1;
             let totalPages = false;
             let fetchedBooks = [];
@@ -280,7 +320,121 @@ module.exports = function (proxyMgr) {
             return fetchedBooks;
         },
 
-        async getBook(mediaUrl) {
+        saveStream(localPath, stream) {
+            return new Promise(resolve => {
+                let writeStream = fs.createWriteStream(localPath);
+                stream.pipe(writeStream);
+                writeStream.on('finish', () => resolve(localPath));
+            });
+        },
+        streamToBuffer(stream) {
+            let chunks = [];
+            let fileBuffer;
+
+            return new Promise((resolve, reject) => {
+                stream.once('error', reject);
+                stream.once('end', () => {
+                    fileBuffer = Buffer.concat(chunks);
+                    resolve(fileBuffer);
+                });
+                stream.on('data', chunk => {
+                    chunks.push(chunk);
+                });
+            });
+        },
+        bufferToStream(buffer) {
+            return Readable.from(buffer.toString());
+        },
+        async drainAndCloneStream(stream) {
+            return this.bufferToStream( await this.streamToBuffer(stream) );
+        },
+
+        unzipFileFrom(fileName, from) {
+            return new Promise(async (resolve, reject) => {
+                let zip = fs.createReadStream(from)
+                    .on('error', reject)
+                    .pipe(unzipper.Parse({forceStream: true}))
+                    .on('error', reject);
+
+                let unzippedFile = false
+
+                for await (const entry of zip) {
+                    if (entry.path === fileName) {
+                        unzippedFile = await this.drainAndCloneStream(entry);
+                    }
+                    else {
+                        entry.autodrain();
+                    }
+                }
+
+                resolve(unzippedFile);
+            });
+        },
+
+        async getFb2FileStream(localBook) {
+            let bookFileName = localBook.id+'.'+localBook.format;
+            let zipFilePath = path.join(LIB_PATH, localBook.archiveName);
+
+            return this.unzipFileFrom(bookFileName, zipFilePath);
+        },
+
+        async convertFb2StreamToFormat(book, fb2Stream, format) {
+            let srcFile = path.join(FILES_LOCAL_PATH, book.id+'.fb2');
+            let dstFile = path.join(FILES_LOCAL_PATH, book.id+'.'+format);
+
+            let options = {
+                input: srcFile,
+                output: dstFile,
+                authors: '@'+process.env.BOT_NAME,
+            }
+
+            return new Promise( async (resolve, reject) => {
+                await this.saveStream(srcFile, fb2Stream);
+
+                convert(options, async err => {
+                    if (err) {
+                        return reject(err);
+                    }
+
+                    let formatStream = await this.drainAndCloneStream( fs.createReadStream(dstFile) );
+                    fs.rmSync(srcFile);
+                    fs.rmSync(dstFile);
+
+                    resolve(formatStream);
+                });
+            })
+        },
+
+        async getLocalBook(book, format) {
+            const db = await getDb(BOOKS_DB);
+            let localBook = await db.collection('books').findOne({id: book.id});
+            try {
+                let fb2Stream = await this.getFb2FileStream(localBook);
+
+                if (format === 'fb2') {
+                    return fb2Stream;
+                }
+
+                return this.convertFb2StreamToFormat(book, fb2Stream, format);
+            }
+            catch (e) {
+                return false;
+            }
+        },
+
+        async getBook(book, mediaUrl, format) {
+            let hasLocal = await this.localExists(book);
+
+            if (hasLocal) {
+                let localStream = await this.getLocalBook(book, format);
+                if (localStream) {
+                    return localStream;
+                }
+                else {
+                    mediaUrl = `http://flibusta.is/b/${book.id}/${format}`;
+                }
+            }
+
             let options = {responseType: 'stream'};
             let proxyAgent = await this.getProxyAgent();
             if (proxyAgent) {
@@ -301,7 +455,7 @@ module.exports = function (proxyMgr) {
                 await this.checkProxyAndThrowError(proxyAgent, mediaUrl, error, 'Books.js:291');
             }
         },
-        async getAudioBook(link) {
+        async getAudioBook(book, link, format) {
             let proxyAgent = await this.getProxyAgent();
             const USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36';
 

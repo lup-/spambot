@@ -125,7 +125,7 @@ function saveStream(fileName, stream) {
         writeStream.on('finish', () => resolve({localPath, remotePath}));
     });
 }
-async function sendDownload(ctx, fileLink, book, params, retry = 1, message = false) {
+async function sendDownload(ctx, fileLink, book, params, retry = 1, message = false, format = false) {
     const {getFile, isAudio, books} = params;
 
     let extra = menu([{code: 'back_book', text: 'Найти книгу'}, {code: 'back_audio', text: 'Найти аудиокнигу'}]);
@@ -136,9 +136,15 @@ async function sendDownload(ctx, fileLink, book, params, retry = 1, message = fa
 
     let platform = books.getPlatform(isAudio);
     let bookId = book.id;
-    let format = isAudio
-        ? 'mp3'
-        : fileLink.replace(/^.*\//, '');
+    if (!format) {
+        if (isAudio) {
+            format = 'mp3';
+        }
+
+        if (fileLink) {
+            format = fileLink.replace(/^.*\//, '');
+        }
+    }
 
     ctx.perfStart('getFile');
     let savedFile = await books.getFile(platform, bookId, format);
@@ -164,7 +170,7 @@ async function sendDownload(ctx, fileLink, book, params, retry = 1, message = fa
         else {
             console.log(`Загрузка, попытка ${retry}`);
         }
-        let fileStream = await getFile(fileLink);
+        let fileStream = await getFile(book, fileLink, format);
         let fileName = bookId + '.' + format;
 
         ctx.perfStart('saveStream');
@@ -275,7 +281,7 @@ module.exports = function (params) {
 
         if (hasManyFormats) {
             let formats = item.downloads.map(item => item.format);
-            let buttons = formats.map(format => ({code: 'download_'+itemId+'_'+format, text: format}));
+            let buttons = formats.map(format => ({code: 'download_'+itemId+'_'+format, text: format === 'download' ? 'pdf' : format}));
             let extra = menu(buttons);
             extra.parse_mode = 'HTML';
 
@@ -296,7 +302,7 @@ module.exports = function (params) {
         let item = await getItemById(itemId, ctx);
         let {url} = item.downloads.find(item => item.format === format);
 
-        return sendDownload(ctx, url, item, params);
+        return sendDownload(ctx, url, item, params, 1, false, format);
     });
 
     scene.action('back', ctx => {

@@ -1,0 +1,27 @@
+FROM frolvlad/alpine-glibc AS calibre
+
+ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:/opt/calibre/lib
+ENV CALIBRE_INSTALLER_SOURCE_CODE_URL https://raw.githubusercontent.com/kovidgoyal/calibre/master/setup/linux-installer.py
+ENV PYTHONUNBUFFERED=1
+
+RUN apk add --update --no-cache \
+    ca-certificates \
+    gcc \
+    imagemagick \
+    mesa-gl \
+    python3 \
+    py3-pip \
+    qt5-qtbase-x11 \
+    wget \
+    xdg-utils \
+    xvfb \
+    xz && ln -sf python3 /usr/bin/python
+
+RUN python3 -m ensurepip
+RUN wget -O- ${CALIBRE_INSTALLER_SOURCE_CODE_URL} | python -c "import sys; main=lambda:sys.stderr.write('Download failed\n'); exec(sys.stdin.read()); main(install_dir='/opt', isolated=True)" && \
+    rm -rf /tmp/calibre-installer-cache
+
+FROM node:alpine
+COPY --from=calibre ./ .
+RUN echo export PATH='$PATH:/opt/calibre' >> /etc/profile
+ENV PATH $PATH:/opt/calibre

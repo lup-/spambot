@@ -349,7 +349,9 @@ services:
     command: npm run refs_bot
 
   bookie_bot:
-    image: node
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_books"
     container_name: 'bookie_bot'
     restart: always
     depends_on:
@@ -359,6 +361,7 @@ services:
     volumes:
       - ./bot:/var/www
       - ./files:/var/www/files
+      - /mnt/lib/books/fb2.Flibusta.Net:/var/www/lib
     working_dir: /var/www
     environment:
       - NODE_ENV=development
@@ -371,10 +374,14 @@ services:
       - NODE_TLS_REJECT_UNAUTHORIZED=0
       - FILES_LOCAL_PATH=/var/www/files
       - FILES_REMOTE_PATH=/files
+      - LIB_PATH=/var/www/lib
+      - PROXY_DISABLED=${BOOKS_PROXY_DISABLED}
     command: node bots/books.js
 
   booksave_bot:
-    image: node
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_books"
     container_name: 'booksave_bot'
     restart: always
     depends_on:
@@ -384,6 +391,7 @@ services:
     volumes:
       - ./bot:/var/www
       - ./files:/var/www/files
+      - /mnt/lib/books/fb2.Flibusta.Net:/var/www/lib
     working_dir: /var/www
     environment:
       - NODE_ENV=development
@@ -397,10 +405,14 @@ services:
       - PERF_MONITOR=1
       - FILES_LOCAL_PATH=/var/www/files
       - FILES_REMOTE_PATH=/files
+      - LIB_PATH=/var/www/lib
+      - PROXY_DISABLED=${BOOKS_PROXY_DISABLED}
     command: node bots/books.js
 
   b3okie_bot:
-    image: node
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_books"
     container_name: 'b3okie_bot'
     restart: always
     depends_on:
@@ -410,6 +422,7 @@ services:
     volumes:
       - ./bot:/var/www
       - ./files:/var/www/files
+      - /mnt/lib/books/fb2.Flibusta.Net:/var/www/lib
     working_dir: /var/www
     environment:
       - NODE_ENV=development
@@ -423,10 +436,14 @@ services:
       - PERF_MONITOR=0
       - FILES_LOCAL_PATH=/var/www/files
       - FILES_REMOTE_PATH=/files
+      - LIB_PATH=/var/www/lib
+      - PROXY_DISABLED=${BOOKS_PROXY_DISABLED}
     command: node bots/books.js
 
   booksforfree_bot:
-    image: node
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_books"
     container_name: 'booksforfree_bot'
     restart: always
     depends_on:
@@ -436,6 +453,7 @@ services:
     volumes:
       - ./bot:/var/www
       - ./files:/var/www/files
+      - /mnt/lib/books/fb2.Flibusta.Net:/var/www/lib
     working_dir: /var/www
     environment:
       - NODE_ENV=development
@@ -449,10 +467,14 @@ services:
       - PERF_MONITOR=0
       - FILES_LOCAL_PATH=/var/www/files
       - FILES_REMOTE_PATH=/files
+      - LIB_PATH=/var/www/lib
+      - PROXY_DISABLED=${BOOKS_PROXY_DISABLED}
     command: node bots/books.js
 
   allbooks_bot:
-    image: node
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_books"
     container_name: 'allbooks_bot'
     restart: always
     depends_on:
@@ -462,6 +484,7 @@ services:
     volumes:
       - ./bot:/var/www
       - ./files:/var/www/files
+      - /mnt/lib/books/fb2.Flibusta.Net:/var/www/lib
     working_dir: /var/www
     environment:
       - NODE_ENV=development
@@ -475,10 +498,14 @@ services:
       - PERF_MONITOR=0
       - FILES_LOCAL_PATH=/var/www/files
       - FILES_REMOTE_PATH=/files
+      - LIB_PATH=/var/www/lib
+      - PROXY_DISABLED=${BOOKS_PROXY_DISABLED}
     command: node bots/books.js
 
   freereading_bot:
-    image: node
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_books"
     container_name: 'freereading_bot'
     restart: always
     depends_on:
@@ -488,6 +515,7 @@ services:
     volumes:
       - ./bot:/var/www
       - ./files:/var/www/files
+      - /mnt/lib/books/fb2.Flibusta.Net:/var/www/lib
     working_dir: /var/www
     environment:
       - NODE_ENV=development
@@ -501,10 +529,14 @@ services:
       - PERF_MONITOR=0
       - FILES_LOCAL_PATH=/var/www/files
       - FILES_REMOTE_PATH=/files
+      - LIB_PATH=/var/www/lib
+      - PROXY_DISABLED=${BOOKS_PROXY_DISABLED}
     command: node bots/books.js
 
   bookdow_bot:
-    image: node
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_books"
     container_name: 'bookdow_bot'
     restart: always
     depends_on:
@@ -514,6 +546,7 @@ services:
     volumes:
       - ./bot:/var/www
       - ./files:/var/www/files
+      - /mnt/lib/books/fb2.Flibusta.Net:/var/www/lib
     working_dir: /var/www
     environment:
       - NODE_ENV=development
@@ -527,10 +560,14 @@ services:
       - PERF_MONITOR=0
       - FILES_LOCAL_PATH=/var/www/files
       - FILES_REMOTE_PATH=/files
+      - LIB_PATH=/var/www/lib
+      - PROXY_DISABLED=${BOOKS_PROXY_DISABLED}
     command: node bots/books.js
 
   dowread_bot:
-    image: node
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_books"
     container_name: 'dowread_bot'
     restart: always
     depends_on:
@@ -540,6 +577,7 @@ services:
     volumes:
       - ./bot:/var/www
       - ./files:/var/www/files
+      - /mnt/lib/books/fb2.Flibusta.Net:/var/www/lib
     working_dir: /var/www
     environment:
       - NODE_ENV=development
@@ -553,6 +591,8 @@ services:
       - PERF_MONITOR=0
       - FILES_LOCAL_PATH=/var/www/files
       - FILES_REMOTE_PATH=/files
+      - LIB_PATH=/var/www/lib
+      - PROXY_DISABLED=1
     command: node bots/books.js
 
   workhant_bot:

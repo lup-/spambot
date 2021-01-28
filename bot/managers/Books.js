@@ -276,6 +276,8 @@ module.exports = function (proxyMgr) {
                 return localBooks;
             }
 
+            console.log(`Ничего не найдено, запрос к флибусте: ${searchText}`);
+
             let currentPage = 1;
             let totalPages = false;
             let fetchedBooks = [];
@@ -343,7 +345,7 @@ module.exports = function (proxyMgr) {
             });
         },
         bufferToStream(buffer) {
-            return Readable.from(buffer.toString());
+            return Readable.from(buffer);
         },
         async drainAndCloneStream(stream) {
             return this.bufferToStream( await this.streamToBuffer(stream) );
@@ -391,9 +393,9 @@ module.exports = function (proxyMgr) {
             return new Promise( async (resolve, reject) => {
                 await this.saveStream(srcFile, fb2Stream);
 
-                convert(options, async err => {
-                    if (err) {
-                        return reject(err);
+                convert(options, async (error, stdout, stderr) => {
+                    if (error) {
+                        return reject(error);
                     }
 
                     let formatStream = await this.drainAndCloneStream( fs.createReadStream(dstFile) );
@@ -432,6 +434,7 @@ module.exports = function (proxyMgr) {
                 }
                 else {
                     mediaUrl = `http://flibusta.is/b/${book.id}/${format}`;
+                    console.log(`Загрузка не удалась, запрос к флибусте: ${book.id}`);
                 }
             }
 

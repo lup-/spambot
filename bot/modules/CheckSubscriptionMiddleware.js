@@ -1,6 +1,5 @@
 const {getDb} = require('./Database');
 const Telegram = require('telegraf/telegram');
-const {wait, eventLoopQueue} = require('./Helpers');
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const tg = new Telegram(BOT_TOKEN);
 
@@ -19,10 +18,8 @@ async function waitForSubscription(tg, chat, userId) {
     return new Promise(resolve => {
         let checkIntervalId;
         let doCheck = async () => {
-            console.log(`Check: ${userId}`); //
             let isSubscriber = await checkSubscribe(tg, chat, userId);
             if (isSubscriber) {
-                console.log(`Clearing: ${userId}`); //
                 clearInterval(checkIntervalId);
                 resolve(isSubscriber);
             }
@@ -75,21 +72,18 @@ module.exports = async (ctx, next) => {
         }
 
         if (!isSubscriber) {
-            console.log(`Need: ${userId}`); //
             let chatId = ctx.chat.id;
             setTimeout(async () => {
                 try {
-                    console.log(`Reply: ${userId} ${chatId}`); //
                     await tg.sendMessage(chatId,'Сначала необходимо подписаться на '+chatUsername);
                     isSubscriber = await waitForSubscription(ctx.tg, chatUsername, userId);
                     if (isSubscriber) {
-                        console.log(`OK: ${userId}`); //
-                        await tg.sendMessage(chatId,'Спасибо, что подписались! Продолжаю работу...');
+                        await tg.sendMessage(chatId,'Спасибо, что подписались! Повторите последнее действие, пожалуйста');
                         return next();
                     }
                 }
                 catch (e) {
-                    console.log(e); //
+                    console.log('Subscribe', e);
                 }
             }, 0);
             return;

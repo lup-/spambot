@@ -5,6 +5,7 @@ const {getDb} = require('../../bot/modules/Database');
 const config = require('../config');
 const {MAILER_BOT_ID, TEST_BOT_ID, STATUS_NEW, MAILING_STATUS_PAUSED, MAILING_STATUS_NEW} = require('../../bot/mailer/SenderClass');
 const Mailer = require('../../bot/mailer/MailerClass');
+const Sender = require('../../bot/mailer/SenderClass');
 const {publishCommandWithReply} = require('../modules/commands');
 
 const QUEUE_SAMPLE_SIZE = 5;

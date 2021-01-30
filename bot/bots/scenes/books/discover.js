@@ -300,7 +300,13 @@ module.exports = function (params) {
         let itemId = ctx.match[1];
         let format = ctx.match[2];
         let item = await getItemById(itemId, ctx);
-        let {url} = item.downloads.find(item => item.format === format);
+        let url = false;
+        if (item.downloads) {
+            let downloadItem = item.downloads.find(item => item.format === format);
+            if (downloadItem) {
+                url = downloadItem.url;
+            }
+        }
 
         return sendDownload(ctx, url, item, params, 1, false, format);
     });

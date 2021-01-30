@@ -5,7 +5,7 @@ const CryptoJS = require('crypto-js');
 const fs = require('fs');
 const path = require('path');
 const { Readable } = require('stream');
-const unzipper = require('unzipper');
+const StreamZip = require('node-stream-zip');
 const convert = require('ebook-convert')
 
 const {getDb} = require('../modules/Database');
@@ -353,23 +353,20 @@ module.exports = function (proxyMgr) {
 
         unzipFileFrom(fileName, from) {
             return new Promise(async (resolve, reject) => {
-                let zip = fs.createReadStream(from)
-                    .on('error', reject)
-                    .pipe(unzipper.Parse({forceStream: true}))
-                    .on('error', reject);
+                const zip = new StreamZip({
+                    file: from,
+                    storeEntries: true
+                });
 
-                let unzippedFile = false
+                let unzippedFile = false;
 
-                for await (const entry of zip) {
-                    if (entry.path === fileName) {
-                        unzippedFile = await this.drainAndCloneStream(entry);
-                    }
-                    else {
-                        entry.autodrain();
-                    }
-                }
-
-                resolve(unzippedFile);
+                zip.on('error', reject);
+                zip.on('ready', () => {
+                    let buffer = zip.entryDataSync(fileName);
+                    unzippedFile = this.bufferToStream(buffer);
+                    zip.close();
+                    return resolve(unzippedFile);
+                });
             });
         },
 

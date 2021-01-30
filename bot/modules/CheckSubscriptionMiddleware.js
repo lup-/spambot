@@ -1,23 +1,28 @@
 const {getDb} = require('./Database');
+const Telegram = require('telegraf/telegram');
 const {wait, eventLoopQueue} = require('./Helpers');
+const BOT_TOKEN = process.env.BOT_TOKEN;
+const tg = new Telegram(BOT_TOKEN);
 
 const MAX_WAIT_TIMEOUT_SEC = 5 * 60;
 
-async function checkSubscribe(ctx, chat, userId) {
-    let subscriber = await ctx.tg.getChatMember(chat, userId);
+async function checkSubscribe(tg, chat, userId) {
+    let subscriber = await tg.getChatMember(chat, userId);
     let isSubscriber = subscriber && subscriber.status && ["creator", "administrator", "member"].indexOf(subscriber.status) !== -1;
     return isSubscriber;
 }
 
-async function waitForSubscription(ctx, chat, userId) {
+async function waitForSubscription(tg, chat, userId) {
     let timeout = MAX_WAIT_TIMEOUT_SEC * 1000;
     let checkStepTime = 1000;
 
     return new Promise(resolve => {
         let checkIntervalId;
         let doCheck = async () => {
-            let isSubscriber = await checkSubscribe(ctx, chat, userId);
+            console.log(`Check: ${userId}`); //
+            let isSubscriber = await checkSubscribe(tg, chat, userId);
             if (isSubscriber) {
+                console.log(`Clearing: ${userId}`); //
                 clearInterval(checkIntervalId);
                 resolve(isSubscriber);
             }
@@ -28,7 +33,7 @@ async function waitForSubscription(ctx, chat, userId) {
 
         setTimeout(async () => {
             clearInterval(checkIntervalId);
-            let isSubscriber = await checkSubscribe(ctx, chat, userId);
+            let isSubscriber = await checkSubscribe(tg, chat, userId);
             resolve(isSubscriber);
         }, timeout);
     });
@@ -62,7 +67,7 @@ module.exports = async (ctx, next) => {
 
         if (userId) {
             try {
-                isSubscriber = await checkSubscribe(ctx, chatUsername, userId);
+                isSubscriber = await checkSubscribe(ctx.tg, chatUsername, userId);
             }
             catch (e) {
                 isSubscriber = true;
@@ -70,16 +75,22 @@ module.exports = async (ctx, next) => {
         }
 
         if (!isSubscriber) {
+            console.log(`Need: ${userId}`); //
+            let chatId = ctx.chat.id;
             setTimeout(async () => {
                 try {
-                    await ctx.reply('Сначала необходимо подписаться на '+chatUsername);
-                    isSubscriber = await waitForSubscription(ctx, chatUsername, userId);
+                    console.log(`Reply: ${userId} ${chatId}`); //
+                    await tg.sendMessage(chatId,'Сначала необходимо подписаться на '+chatUsername);
+                    isSubscriber = await waitForSubscription(ctx.tg, chatUsername, userId);
                     if (isSubscriber) {
-                        await ctx.reply('Спасибо, что подписались! Продолжаю работу...');
+                        console.log(`OK: ${userId}`); //
+                        await tg.sendMessage(chatId,'Спасибо, что подписались! Продолжаю работу...');
                         return next();
                     }
                 }
-                catch (e) {}
+                catch (e) {
+                    console.log(e); //
+                }
             }, 0);
             return;
         }

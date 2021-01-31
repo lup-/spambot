@@ -217,7 +217,7 @@ module.exports = class Mailer {
                 let pipe = matchConditions.map(cond => ({'$match': cond}));
                 let foundUsers = await db.collection('users').aggregate(pipe).toArray();
                 queue = queue.concat(foundUsers.map(user => ({
-                    mailing: this.id,
+                    mailing: mailing.id,
                     bot: bot.id,
                     userId: user.user.id,
                     chatId: user.chat.id,

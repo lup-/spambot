@@ -5,7 +5,7 @@ const {getDb} = require('../../bot/modules/Database');
 const config = require('../config');
 const {MAILER_BOT_ID, TEST_BOT_ID, STATUS_NEW, MAILING_STATUS_PAUSED, MAILING_STATUS_NEW} = require('../../bot/mailer/SenderClass');
 const Mailer = require('../../bot/mailer/MailerClass');
-const Sender = require('../../bot/mailer/SenderClass');
+const {Sender} = require('../../bot/mailer/SenderClass');
 const {publishCommandWithReply} = require('../modules/commands');
 
 const QUEUE_SAMPLE_SIZE = 5;
@@ -81,8 +81,8 @@ module.exports = {
         let updateResult = await db.collection('mailings').findOneAndUpdate({id}, {$set: {deleted: moment().unix()}}, {returnOriginal: false});
         let mailing = updateResult.value || false;
         
-        let queueDeleteResult = await db.collection('mailingQueue').delete({mailing: id});
-        let statsDeleteResult = await db.collection('mailingStats').delete({mailing: id});
+        let queueDeleteResult = await db.collection('mailingQueue').deleteMany({mailing: id});
+        let statsDeleteResult = await db.collection('mailingStats').deleteMany({mailing: id});
 
         ctx.body = {
             mailing,

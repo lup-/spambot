@@ -287,6 +287,8 @@ module.exports = class Mailer {
         let now = moment().unix();
         return await db.collection('mailings').find({
             startAt: {'$lte': now},
+            deleted: { $in: [null,  false] },
+            archived: { $in: [null,  false] },
             status: {'$in': [MAILING_STATUS_NEW, MAILING_STATUS_PROCESSING]},
         }).toArray();
     }

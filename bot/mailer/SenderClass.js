@@ -12,7 +12,7 @@ const moment = require('moment');
 
 const MAILING_DB_NAME = 'botofarmer';
 
-const TEST_QUEUE_SIZE = 100;
+const TEST_QUEUE_SIZE = 10;
 const TEST_BOT_ID = 'mailer_bot';
 const MAILER_BOT_ID = TEST_BOT_ID;
 const TEST_CHAT_ID = 483896081;
@@ -45,6 +45,7 @@ class Sender {
         this.bots = false;
         this.stop = false;
         this.stopResolve = false;
+        this.cachedImage = false;
     }
 
     async init(mailing = false) {
@@ -188,43 +189,35 @@ class Sender {
         return photos.find(photo => photo.width === maxWidth);
     }
 
-    async checkIsNew(chat) {
-        let db = await getDb(MAILING_DB_NAME);
-        let freshChat = await db.collection('mailingQueue').findOne({_id: chat._id});
-        return freshChat.status === STATUS_NEW;
-    }
-
     async sendSinglePhotoMessage(chatId, telegram) {
         let options = this.getExtra();
         options['caption'] = this.getMessage();
 
-        if (this.mailing.cachedImage && this.mailing.cachedImage.file_id) {
-            return telegram.sendPhoto(chatId, this.mailing.cachedImage.file_id, options);
+        if (this.cachedImage && this.cachedImage.file_id) {
+            return telegram.sendPhoto(chatId, this.cachedImage.file_id, options);
         }
         else {
             let image = this.mailing.photos[0];
             let buffer = this.dataUriToBuffer(image.src);
             let apiMessage = await telegram.sendPhoto(chatId, {source: buffer}, options);
-            this.mailing.cachedImage = this.getBestPhoto(apiMessage.photo);
-            await this.saveMailingState();
+            this.cachedImage = this.getBestPhoto(apiMessage.photo);
             return apiMessage;
         }
     }
 
     async sendLinkedPhotoMessage(chatId, telegram) {
-        if (!this.mailing.cachedImage) {
+        if (!this.cachedImage) {
             let image = this.mailing.photos[0];
             let buffer = this.dataUriToBuffer(image.src);
             let uploadedImage = await this.uploadImage(buffer);
             if (!uploadedImage) {
                 return false;
             }
-            this.mailing.cachedImage = uploadedImage;
-            await this.saveMailingState();
+            this.cachedImage = uploadedImage;
         }
 
         const emptyChar = '‎';
-        let imageUrl = this.mailing.cachedImage.url;
+        let imageUrl = this.cachedImage.url;
         let text = this.getMessage();
 
         text = `<a href="${imageUrl}">${emptyChar}</a> ${text}`;
@@ -233,8 +226,8 @@ class Sender {
 
     async sendMediaGroupMessage(chatId, telegram) {
         let media;
-        if (this.mailing.cachedImage) {
-            media = this.mailing.cachedImage.map(photo => photo.file_id);
+        if (this.cachedImage) {
+            media = this.cachedImage.map(photo => photo.file_id);
         }
         else {
             media = this.mailing.photos.map(image => {
@@ -257,14 +250,12 @@ class Sender {
             result = mediaGroup[0];
         }
 
-        if (!this.mailing.cachedImage) {
-            this.mailing.cachedImage = mediaGroup.reduce((files, message) => {
+        if (!this.cachedImage) {
+            this.cachedImage = mediaGroup.reduce((files, message) => {
                 let photo = this.getBestPhoto(message.photo);
                 files.push(photo);
                 return files;
             }, []);
-
-            await this.saveMailingState();
         }
 
         return result;
@@ -300,17 +291,14 @@ class Sender {
                 }
             }
 
-            let isNew = await this.checkIsNew(chat);
-            if (isNew) {
-                response = await method.call(this, chat.chatId, telegram);
+            response = await method.call(this, chat.chatId, telegram);
 
-                if (this.id) {
-                    if (!response) {
-                        await this.setChatFailed(chat, false);
-                    }
-                    else {
-                        await this.setChatFinished(chat, response.message_id);
-                    }
+            if (this.id) {
+                if (!response) {
+                    await this.setChatFailed(chat, false);
+                }
+                else {
+                    await this.setChatFinished(chat, response.message_id);
                 }
             }
         }
@@ -333,10 +321,10 @@ class Sender {
                     await wait(waitTimeMs);
                     return this.sendMailingToChat(chat);
                 }
-
-                await this.setChatFailed(chat, sendError);
-                return false;
             }
+
+            await this.setChatFailed(chat, sendError);
+            return false;
         }
 
         return response;

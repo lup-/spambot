@@ -12,7 +12,7 @@ const moment = require('moment');
 
 const MAILING_DB_NAME = 'botofarmer';
 
-const TEST_QUEUE_SIZE = 1000;
+const TEST_QUEUE_SIZE = 100;
 const TEST_BOT_ID = 'mailer_bot';
 const MAILER_BOT_ID = TEST_BOT_ID;
 const TEST_CHAT_ID = 483896081;
@@ -188,6 +188,12 @@ class Sender {
         return photos.find(photo => photo.width === maxWidth);
     }
 
+    async checkIsNew(chat) {
+        let db = await getDb(MAILING_DB_NAME);
+        let freshChat = await db.collection('mailingQueue').findOne({_id: chat._id});
+        return freshChat.status === STATUS_NEW;
+    }
+
     async sendSinglePhotoMessage(chatId, telegram) {
         let options = this.getExtra();
         options['caption'] = this.getMessage();
@@ -294,13 +300,17 @@ class Sender {
                 }
             }
 
-            response = await method.call(this, chat.chatId, telegram);
-            if (this.id) {
-                if (!response) {
-                    await this.setChatFailed(chat, false);
-                }
-                else {
-                    await this.setChatFinished(chat, response.message_id);
+            let isNew = await this.checkIsNew(chat);
+            if (isNew) {
+                response = await method.call(this, chat.chatId, telegram);
+
+                if (this.id) {
+                    if (!response) {
+                        await this.setChatFailed(chat, false);
+                    }
+                    else {
+                        await this.setChatFinished(chat, response.message_id);
+                    }
                 }
             }
         }
@@ -316,7 +326,7 @@ class Sender {
                 }
 
                 if (sendError.code === 429) {
-                    let waitTimeMs = sendError.parameters && sendError.parameters.retry_after
+                    let waitTimeMs = sendError.parameters && sendError.parameters.retry_after > 0
                         ? (sendError.parameters.retry_after || 1) * 1000
                         : 1000;
 

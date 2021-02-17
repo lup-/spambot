@@ -49,7 +49,7 @@ module.exports = function ({getDisclaimer, periodic, vacancies, saveSettings}) {
         try {
             let disclaimer = await getDisclaimer(ctx);
             ctx.session.introShown = true;
-            return ctx.reply(__(disclaimer.text, disclaimer.tags), menu([{code: 'accept', text: 'Понятно'}]));
+            return ctx.replyWithHTML(__(disclaimer.text, disclaimer.tags), menu([{code: 'accept', text: 'Понятно'}]));
         }
         catch (e) {
         }
@@ -77,12 +77,12 @@ module.exports = function ({getDisclaimer, periodic, vacancies, saveSettings}) {
             );
 
             ctx.session.subscribeShown = true;
-            await ctx.reply(__('Вы подписались на новые вакансии.', ['subscribe', 'info', 'success']));
+            await ctx.replyWithHTML(__('Вы подписались на новые вакансии.', ['subscribe', 'info', 'success']));
         }
         else {
             await ctx.safeReply(
-                ctx => ctx.editMessageText(__('Вы подписались на новые вакансии.', ['subscribe', 'info', 'success'])),
-                ctx => ctx.reply(__('Вы подписались на новые вакансии.', ['subscribe', 'info', 'success'])),
+                ctx => ctx.editMessageText(__('Вы подписались на новые вакансии.', ['subscribe', 'info', 'success']), {parse_mode: 'HTML'}),
+                ctx => ctx.replyWithHTML(__('Вы подписались на новые вакансии.', ['subscribe', 'info', 'success'])),
                 ctx
             );
         }
@@ -96,8 +96,8 @@ module.exports = function ({getDisclaimer, periodic, vacancies, saveSettings}) {
         await periodic.unsubscribe(ctx.session.profile);
 
         await ctx.safeReply(
-            ctx => ctx.editMessageText(__('Вы отписались от рассылки. Новые вакансии больше не будут приходить.', ['unsubscribe', 'info'])),
-            ctx => ctx.reply(__('Вы отписались от рассылки. Новые вакансии больше не будут приходить.', ['unsubscribe', 'info'])),
+            ctx => ctx.editMessageText(__('Вы отписались от рассылки. Новые вакансии больше не будут приходить.', ['unsubscribe', 'info']), {parse_mode: 'HTML'}),
+            ctx => ctx.replyWithHTML(__('Вы отписались от рассылки. Новые вакансии больше не будут приходить.', ['unsubscribe', 'info'])),
             ctx
         );
 

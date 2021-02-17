@@ -24,7 +24,7 @@ module.exports = function (datingManager) {
     const scene = new BaseScene('mainMenu');
 
     scene.enter(ctx => {
-        return ctx.safeReply(ctx => ctx.reply(
+        return ctx.safeReply(ctx => ctx.replyWithHTML(
             __('Что дальше?', ['main', 'menu', 'start']),
         mainMenu(ctx)), null, ctx);
     });

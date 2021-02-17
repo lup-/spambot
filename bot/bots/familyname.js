@@ -68,7 +68,7 @@ tbot = setupBot(tbot)
 tbot.catch(catchErrors);
 
 tbot.start( async (ctx) => {
-    return ctx.reply('Назовите фамилию, значение которой Вас интересует');
+    return ctx.replyWithHTML('Назовите фамилию, значение которой Вас интересует');
 });
 
 tbot.on('message', async (ctx) => {
@@ -82,7 +82,7 @@ tbot.on('message', async (ctx) => {
         return ctx.replyWithHTML( getMessage(meanings, 0), await keyboard(familyName) );
     }
     else {
-        return ctx.reply('Введите фамилию')
+        return ctx.replyWithHTML('Введите фамилию')
     }
 });
 
@@ -103,7 +103,7 @@ tbot.action(/action([0-9]+)\/(.*)/, async ctx => {
 });
 
 tbot.action('back', ctx => {
-    return ctx.reply('Введите фамилию');
+    return ctx.replyWithHTML('Введите фамилию');
 });
 
 tbot.launch();

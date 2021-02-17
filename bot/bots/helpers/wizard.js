@@ -7,12 +7,12 @@ function getMarkupButtons(buttons, columns = false) {
     }
 
     let markupButtons = buttons.map(button => {
-        let btn = Markup.callbackButton(button.text, button.code);
-        if (button.type === 'location') {
-            btn = Markup.locationRequestButton(button.text);
+        if (button.url) {
+            return Markup.urlButton(button.text, button.url);
         }
-
-        return btn;
+        else {
+            return Markup.callbackButton(button.text, button.code);
+        }
     });
 
     let columnButtons = [];

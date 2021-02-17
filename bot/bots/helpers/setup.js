@@ -10,6 +10,8 @@ const {catchErrors, clone} = require('../helpers/common');
 const SafeReplyMiddleware = require('../../modules/SafeReplyMiddleware');
 const SaveActivityMiddleware = require('../../modules/SaveActivityMiddleware');
 const checkSubscriptionMiddleware = require('../../modules/CheckSubscriptionMiddleware');
+const {menu} = require('../helpers/wizard');
+const {__} = require('../../modules/Messages');
 
 const {init} = require('../../managers');
 
@@ -140,13 +142,27 @@ class Injector {
 
             try {
                 ctx.session.introShown = true;
-                return ctx.reply(__(text, ['content', 'intro']), menu([{code: '_accept', text: 'Понятно'}]));
+                return ctx.replyWithHTML(__(text, ['content', 'intro']), menu([{code: '_accept', text: 'Понятно'}]));
             }
             catch (e) {
+                console.log(e);
             }
         });
 
         this.app.action('_accept', afterAccept);
+        return this;
+    }
+
+    addRoute(type, subType, handler) {
+        if (typeof(subType) === 'function') {
+            handler = subType;
+            subType = null;
+            this.app[type](handler);
+        }
+        else {
+            this.app[type](subType, handler);
+        }
+
         return this;
     }
 

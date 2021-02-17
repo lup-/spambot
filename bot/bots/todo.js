@@ -52,7 +52,9 @@ initManagers(['chat', 'periodic', 'profile', 'bus']).then(async ({chat, periodic
     periodic.setTaskRunner(async task => {
         try {
             let taskText = __(task.text, ['content', 'remind']);
-            let message = await app.telegram.sendMessage(task.chatId, taskText, postponeMenu(task.taskId));
+            let extra = postponeMenu(task.taskId);
+            extra.parse_mode = 'HTML';
+            let message = await app.telegram.sendMessage(task.chatId, taskText, extra);
             if (message && message.message_id) {
                 await periodic.setTaskRemindSuccess(task.taskId);
             }

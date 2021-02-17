@@ -24,7 +24,7 @@ module.exports = function (business) {
             buttons.push({code: 'type_recommendations', text: 'Рекомендации'});
         }
 
-        return ctx.reply(
+        return ctx.replyWithHTML(
             __('Что вам интересно?', ['main', 'menu', 'start']),
             menu(buttons, 1)
         );

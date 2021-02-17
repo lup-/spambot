@@ -49,7 +49,7 @@ module.exports = function (params) {
         try {
             ctx.session.introShown = true;
             let extra = menu([{code: 'accept', text: 'Понятно'}]);
-            return ctx.reply(__(disclaimer.text, disclaimer.tags), extra);
+            return ctx.replyWithHTML(__(disclaimer.text, disclaimer.tags), extra);
         }
         catch (e) {
         }

@@ -53,7 +53,7 @@ module.exports = function (params) {
 
         try {
             ctx.session.introShown = true;
-            return ctx.reply(__(disclaimer.text, disclaimer.tags), menu([{code: 'accept', text: 'Понятно'}]));
+            return ctx.replyWithHTML(__(disclaimer.text, disclaimer.tags), menu([{code: 'accept', text: 'Понятно'}]));
         }
         catch (e) {
         }

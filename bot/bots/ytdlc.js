@@ -107,7 +107,7 @@ initManagers(['chat', 'bus']).then(async ({chat, bus}) => {
     app.use(SaveActivityMiddleware);
 
     app.start(async (ctx) => {
-        return ctx.reply(
+        return ctx.replyWithHTML(
             __('Пришлите ссылку на видео. Максимальный размер файла для бота в Telegram 50Мб.\nБудет загружено видео максимального качества с учетом этого органичения.', ['main', 'start'])
         );
     });
@@ -177,19 +177,19 @@ initManagers(['chat', 'bus']).then(async ({chat, bus}) => {
 
             let isUnsupportedUrl = e && typeof (e) === 'string' && e.toLowerCase().indexOf('unsupported url') !== -1;
             if (isUnsupportedUrl) {
-                return ctx.reply('Такие ссылки пока не поддерживаются. Попробуйте другую.');
+                return ctx.replyWithHTML('Такие ссылки пока не поддерживаются. Попробуйте другую.');
             }
 
             if (e && e.type === 'inner') {
-                return ctx.reply(e.text);
+                return ctx.replyWithHTML(e.text);
             }
 
             if (e && e.code && e.code === 413) {
-                return ctx.reply('Видео слишком большое для отправки через Telegram');
+                return ctx.replyWithHTML('Видео слишком большое для отправки через Telegram');
             }
 
             console.error(e);
-            return ctx.reply('Ошибка загрузки. Попробуйте еще раз.\n\nPS. Загрузки приватных ссылок не поддерживаются:(');
+            return ctx.replyWithHTML('Ошибка загрузки. Попробуйте еще раз.\n\nPS. Загрузки приватных ссылок не поддерживаются:(');
         }
 
         ctx.session.lastDownload = moment().unix();

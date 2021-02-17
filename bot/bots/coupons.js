@@ -1,115 +1,57 @@
-const axios = require('axios');
-const FormData = require('form-data');
+const { Telegraf } = require('telegraf');
+const setupBot = require('./helpers/setup');
+const {getManagerSync: manager} = require('../managers');
 
-const PAGE_LIMIT = 10;
+const BOT_TOKEN = process.env.BOT_TOKEN;
 
-async function auth() {
-    const CLIENT_ID = process.env.ADMITAD_CLIENT_ID;
-    const CLIENT_SECRET = process.env.ADMITAD_CLIENT_SECRET;
+let app = new Telegraf(BOT_TOKEN);
+let bus = manager('bus');
+let periodic = manager('periodic');
+let coupon = manager('coupon');
+let profileManager = manager('profile');
 
-    let scopes = [
-        'public_data',
-        'websites',
-        'coupons',
-        'coupons_for_website',
-        'advcampaigns', 'advcampaigns_for_website', 'manage_advcampaigns',
-        'deeplink_generator'
-    ];
-
-    let authParams = new FormData;
-    authParams.append('client_id', CLIENT_ID);
-    authParams.append('scope', scopes.join(' '));
-    authParams.append('grant_type', 'client_credentials');
-
-    let response = await axios.post('https://api.admitad.com/token/', authParams, {
-        headers: authParams.getHeaders(),
-        auth: {
-            username: CLIENT_ID,
-            password: CLIENT_SECRET
-        }
-    });
-
-    return response.data;
+let settingsParams = {
+    getSettingsText() {
+        return `Укажите интересные вам категории. Так игра будет интереснее`;
+    },
+    getSelectedCategoryIds(ctx) {
+        return ctx.session.profile.category || [];
+    },
+    getAllCategories: coupon.getCatalogCategories.bind(coupon),
+    async saveSettings(profile, ctx) {
+        ctx.session.profile = await profileManager.saveProfile(profile);
+    },
+    settingsNextScene: 'couponMenu'
 }
-async function getToken() {
-    let authData = await auth();
-    return authData.access_token;
-}
+let disclaimer = `В этом боте 100-тни тысяч скидок и предложений. И посмотреть их все -- нереально.
 
-async function getCoupons(token, region = 'ru') {
-    let response = await axios.get('https://api.admitad.com/coupons/', {
-        headers: { 'Authorization': `Bearer ${token}` },
-        params: {
-            language: region,
-            order_by: '-rating',
-        }
-    });
+Но можно испытать удачу. Правда не чаще, чем 1 раз в час: все самое сладкое нужно поберечь.
 
-    return response.data.results;
-}
-async function getAdvCampaigns(token, filter = {}, connected = false, offset = 0) {
-    if (!filter) {
-        filter = {};
-    }
+Бросайте кости и получайте лучшие скидки. Чем больше очков, тем больше скидка. За дубль -- самое сладкое.`;
 
-    filter.limit = PAGE_LIMIT;
-    filter.offset = offset;
+app = setupBot(app)
+    .blockNonPrivate()
+    .addPerformance()
+    .addSession()
+    .addSafeReply()
+    .addIdsToSession()
+    .addRefSave()
+    .addUserSave()
+    .addProfile()
+    .addSaveActivity()
+    .addSubscription()
+    .addScene('catalog', 'settings', settingsParams)
+    .addScenes('coupon', {coupon, profile: profileManager})
+    .addDisclaimer(disclaimer, ctx => ctx.scene.enter('couponMenu'))
+    .addDefaultRoute(ctx => ctx.scene.enter('couponMenu'), false)
+    .get();
 
-    let {data} = await axios.get('https://api.admitad.com/advcampaigns/', {
-        headers: {'Authorization': `Bearer ${token}`},
-        params: filter
-    });
+periodic.setRepeatingTask(async () => {
+    await coupon.updateAllCampaigns();
+    await coupon.updateAllCoupons();
+    await coupon.connectNewCampaigns();
+    await coupon.updateAllProducts();
+}, 86400);
 
-    let campaigns = data.results;
-    let isPage = offset > 0;
-    if (isPage) {
-        return campaigns;
-    }
-
-    let hasPages = data._meta.count > data._meta.limit;
-    if (hasPages) {
-        let pageCount = Math.ceil(data._meta.count / data._meta.limit);
-        for (let page = 1; page < pageCount; page++) {
-            let nextPageCampaigns = await getAdvCampaigns(token, filter, connected, page);
-            campaigns = campaigns.concat(nextPageCampaigns);
-        }
-    }
-
-    return connected ? campaigns.filter(campaign => campaign.connected) : campaigns;
-}
-async function getNewCouponCampaigns(token) {
-    return getAdvCampaigns(token, {has_tool: 'coupons'});
-}
-async function connectAdvCapaign(token, campaign, website = false) {
-    let campaignId = campaign.id;
-    let websiteId = website.id;
-
-    let response = await axios.get(`https://api.admitad.com/advcampaigns/${campaignId}/attach/${websiteId}/`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-    });
-
-    return response.data && response.data.success && response.data.success === 'OK';
-}
-async function getWebsite(token) {
-    let response = await axios.get('https://api.admitad.com/websites/v2/', {
-        headers: {'Authorization': `Bearer ${token}`},
-    });
-
-    let activeWebsites = response.data.filter(website => website.status === 'active');
-    return activeWebsites.length > 0 ? activeWebsites[0] : false;
-}
-
-(async () => {
-    try {
-        let token = await getToken();
-        let website = await getWebsite(token);
-        let coupons = await getCoupons(token);
-        //let campaigns = await getNewCouponCampaigns(token);
-        let allCampaigns = await getAdvCampaigns(token)
-
-        console.log(coupons);
-    }
-    catch (e) {
-        console.log(e);
-    }
-})();
+bus.listenCommands();
+app.launch();

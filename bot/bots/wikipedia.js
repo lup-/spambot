@@ -37,7 +37,7 @@ initManagers(['chat', 'bus']).then(async ({chat, bus}) => {
     app.use(SaveActivityMiddleware);
 
     app.start(async (ctx) => {
-        return ctx.reply(
+        return ctx.replyWithHTML(
             __('Пришлите любой запрос и я поищу его в Википедии', ['main', 'start'])
         );
     });

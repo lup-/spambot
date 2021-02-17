@@ -32,7 +32,7 @@ module.exports = function (params) {
             : await datingManager.randomProfile(currentProfile);
 
         if (!profileToRate) {
-            await ctx.reply(
+            await ctx.replyWithHTML(
                 __('Похоже, что тут пусто', ['content', 'empty'])
             );
             return ctx.scene.enter('mainMenu');
@@ -42,6 +42,7 @@ module.exports = function (params) {
 
         let extra = rateMenu(ctx, profileToRate);
         extra.caption = __(profileText, ['content', 'profile'], 'photo');
+        extra.parse_mode = 'HTML';
 
         return ctx.safeReply(
             ctx => ctx.replyWithPhoto(profileToRate.photo.file_id, extra),
@@ -70,7 +71,7 @@ module.exports = function (params) {
 
                 let userLink = `[✉ Написать](tg://user?id=${targetProfile.userId})`;
                 await ctx.replyWithMarkdown('Взаимная симпатия! ❤\n\n'+userLink);
-                return ctx.reply(
+                return ctx.replyWithHTML(
                     __('Для продолжения работы нажмите /start', ['menu', 'restart'])
                 );
             }, ctx => ctx.scene.reenter(), ctx);

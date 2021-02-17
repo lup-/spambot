@@ -202,7 +202,7 @@ module.exports = function ({vacancies}) {
         let fileId = ctx.scene.state.document ? ctx.scene.state.document.file_id : false;
 
         await vacancies.saveResume(candidate, fileId, text, userId);
-        ctx.replyWithHTML(__('Резюме опубликовано!', ['settings', 'success', 'saved']));
+        await ctx.replyWithHTML(__('Резюме опубликовано!', ['settings', 'success', 'saved']));
         return ctx.scene.enter('intro');
     });
 

@@ -81,7 +81,7 @@ function categoryMenu(selectedCategoryIds, allCategories, pageIndex, levels) {
     return menuWithControls(buttons, 2, controls);
 }
 
-module.exports = function ({getSettingsText, getSelectedCategoryIds, getAllCategories, saveSettings}) {
+module.exports = function ({getSettingsText, getSelectedCategoryIds, getAllCategories, saveSettings, settingsNextScene}) {
     const scene = new BaseScene('settings');
 
     scene.enter(async ctx => {
@@ -159,7 +159,10 @@ module.exports = function ({getSettingsText, getSelectedCategoryIds, getAllCateg
             newProfile.category = ctx.session.category || [];
             await saveSettings(newProfile, ctx);
         }
-        return ctx.scene.enter('discover');
+
+        let goto = settingsNextScene ? settingsNextScene : 'discover';
+
+        return ctx.scene.enter(goto);
     });
 
     return scene;

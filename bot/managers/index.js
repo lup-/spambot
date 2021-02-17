@@ -18,6 +18,7 @@ const BooksManager = require('./Books');
 const MessageBus = require('./MessageBus');
 const PerformanceManager = require('./Perfomance');
 const ProxyManager = require('./Proxy');
+const CouponManager = require('./Coupon');
 
 let instances = {};
 
@@ -65,6 +66,8 @@ function init(manager, params = {}) {
             return new PerformanceManager();
         case 'proxy':
             return new ProxyManager();
+        case 'coupon':
+            return new CouponManager();
         default:
             return null;
     }

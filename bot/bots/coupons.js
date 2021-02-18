@@ -29,6 +29,16 @@ let disclaimer = `В этом боте 100-тни тысяч скидок и п�
 
 Бросайте кости и получайте лучшие скидки. Чем больше очков, тем больше скидка. За дубль -- самое сладкое.`;
 
+function settingsOrMenu(ctx) {
+    let categorySelected = ctx.session.profile && ctx.session.profile.categorySelected;
+    if (categorySelected) {
+        return ctx.scene.enter('couponMenu');
+    }
+    else {
+        return ctx.scene.enter('settings');
+    }
+}
+
 app = setupBot(app)
     .blockNonPrivate()
     .addPerformance()
@@ -42,8 +52,8 @@ app = setupBot(app)
     .addSubscription()
     .addScene('catalog', 'settings', settingsParams)
     .addScenes('coupon', {coupon, profile: profileManager})
-    .addDisclaimer(disclaimer, ctx => ctx.scene.enter('couponMenu'))
-    .addDefaultRoute(ctx => ctx.scene.enter('couponMenu'), false)
+    .addDisclaimer(disclaimer, settingsOrMenu)
+    .addDefaultRoute(settingsOrMenu, false)
     .get();
 
 periodic.setRepeatingTask(async () => {

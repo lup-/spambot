@@ -157,6 +157,7 @@ module.exports = function ({getSettingsText, getSelectedCategoryIds, getAllCateg
         if (ctx.session.profile) {
             let newProfile = clone(ctx.session.profile);
             newProfile.category = ctx.session.category || [];
+            newProfile.categorySelected = true;
             await saveSettings(newProfile, ctx);
         }
 

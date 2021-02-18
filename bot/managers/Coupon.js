@@ -497,7 +497,7 @@ module.exports = function () {
             let index = 0;
             if (isDouble) {
                 let indexFrom = scoreCount;
-                let relativeIndex = totalScore/2;
+                let relativeIndex = totalScore/2-1;
                 index = indexFrom + relativeIndex;
             }
             else {
@@ -506,6 +506,10 @@ module.exports = function () {
 
             let realIntervalCount = intervals.length;
             let realIndex = Math.floor(realIntervalCount / intervalsCount * index);
+            if (realIndex > intervals.length - 1) {
+                realIndex = intervals.length - 1;
+            }
+
             let interval = intervals[realIndex];
 
             return {maxScore: interval.to, minScore: interval.from};
@@ -618,7 +622,7 @@ module.exports = function () {
 
         async getRandomItem(type, totalScore, isDouble, ctx) {
             let profile = ctx.session.profile;
-            let categories = profile.categories || [];
+            let categories = profile.category || [];
             let region = ctx.from.language_code || false;
 
             switch (type) {

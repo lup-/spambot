@@ -3,6 +3,10 @@ const {menu} = require('../../helpers/wizard');
 const {__} = require('../../../modules/Messages');
 const {wait} = require('../../../modules/Helpers');
 
+function cleanName(name) {
+    return name.replace(/ +(RU|UA|KZ|BY|WW)/g, '').replace(/ +\[.*?\]/g, '');
+}
+
 function getProductText(ctx, productItem) {
     let rawProduct = productItem.rawProduct;
     return `<b>${productItem.name}</b>
@@ -16,7 +20,7 @@ ${rawProduct.description}`;
 function getCouponText(ctx, couponItem) {
     let rawCoupon = couponItem.rawCoupon;
     let description = rawCoupon.description;
-    let name = rawCoupon.campaign.name.replace(/ +(RU|UA|KZ|BY|WW)/g, '');
+    let name = cleanName(rawCoupon.campaign.name);
     if (!description) {
         description = rawCoupon.categories ? rawCoupon.categories.map(category => category.name).join(' / ') : '';
     }
@@ -30,7 +34,7 @@ ${description}`;
 function getCashbackText(ctx, cashbackItem, couponMgr) {
     let cashbackSize = couponMgr.getCashbackValue(cashbackItem);
     let description = cashbackItem.admitadCampaign.categories ? cashbackItem.admitadCampaign.categories.map(category => category.name).join(' / ') : '';
-    let name = cashbackItem.name.replace(/ +(RU|UA|KZ|BY|WW)/g, '');
+    let name = cleanName(cashbackItem.name);
 
     return `<b>${name}</b>
 Cashback: до ${cashbackSize}%
@@ -41,7 +45,8 @@ ${description}`
 async function replyWithItem(type, ctx, item, couponMgr) {
     if (!item) {
         let emptyMenu = menu([
-            { code: 'dice', text: 'Бросить кости еще раз' }
+            { code: 'dice', text: 'Бросить кости еще раз' },
+            { code: 'settings', text: 'Поменять категории' },
         ], 1);
 
         return ctx.replyWithHTML(`Неужели не нашлось скдики? Вот это да...`, emptyMenu);
@@ -115,7 +120,8 @@ module.exports = function ({coupon}) {
         return replyWithItem(type, ctx, item, coupon);
     });
     
-    scene.action('back', ctx => ctx.scene.enter('intro'));
+    scene.action('back', ctx => ctx.scene.enter('couponMenu'));
+    scene.action('settings', ctx => ctx.scene.enter('settings'));
 
     return scene;
 }

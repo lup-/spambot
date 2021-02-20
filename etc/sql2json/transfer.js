@@ -1,7 +1,7 @@
-const {getDb} = require('../bot/modules/Database');
-const moment = require('../bot/node_modules/moment');
-const axios = require('../bot/node_modules/axios');
-const shortid = require('../bot/node_modules/shortid');
+const {getDb} = require('../../bot/modules/Database');
+const moment = require('../../bot/node_modules/moment');
+const axios = require('../../bot/node_modules/axios');
+const shortid = require('../../bot/node_modules/shortid');
 
 const VACANCIES_DB = process.env.VACANCIES_DB || 'vacancies';
 
@@ -235,6 +235,41 @@ async function getData(dbName) {
                 return records;
             }, []);
         break;
+        case 'promokodes':
+        case 'promokodas':
+            let oldKodesUsers = await db.collection('public.bot_users').find({}).toArray();
+            users = oldKodesUsers.map(oldUser => {
+                let startedAt;
+                try {
+                    startedAt = oldUser.startedAt ? moment(oldUser.startedAt).unix() : null;
+                }
+                catch (e) {
+                    startedAt = null
+                }
+
+                return {
+                    "id": oldUser.id,
+                    "user": {
+                        "id": oldUser.id,
+                        "is_bot": false,
+                        "first_name": oldUser.firstName,
+                        "last_name": oldUser.lastName,
+                        "username": oldUser.username,
+                        "language_code": null
+                    },
+                    "chat": {
+                        "id": oldUser.id,
+                        "first_name": oldUser.firstName,
+                        "last_name": oldUser.lastName,
+                        "username": oldUser.username,
+                        "type": "private"
+                    },
+                    "transferred": true,
+                    "registered": startedAt,
+                    "updated": startedAt
+                };
+            });
+            break;
     }
 
     return {users, refs, cvs, profiles};

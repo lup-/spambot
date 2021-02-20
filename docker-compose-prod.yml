@@ -658,6 +658,29 @@ services:
       - 'HH_FILTER={"schedule": "remote", "text": "NOT МТС"}'
     command: node bots/vacancies.js
 
+  coupon_bot:
+    image: node
+    container_name: 'coupon_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+    volumes:
+      - ./bot:/var/www
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=coupon_bot
+      - BOT_TOKEN=${COUPON_BOT_TOKEN}
+      - BOT_NAME=coupon_bot
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - ADMITAD_CLIENT_ID=${ADMITAD_CLIENT_ID}
+      - ADMITAD_CLIENT_SECRET=${ADMITAD_CLIENT_SECRET}
+      - MONGO_TIMEOUT=3600
+    command: node bots/coupons.js
+
   mailer_bot:
     image: node
     container_name: 'mailer_bot'

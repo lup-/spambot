@@ -1,9 +1,11 @@
 const {Sender} = require('./SenderClass');
 
-const [,, mailingId] = process.argv;
+const mailingId = process.argv[2];
+const botId = process.argv[3];
 
 (async () => {
-    const sender = new Sender(mailingId);
+    process.send({action: 'started'});
+    const sender = new Sender(mailingId, botId);
     await sender.init();
 
     process.on('message', async message => {
@@ -14,4 +16,5 @@ const [,, mailingId] = process.argv;
     });
 
     await sender.startSending();
+    process.exit();
 })();

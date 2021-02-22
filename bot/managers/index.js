@@ -13,7 +13,12 @@ const DiseasesManager = require('./Diseases');
 const PodcastsManager = require('./Podcasts');
 const FinanceManager = require('./Finance');
 const BusinessManager = require('./Business');
+const VacanciesManager = require('./Vacancies');
+const BooksManager = require('./Books');
 const MessageBus = require('./MessageBus');
+const PerformanceManager = require('./Perfomance');
+const ProxyManager = require('./Proxy');
+const CouponManager = require('./Coupon');
 
 let instances = {};
 
@@ -51,9 +56,18 @@ function init(manager, params = {}) {
             return new FinanceManager();
         case 'business':
             return new BusinessManager();
+        case 'vacancies':
+            return new VacanciesManager();
+        case 'books':
+            return new BooksManager(params.proxy);
         case 'bus':
             return new MessageBus();
-
+        case 'performance':
+            return new PerformanceManager();
+        case 'proxy':
+            return new ProxyManager();
+        case 'coupon':
+            return new CouponManager();
         default:
             return null;
     }
@@ -61,6 +75,14 @@ function init(manager, params = {}) {
 
 module.exports = {
     init,
+    getManagerSync(manager, params) {
+        if (instances && instances[manager]) {
+            return instances[manager];
+        }
+
+        instances[manager] = init(manager, params);
+        return instances[manager];
+    },
     getManager: async function (manager) {
         if (instances && instances[manager]) {
             return instances[manager];

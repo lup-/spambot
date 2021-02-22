@@ -47,7 +47,8 @@
                         ></v-simple-checkbox>
                     </template>
                     <template v-slot:item.actions="{ item }">
-                        <v-btn small @click="gotoBotStats(item.botId)">Статистика</v-btn>
+                        <v-btn small icon @click="gotoBotStats(item.botId)"><v-icon>mdi-chart-bar</v-icon></v-btn>
+                        <v-btn small icon @click="gotoSettings(item.botId)"><v-icon>mdi-cog</v-icon></v-btn>
                     </template>
                 </v-data-table>
             </v-col>
@@ -75,6 +76,9 @@
             },
             gotoBotStats(botId) {
                 this.$router.push({name: 'statsDetails', params: {id: botId}});
+            },
+            gotoSettings(botName) {
+                this.$router.push({name: 'botSettings', params: {botName}});
             }
         },
         computed: {

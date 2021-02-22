@@ -141,10 +141,10 @@ initManagers(['chat', 'bus']).then(async ({chat, bus}) => {
                 await ctx.replyWithHTML(
                     __(analyticsText( text ), ['content', 'stats'])
                 );
-                return ctx.reply('Проверка окончена. Пришлите новый текст');
+                return ctx.replyWithHTML('Проверка окончена. Пришлите новый текст');
             }
             else {
-                await ctx.reply('Ошибок не найдено');
+                await ctx.replyWithHTML('Ошибок не найдено');
                 return ctx.replyWithHTML( analyticsText( text ) );
             }
 

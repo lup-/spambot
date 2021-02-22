@@ -7,7 +7,7 @@ const routes = [
 
 const events = [
     { code: 'message', handler: (ctx) => {
-            return ctx.replyWithMarkdown(__('unknownMessage'));
+            return ctx.replyWithHTML(__('unknownMessage'));
         }},
 ]
 

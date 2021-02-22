@@ -28,7 +28,7 @@ module.exports = function (filmManager) {
         let allGenres = await filmManager.genresList(searchType);
 
         await ctx.reply(genresText, genresMenu(genreIds, allGenres));
-        return ctx.reply(
+        return ctx.replyWithHTML(
             __('После настройки нажмите', ['settings', 'save']),
             menu([{code: 'ready', text: 'Готово'}])
         );

@@ -1,0 +1,7 @@
+#!/bin/sh
+if [ "$1" = "--show" ]
+then
+  docker run -v $UNOCONV_SHARED:/workdir -w /workdir --rm $UNOCONV_CONTAINER unoconv "$@"
+else
+  docker run -v $UNOCONV_SHARED:/workdir -w /workdir --rm $UNOCONV_CONTAINER unoconv "$@" 2>/dev/null
+fi

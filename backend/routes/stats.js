@@ -38,45 +38,6 @@ module.exports = {
             botstats.push({botId: bot.id, users: usersStat, refs: refsStat});
         }
 
-        let botQueries = [
-            {
-                botId: 'book_bot',
-                userCount: 'SELECT COUNT(*) AS count FROM bot_user',
-                refs: false,
-            },
-            {
-                botId: 'music_bot',
-                userCount: 'SELECT COUNT(*) AS count FROM userdata',
-                refs: 'SELECT ref AS code, COUNT(*) AS count FROM userdata WHERE ref IS NOT NULL GROUP BY ref ORDER BY count DESC',
-            },
-            {
-                botId: 'promo_bot',
-                userCount: 'SELECT COUNT(*) AS count FROM bot_users',
-                refs: false,
-            },
-            {
-                botId: 'remotework_bot',
-                userCount: 'SELECT COUNT(*) AS count FROM users',
-                refs: false,
-            },
-        ];
-
-        for (const bot of config.externalBotsList()) {
-            let queries = botQueries.find(item => item.botId === bot.id);
-
-            const db = await getPg(bot.dbName);
-            const countRes = await db.query(queries.userCount);
-            const refRes = queries.refs ? await db.query(queries.refs) : false;
-            await db.end();
-
-            let usersStat = countRes && countRes.rows
-                ? {count: parseInt(countRes.rows[0].count)}
-                : false;
-            let refsStat = refRes.rows;
-
-            botstats.push({botId: bot.id, users: usersStat, refs: refsStat, external: true});
-        }
-
         ctx.body = {stats: botstats};
     },
     async details(ctx) {
@@ -145,6 +106,10 @@ module.exports = {
             ]).toArray();
 
             let usersResult = await users.aggregate([
+                {$match: {$or: [
+                    {blocked: {$in: [null, false]}},
+                    {$and: [ {blocked: true}, {blockedSince: {$gt: range.end}} ]}
+                ]}},
                 {$match: {$and: [{registered: {$gte: range.start}}, {registered: {$lt: range.end}}]}},
                 {$set: {registered_date: {$toDate: {$multiply: ["$registered", 1000]}}}},
                 {$set: {
@@ -277,86 +242,7 @@ module.exports = {
     async dashboard(ctx) {
         ctx.body = await this.getStats();
     },
-    // async dashboardOld(ctx) {
-    //
-    //     let userAllCount = [];
-    //     let botsAll = await config.botList();
-    //
-    //     let totalTodayBotUsers = 0;
-    //     let totalYesterdayBotUsers = 0;
-    //     let allFoundUsers = [];
-    //     let totalActivityRecords = [];
-    //     let totalActivityWeek = 0;
-    //     let totalActivityMoonts = 0;
-    //
-    //     for (const bot of botsAll) {
-    //         let db = await getDb(bot.dbName);
-    //         let usersTable = db.collection('users');
-    //         let activityTable = db.collection('activity');
-    //
-    //         let yesterday = moment().subtract(1, 'd').startOf('d').unix(); //moment.js
-    //         let today = moment().unix();
-    //
-    //         let findUsersToday = await usersTable.count({registered: {$lt: today}});
-    //         let yesterdayBotUsers = await usersTable.count({registered: {$lt: yesterday}});
-    //         let botUsers = await usersTable.find({registered: {$lt: today}}).toArray();
-    //
-    //         let activityRecords = await  activityTable.find({date: {$gte: activityToday} }).toArray();
-    //
-    //         let activityWeekRecords = await usersTable.count({registered: {$lt: activityWeek}});
-    //
-    //         let activityMoontsRecords = await usersTable.count({registered: {$lt: activityMoonts}});
-    //
-    //                 totalActivityRecords = totalActivityRecords.concat(activityRecords);
-    //
-    //         totalTodayBotUsers += findUsersToday;
-    //
-    //         totalYesterdayBotUsers += yesterdayBotUsers;
-    //
-    //         totalActivityWeek += activityWeekRecords;
-    //
-    //         totalActivityMoonts += activityMoontsRecords;
-    //
-    //         allFoundUsers = allFoundUsers.concat(botUsers);
-    //     }
-    //
-    //     function onlyUnique(value, index, self) {
-    //         return self.indexOf(value) === index;
-    //     }
-    //
-    //     let allUserIds = allFoundUsers.map(function (user) {
-    //         return user.id;
-    //     });
-    //
-    //     let allActivityUser = totalActivityRecords.map(function (record) {
-    //        return  record.userId;
-    //     });
-    //
-    //     let usersForWeek = totalActivityWeek.filter(onlyUnique);
-    //
-    //     let userAllMoonts = totalActivityMoonts.filter(onlyUnique);
-    //
-    //     let uniqueIds = allUserIds.filter(onlyUnique);
-    //     let uniqueRecordsUser = allActivityUser.filter(onlyUnique);
-    //
-    //
-    //     let countUniqueId = uniqueIds.length;
-    //     let countRecordsUser = uniqueRecordsUser.length;
-    //
-    //     let deltaUsers = totalTodayBotUsers - totalYesterdayBotUsers;
-    //     let procentOfAllUsersYesterday = parseFloat((deltaUsers / totalYesterdayBotUsers * 100).toFixed(2));
-    //
-    //
-    //
-    //     ctx.body = {
-    //         totalTodayBotUsers,
-    //         totalYesterdayBotUsers,
-    //         procentOfAllUsersYesterday,
-    //         countUniqueId,
-    //         countRecordsUser,
-    //         usersForWeek,
-    //     };
-    // },
+
     async getStats() {
         let totalUsers = await totalUsersBot.getTotalUsers();
         let uniqueUsers = await uniqueUsersBot.getUniqueUsers();

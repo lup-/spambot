@@ -3,6 +3,7 @@ import axios from "axios";
 export default {
     state: {
         list: [],
+        settings: false,
     },
     getters: {
         botNames(state) {
@@ -19,6 +20,14 @@ export default {
         async loadBots({commit}, filter) {
             let response = await axios.post(`/api/bots/list`, {filter});
             return commit('setBots', response.data.bots);
+        },
+        async loadSettings({commit}, botName) {
+            let response = await axios.post(`/api/bots/getSettings`, {botName});
+            return commit('setSettings', response.data.settings);
+        },
+        async saveSettings({commit}, settings) {
+            let response = await axios.post(`/api/bots/saveSettings`, {settings});
+            return commit('setSettings', response.data.settings);
         },
         async restartBots({getters}, botNames) {
             if (!botNames) {
@@ -42,6 +51,9 @@ export default {
     mutations: {
         setBots(state, bots) {
             state.list = bots;
+        },
+        setSettings(state, settings) {
+            state.settings = settings;
         },
     }
 }

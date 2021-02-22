@@ -126,7 +126,7 @@ module.exports = function (periodic) {
         try {
             let updatedTask = await periodic.setTaskTime(taskId, newTime);
             let taskTime = moment.unix(updatedTask.nextRemind).tz(ctx.session.profile.zone).format('DD.MM.YYYY');
-            return ctx.reply(
+            return ctx.replyWithHTML(
                 __('Хорошо. Напомню ' + taskTime, ['content', 'success', 'task']),
                 timeMenu(taskId)
             );
@@ -152,7 +152,7 @@ module.exports = function (periodic) {
 
         let updatedTask = await periodic.setTaskTime(taskId, newTime);
         let taskTime = moment.unix(updatedTask.nextRemind).tz(ctx.session.profile.zone).format('DD.MM.YYYY в HH:mm');
-        await ctx.reply(
+        await ctx.replyWithHTML(
             __('Хорошо. Напомню ' + taskTime, ['content', 'success', 'task', 'time'])
         );
         return ctx.scene.reenter();

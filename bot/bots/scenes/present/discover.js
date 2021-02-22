@@ -79,14 +79,30 @@ async function replyWithPresent(ctx, presentManager, showNewMessage) {
     let editExtra = presentMenu(results);
     editExtra.parse_mode = 'html';
 
-    let media = imageUrl
-        ? {url: imageUrl}
-        : EMPTY_FILE_ID;
+    let media = false;
 
-    return showNewMessage
-        ? ctx.replyWithPhoto(media, photoExtra)
-        : ctx.editMessageMedia({type: 'photo', media, caption: presentDescription(results.present)}, photoExtra);
+    if (results.present && results.present.imageId) {
+        media = results.present.imageId;
+    }
 
+    if (!media && imageUrl) {
+        media = {url: imageUrl};
+    }
+
+    if (!media) {
+        media = EMPTY_FILE_ID;
+    }
+
+
+    let result = showNewMessage
+        ? await ctx.replyWithPhoto(media, photoExtra)
+        : await ctx.editMessageMedia({type: 'photo', media, caption: presentDescription(results.present)}, photoExtra);
+
+    if (!results.present.imageId) {
+        await presentManager.saveImageId(results.present, result);
+    }
+
+    return result;
 }
 
 module.exports = function (presentManager) {

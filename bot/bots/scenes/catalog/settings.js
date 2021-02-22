@@ -1,5 +1,6 @@
 const BaseScene = require('telegraf/scenes/base');
 const {menuWithControls} = require('../../helpers/wizard');
+const {clone} = require('../../helpers/common');
 
 function isSelectedRecursive(selectedCategoryIds, category) {
     let hasSelectedIds = selectedCategoryIds && selectedCategoryIds.length > 0;
@@ -80,7 +81,7 @@ function categoryMenu(selectedCategoryIds, allCategories, pageIndex, levels) {
     return menuWithControls(buttons, 2, controls);
 }
 
-module.exports = function ({getSettingsText, getSelectedCategoryIds, getAllCategories, saveSettings}) {
+module.exports = function ({getSettingsText, getSelectedCategoryIds, getAllCategories, saveSettings, settingsNextScene}) {
     const scene = new BaseScene('settings');
 
     scene.enter(async ctx => {
@@ -95,6 +96,7 @@ module.exports = function ({getSettingsText, getSelectedCategoryIds, getAllCateg
         );
     });
 
+    scene.start(ctx => ctx.scene.enter('intro'));
     scene.action(/level_(.*)/, async ctx => {
         let levelId = ctx.match[1] ? ctx.match[1] : false;
 
@@ -104,6 +106,7 @@ module.exports = function ({getSettingsText, getSelectedCategoryIds, getAllCateg
 
         if (levelId) {
             ctx.scene.state.levels.push(levelId);
+            ctx.scene.state.page = 0;
         }
 
         return ctx.scene.reenter();
@@ -152,10 +155,15 @@ module.exports = function ({getSettingsText, getSelectedCategoryIds, getAllCateg
 
     scene.action('ready', async ctx => {
         if (ctx.session.profile) {
-            ctx.session.profile.category = ctx.session.category || [];
-            await saveSettings(ctx.session.profile, ctx);
+            let newProfile = clone(ctx.session.profile);
+            newProfile.category = ctx.session.category || [];
+            newProfile.categorySelected = true;
+            await saveSettings(newProfile, ctx);
         }
-        return ctx.scene.enter('discover');
+
+        let goto = settingsNextScene ? settingsNextScene : 'discover';
+
+        return ctx.scene.enter(goto);
     });
 
     return scene;

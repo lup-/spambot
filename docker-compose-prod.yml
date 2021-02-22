@@ -53,7 +53,7 @@ services:
       - mongo
       - redis
     volumes:
-      - ./files:/downloads
+      - /mnt/lib/files:/downloads
       - ./bot:/var/www
     working_dir: /var/www
     environment:
@@ -75,7 +75,7 @@ services:
       - mongo
       - redis
     volumes:
-      - ./files:/downloads
+      - /mnt/lib/files:/downloads
       - ./bot:/var/www
     working_dir: /var/www
     environment:
@@ -348,6 +348,339 @@ services:
       - BOT_NAME=refs_bot
     command: npm run refs_bot
 
+  bookie_bot:
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_books"
+    container_name: 'bookie_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+      - tgapi_proxy
+    volumes:
+      - ./bot:/var/www
+      - /mnt/lib/files:/var/www/files
+      - /mnt/lib/books/fb2.Flibusta.Net:/var/www/lib
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=bookie_bot
+      - BOT_NAME=bookie_bot
+      - BOT_TOKEN=${BOOKIE_BOT_TOKEN}
+      - TGAPI_ROOT=https://tgapi_proxy
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - FILES_LOCAL_PATH=/var/www/files
+      - FILES_REMOTE_PATH=/files
+      - LIB_PATH=/var/www/lib
+      - PROXY_DISABLED=${BOOKS_PROXY_DISABLED}
+    command: node bots/books.js
+
+  booksave_bot:
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_books"
+    container_name: 'booksave_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+      - tgapi_proxy
+    volumes:
+      - ./bot:/var/www
+      - /mnt/lib/files:/var/www/files
+      - /mnt/lib/books/fb2.Flibusta.Net:/var/www/lib
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=booksave_bot
+      - BOT_NAME=booksave_bot
+      - BOT_TOKEN=${BOOKSAVE_BOT_TOKEN}
+      - TGAPI_ROOT=https://tgapi_proxy
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - PERF_MONITOR=1
+      - FILES_LOCAL_PATH=/var/www/files
+      - FILES_REMOTE_PATH=/files
+      - LIB_PATH=/var/www/lib
+      - PROXY_DISABLED=${BOOKS_PROXY_DISABLED}
+    command: node bots/books.js
+
+  b3okie_bot:
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_books"
+    container_name: 'b3okie_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+      - tgapi_proxy
+    volumes:
+      - ./bot:/var/www
+      - /mnt/lib/files:/var/www/files
+      - /mnt/lib/books/fb2.Flibusta.Net:/var/www/lib
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=b3okie_bot
+      - BOT_NAME=b3okie_bot
+      - BOT_TOKEN=${B3OKIE_BOT_TOKEN}
+      - TGAPI_ROOT=https://tgapi_proxy
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - PERF_MONITOR=0
+      - FILES_LOCAL_PATH=/var/www/files
+      - FILES_REMOTE_PATH=/files
+      - LIB_PATH=/var/www/lib
+      - PROXY_DISABLED=${BOOKS_PROXY_DISABLED}
+    command: node bots/books.js
+
+  booksforfree_bot:
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_books"
+    container_name: 'booksforfree_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+      - tgapi_proxy
+    volumes:
+      - ./bot:/var/www
+      - /mnt/lib/files:/var/www/files
+      - /mnt/lib/books/fb2.Flibusta.Net:/var/www/lib
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=booksforfree_bot
+      - BOT_NAME=booksforfree_bot
+      - BOT_TOKEN=${BOOKSFORFREE_BOT_TOKEN}
+      - TGAPI_ROOT=https://tgapi_proxy
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - PERF_MONITOR=0
+      - FILES_LOCAL_PATH=/var/www/files
+      - FILES_REMOTE_PATH=/files
+      - LIB_PATH=/var/www/lib
+      - PROXY_DISABLED=${BOOKS_PROXY_DISABLED}
+    command: node bots/books.js
+
+  allbooks_bot:
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_books"
+    container_name: 'allbooks_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+      - tgapi_proxy
+    volumes:
+      - ./bot:/var/www
+      - /mnt/lib/files:/var/www/files
+      - /mnt/lib/books/fb2.Flibusta.Net:/var/www/lib
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=allbooks_bot
+      - BOT_NAME=allbooks_bot
+      - BOT_TOKEN=${ALLBOOKS_BOT_TOKEN}
+      - TGAPI_ROOT=https://tgapi_proxy
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - PERF_MONITOR=0
+      - FILES_LOCAL_PATH=/var/www/files
+      - FILES_REMOTE_PATH=/files
+      - LIB_PATH=/var/www/lib
+      - PROXY_DISABLED=${BOOKS_PROXY_DISABLED}
+    command: node bots/books.js
+
+  freereading_bot:
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_books"
+    container_name: 'freereading_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+      - tgapi_proxy
+    volumes:
+      - ./bot:/var/www
+      - /mnt/lib/files:/var/www/files
+      - /mnt/lib/books/fb2.Flibusta.Net:/var/www/lib
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=freereading_bot
+      - BOT_NAME=freereading_bot
+      - BOT_TOKEN=${FREEREADING_BOT_TOKEN}
+      - TGAPI_ROOT=https://tgapi_proxy
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - PERF_MONITOR=0
+      - FILES_LOCAL_PATH=/var/www/files
+      - FILES_REMOTE_PATH=/files
+      - LIB_PATH=/var/www/lib
+      - PROXY_DISABLED=${BOOKS_PROXY_DISABLED}
+    command: node bots/books.js
+
+  bookdow_bot:
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_books"
+    container_name: 'bookdow_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+      - tgapi_proxy
+    volumes:
+      - ./bot:/var/www
+      - /mnt/lib/files:/var/www/files
+      - /mnt/lib/books/fb2.Flibusta.Net:/var/www/lib
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=bookdow_bot
+      - BOT_NAME=bookdow_bot
+      - BOT_TOKEN=${BOOKDOW_BOT_TOKEN}
+      - TGAPI_ROOT=https://tgapi_proxy
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - PERF_MONITOR=0
+      - FILES_LOCAL_PATH=/var/www/files
+      - FILES_REMOTE_PATH=/files
+      - LIB_PATH=/var/www/lib
+      - PROXY_DISABLED=${BOOKS_PROXY_DISABLED}
+    command: node bots/books.js
+
+  dowread_bot:
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_books"
+    container_name: 'dowread_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+      - tgapi_proxy
+    volumes:
+      - ./bot:/var/www
+      - /mnt/lib/files:/var/www/files
+      - /mnt/lib/books/fb2.Flibusta.Net:/var/www/lib
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=dowread_bot
+      - BOT_NAME=dowread_bot
+      - BOT_TOKEN=${DOWREAD_BOT_TOKEN}
+      - TGAPI_ROOT=https://tgapi_proxy
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - PERF_MONITOR=0
+      - FILES_LOCAL_PATH=/var/www/files
+      - FILES_REMOTE_PATH=/files
+      - LIB_PATH=/var/www/lib
+      - PROXY_DISABLED=1
+    command: node bots/books.js
+
+  workhant_bot:
+    image: node
+    container_name: 'workhant_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+    volumes:
+      - ./bot:/var/www
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=workhant_bot
+      - BOT_NAME=workhant_bot
+      - BOT_TOKEN=${WORKHANT_BOT_TOKEN}
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - 'HH_FILTER={"text": "NOT МТС"}'
+    command: node bots/vacancies.js
+
+  traineeship_bot:
+    image: node
+    container_name: 'traineeship_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+    volumes:
+      - ./bot:/var/www
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=traineeship_bot
+      - BOT_NAME=traineeship_bot
+      - BOT_TOKEN=${TRAINEESHIP_BOT_TOKEN}
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - 'HH_FILTER={"employment": "probation", "text": "NOT МТС"}'
+    command: node bots/vacancies.js
+
+  beembam_bot:
+    image: node
+    container_name: 'beembam_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+    volumes:
+      - ./bot:/var/www
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=beembam_bot
+      - BOT_NAME=beembam_bot
+      - BOT_TOKEN=${BEEMBAM_BOT_TOKEN}
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - 'HH_FILTER={"schedule": "remote", "text": "NOT МТС"}'
+    command: node bots/vacancies.js
+
+  coupon_bot:
+    image: node
+    container_name: 'coupon_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+    volumes:
+      - ./bot:/var/www
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=coupon_bot
+      - BOT_TOKEN=${COUPON_BOT_TOKEN}
+      - BOT_NAME=coupon_bot
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - ADMITAD_CLIENT_ID=${ADMITAD_CLIENT_ID}
+      - ADMITAD_CLIENT_SECRET=${ADMITAD_CLIENT_SECRET}
+      - MONGO_TIMEOUT=3600
+    command: node bots/coupons.js
+
   mailer_bot:
     image: node
     container_name: 'mailer_bot'
@@ -355,6 +688,7 @@ services:
     depends_on:
       - mongo
       - redis
+      - tgapi_proxy
     volumes:
       - ./backend:/var/backend
       - ./bot:/var/www
@@ -373,6 +707,8 @@ services:
       - BOT_TOKEN=${MAILER_BOT_TOKEN}
       - BOT_NAME=mailer_bot
       - IMGBB_TOKEN=${IMGBB_TOKEN}
+      - TGAPI_ROOT=https://tgapi_proxy
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
     command: npm run mailer_bot
 
   languagetool:
@@ -383,6 +719,11 @@ services:
     restart: always
     working_dir: /LanguageTool-5.1
     command: "java -cp languagetool-server.jar  org.languagetool.server.HTTPServer --port 8010 --public --allow-origin '*'"
+
+  unoconv:
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_unoconv"
 
   mongo:
     image: mongo
@@ -395,10 +736,12 @@ services:
 
   redis:
     image: redis
+    restart: always
     container_name: 'aquarium_redis'
 
   admin:
     image: nginx
+    restart: always
     container_name: 'bots_nginx'
     ports:
       - ${HTTP_PORT}:80
@@ -410,6 +753,7 @@ services:
 
   backend:
     image: node
+    restart: always
     container_name: 'bots_backend'
     ports:
       - ${BACKEND_PORT}:3000
@@ -439,3 +783,47 @@ services:
       - PG_PASS=${PG_PASS}
       - IMGBB_TOKEN=${IMGBB_TOKEN}
     command: npm run debug
+
+  tgapi_proxy:
+    image: outrigger/https-proxy:1.0
+    restart: always
+    container_name: 'tgapi_proxy'
+    depends_on:
+      - tgapi
+    environment:
+      UPSTREAM_DOMAIN: tgapi
+      UPSTREAM_PORT: 8081
+      PROXY_DOMAIN: tgapi_proxy
+      RATE_LIMIT: 0
+      RATE_LIMIT_BURST_QUEUE: 0
+
+  tgapi:
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_tgapi"
+    container_name: 'tgapi'
+    volumes:
+      - /mnt/lib/files:/files
+    restart: always
+    command: telegram-bot-api --api-id ${API_ID} --api-hash ${API_HASH} --http-port=8081 --log=/proc/self/fd/1 --local
+
+  monitor:
+    image: node
+    restart: always
+    ports:
+      - ${MONITOR_PORT}:3000
+    volumes:
+      - ./monitor:/var/monitor
+      - type: bind
+        source: ./docker-compose-prod.yml
+        target: /var/monitor/docker-compose.yml
+      - type: bind
+        source: ./.env
+        target: /var/monitor/.env
+    working_dir: /var/monitor
+    environment:
+      - NODE_ENV=development
+      - TGAPI_ROOT=https://tgapi_proxy
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - PORT=3000
+    command: nodejs queue.js

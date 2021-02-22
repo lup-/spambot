@@ -2,12 +2,12 @@ const BaseScene = require('telegraf/scenes/base');
 const {menu} = require('../../helpers/wizard');
 const {__} = require('../../../modules/Messages');
 
-module.exports = function (filmManager) {
+module.exports = function () {
     const scene = new BaseScene('searchMenu');
 
     scene.enter(async ctx => {
         ctx.session.nav = false;
-        return ctx.reply(
+        return ctx.replyWithHTML(
             __('Что ищем?', ['main', 'menu', 'start']),
             menu([
                 {code: 'type_tv', text: 'Сериальчик'},

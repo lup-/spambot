@@ -47,7 +47,7 @@ module.exports = function (business, profile) {
         let type = ctx.scene.state.type || 'bm';
         let selectedIds = business.getSelectedCategories(ctx.session.profile, type) || [];
 
-        return ctx.reply(__(categoryText, ['settings', 'categories', 'menu']), await categoryMenu(type, selectedIds, business));
+        return ctx.replyWithHTML(__(categoryText, ['settings', 'categories', 'menu']), await categoryMenu(type, selectedIds, business));
     });
 
     scene.action(/^category\/([^\/]+)\/page\/(\d+)\/([^\/]+)$/, async ctx => {
@@ -73,6 +73,7 @@ module.exports = function (business, profile) {
 
         let selectedIds = business.getSelectedCategories(ctx.session.profile, type) || [];
         let menu = await categoryMenu(type, selectedIds, business, pageIndex);
+        menu.parse_mode = 'HTML';
 
         try {
             await ctx.editMessageText(__(categoryText, ['settings', 'categories', 'menu']), menu);

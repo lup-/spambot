@@ -8,7 +8,7 @@ module.exports = function (presentManager) {
     scene.enter(async ctx => {
         ctx.session.nav = false;
         let categories = await presentManager.categoriesList();
-        return ctx.reply(
+        return ctx.replyWithHTML(
             __('Какой подарочек ищем?', ['menu', 'main', 'settings']),
             menu(
                 categories.map((category, index) => {

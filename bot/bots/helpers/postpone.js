@@ -16,7 +16,7 @@ function postponeMenu(taskId) {
 async function complete(ctx, periodic) {
     let [, taskId] = ctx.match;
     let task = await periodic.setTaskComplete(taskId);
-    ctx.reply(
+    ctx.replyWithHTML(
         __(`${task.text}\n\nТак держать! 👍`, ['content', 'success'])
     );
 }
@@ -50,7 +50,7 @@ async function postpone(ctx, periodic) {
     }
     catch (e) {}
 
-    return ctx.reply(
+    return ctx.replyWithHTML(
         __(`${task.text}\n\nХорошо. Напомню ${taskTime}`, ['content', 'postpone'])
     );
 }

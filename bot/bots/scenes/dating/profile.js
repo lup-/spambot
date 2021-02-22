@@ -87,7 +87,8 @@ module.exports = function (datingManager) {
             return ctx.wizard.next();
         },
         (ctx) => {
-            if (!ctx.message.text) {
+            let hasText = ctx.message && ctx.message.text
+            if (!hasText) {
                 return ctx.reply('Как мне тебя называть?');
             }
 
@@ -105,7 +106,7 @@ module.exports = function (datingManager) {
             {code: 'skip', callback: (ctx, nextStep) => nextStep(ctx)}
         ], [
             {code: 'message', callback(ctx, nextStep) {
-                    ctx.wizard.state.profile.details = ctx.message.text.trim();
+                    ctx.wizard.state.profile.details = ctx.message && ctx.message.text ? ctx.message.text.trim() : '';
                     return nextStep(ctx);
                 }}
         ]),

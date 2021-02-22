@@ -18,6 +18,10 @@ module.exports = function () {
                 profile.id = shortid.generate();
             }
 
+            if (profile._id) {
+                delete profile._id;
+            }
+
             const id = profile.id;
             let updateResult = await profiles.findOneAndReplace({id}, profile, {upsert: true, returnOriginal: false});
             return updateResult.value || false;

@@ -2,6 +2,7 @@ const MongoClient = require('mongodb').MongoClient;
 const DB_HOST = process.env.MONGO_HOST;
 const DB_NAME = process.env.MONGO_DB;
 const DB_PORT = process.env.MONGO_PORT || 27017;
+const DB_TIMEOUT = process.env.MONGO_TIMEOUT ? parseInt(process.env.MONGO_TIMEOUT) || 360 : 360;
 
 let clientInstance = {};
 let dbInstance = {};
@@ -12,7 +13,11 @@ async function newClient(dbName = false) {
     }
 
     let dbUrl = `mongodb://${DB_HOST}:${DB_PORT}/${dbName}`;
-    let client = await MongoClient.connect(dbUrl, {useNewUrlParser: true, useUnifiedTopology: true});
+    let client = await MongoClient.connect(dbUrl, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        socketTimeoutMS: DB_TIMEOUT * 1000,
+    });
     return client;
 }
 

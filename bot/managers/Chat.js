@@ -45,6 +45,16 @@ function ChatManager() {
                 return next();
             }
         },
+        blockNonPrivate() {
+            return async (ctx, next) => {
+                let skipThisUpdate = ctx.chat.type !== 'private';
+                if (skipThisUpdate) {
+                    return;
+                }
+
+                return next();
+            }
+        },
         saveRefMiddleware() {
             return async (ctx, next) => {
                 if (!this.isStartCommand(ctx)) {
@@ -60,9 +70,17 @@ function ChatManager() {
                     : false;
 
                 let hasRef = userId && ref;
+                let subref = false;
 
                 if (!hasRef) {
                     return next();
+                }
+
+                let hasSubrefs = ref.indexOf('=') !== -1;
+                if (hasSubrefs) {
+                    let parts = ref.split('=');
+                    ref = parts.shift();
+                    subref = parts.join('=');
                 }
 
                 const db = await getDb();
@@ -77,12 +95,40 @@ function ChatManager() {
                     date: moment().unix(),
                 }
 
+                if (subref) {
+                    refFields.subref = subref;
+                }
+
                 try {
                     await refs.findOneAndReplace({refId}, refFields, {upsert: true, returnOriginal: false});
-                } finally {
+                }
+                finally {
                 }
 
                 return next();
+            }
+        },
+        async addUserBlock(ctx, source) {
+            let {from, chat} = ctx;
+            let id = from.id || chat.id || false;
+            if (!id) {
+                return;
+            }
+
+            const db = await getDb();
+            let user = await db.collection('users').findOne({id});
+            if (user) {
+                user.blocked = true;
+                if (!user.blocks) {
+                    user.blocks = [];
+                }
+
+                user.blocks.push({
+                    time: moment().unix(),
+                    source
+                });
+
+                await db.collection('users').findOneAndReplace({id}, user);
             }
         },
         saveUserMiddleware: function () {
@@ -109,6 +155,11 @@ function ChatManager() {
                         user.user = from;
                         user.chat = chat;
                         user.updated = moment().unix();
+                        if (user.blocked) {
+                            user.blocked = false;
+                            user.lastBlockCheck = moment().unix();
+                        }
+
                     } else {
                         user = {id, user: from, chat, registered: moment().unix(), updated: moment().unix()};
                     }

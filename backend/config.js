@@ -41,6 +41,8 @@ module.exports = {
                 let containerName = botConfig.container_name;
                 let dbName = botEnv['MONGO_DB'];
                 let botName = botEnv['BOT_NAME'];
+                let localApiLink = botEnv['TGAPI_ROOT'] || false;
+                let isLocal = localApiLink && localApiLink.length > 0 && localApiLink.indexOf('http') === 0;
                 let token = envVars[tokenVar];
 
                 let tg = token
@@ -48,7 +50,7 @@ module.exports = {
                     : false;
 
                 bots.push({
-                    id, containerName, dbName, botName, token, tg
+                    id, containerName, dbName, botName, token, tg, isLocal
                 });
             }
         }

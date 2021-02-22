@@ -19,8 +19,11 @@ module.exports = function () {
             runTask = newRunTask;
         },
 
-        setRepeatingTask(taskFn, periodSecs) {
+        setRepeatingTask(taskFn, periodSecs, callOnStart = false) {
             repeatInterval = setInterval(taskFn, periodSecs * 1000);
+            if (callOnStart) {
+                taskFn();
+            }
         },
 
         stopRepeatingTask() {
@@ -138,6 +141,16 @@ module.exports = function () {
             }
 
             return tasks.find(filter).toArray();
+        },
+
+        async subscribe(profileData, nextMessageTime) {
+            let {userId, chatId} = profileData;
+            return this.addCustomTaskInTime(userId, chatId, nextMessageTime);
+        },
+
+        async unsubscribe(profileData) {
+            let {userId} = profileData;
+            await this.setAllUserTasksComplete(userId);
         },
 
         async stop() {

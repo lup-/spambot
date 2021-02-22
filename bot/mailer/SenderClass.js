@@ -12,7 +12,7 @@ const moment = require('moment');
 
 const MAILING_DB_NAME = 'botofarmer';
 
-const TEST_QUEUE_SIZE = 13;
+const TEST_QUEUE_SIZE = 10;
 const TEST_BOT_ID = 'mailer_bot';
 const MAILER_BOT_ID = TEST_BOT_ID;
 const TEST_CHAT_ID = 483896081;
@@ -34,14 +34,18 @@ const MAILING_STATUS_FINISHED = 'finished';
 
 const IMGBB_TOKEN = process.env.IMGBB_TOKEN;
 
+const API_ROOT = process.env.TGAPI_ROOT || 'https://api.telegram.org'
+const SIG_STOPPED = 10;
+
 class Sender {
-    constructor(mailingId = false, test = false) {
+    constructor(mailingId = false, botId = false) {
         this.id = mailingId;
+        this.botId = botId;
         this.chunkSize = 5;
         this.bots = false;
-        this.isTest = test;
         this.stop = false;
         this.stopResolve = false;
+        this.cachedImage = false;
     }
 
     async init(mailing = false) {
@@ -54,140 +58,8 @@ class Sender {
         return this;
     }
 
-    makeTestQueue() {
-        if (!this.id) {
-            return false;
-        }
-
-        return Array(TEST_QUEUE_SIZE).fill(false).map(_ => ({
-            mailing: this.id,
-            bot: TEST_BOT_ID,
-            userId: TEST_USER_ID,
-            chatId: TEST_CHAT_ID,
-            status: STATUS_NEW
-        }));
-    }
-
-    async makeQueue() {
-        if (this.isTest) {
-            return this.makeTestQueue();
-        }
-
-        let bots = await this.getBots();
-        let hasTarget = this.mailing.target && this.mailing.target.length > 0;
-        let cmpToMongo = {'>': '$gt', '<': '$lt', '=': '$eq', '!=': '$ne'};
-
-        if (hasTarget) {
-            let targetBotIds = this.mailing.target.reduce((bots, target) => {
-                if (target.type === 'bots') {
-                    if (!bots) {
-                        bots = [];
-                    }
-
-                    bots = bots.concat(target.value).filter((botId, index, allBots) => allBots.indexOf(botId) === index);
-                }
-
-                return bots;
-            }, false);
-
-            if (targetBotIds) {
-                bots = bots.filter(bot => targetBotIds.indexOf(bot.id) !== -1);
-            }
-
-        }
-
-        let queue = [];
-        for (const bot of bots) {
-            let db = await getDb(bot.dbName);
-            let matchConditions = [];
-            let queueIsEmpty = false;
-
-            if (hasTarget) {
-                for (const target of this.mailing.target) {
-                    let mongoCmp = {};
-                    if (target.type !== 'bots' && target.cmp) {
-                        mongoCmp[ cmpToMongo[target.cmp] ] = moment(target.value).unix();
-                    }
-
-                    if (target.type === 'activity') {
-                        let activityCount = await db.collection('activity').countDocuments();
-                        let hasActivity = activityCount > 0;
-
-                        if (hasActivity) {
-                            let activeUsers = await db.collection('activity').aggregate([
-                                {$match: {date: mongoCmp}},
-                                {$group: {"_id": "$userId"}}
-                            ]).toArray();
-
-                            let hasActiveUsersInPeriod = activeUsers && activeUsers.length > 0;
-                            if (!hasActiveUsersInPeriod) {
-                                queueIsEmpty = true;
-                                break;
-                            }
-
-                            let activeUsersIds = activeUsers.map(user => user._id);
-                            matchConditions.push({id: {$in: activeUsersIds}});
-                        }
-                    }
-
-                    if (target.type === 'register') {
-                        matchConditions.push({registered: mongoCmp});
-                    }
-
-                    if (target.type === 'mailing') {
-                        let mailingDb = await getDb(MAILING_DB_NAME);
-                        let mailingUsers = await mailingDb.collection('mailingQueue').aggregate([
-                            {$match: {sentAt: mongoCmp, status: {$in: STATUSES_SUCCESS, bot: bot.id}}},
-                            {$group: {"_id": "$userId"}}
-                        ]).toArray();
-
-                        let hasMailingUsersInPeriod = mailingUsers && mailingUsers.length > 0;
-                        if (!hasMailingUsersInPeriod) {
-                            queueIsEmpty = true;
-                            break;
-                        }
-
-                        let mailingUsersIds = mailingUsers.map(user => user._id);
-                        matchConditions.push({id: {$in: mailingUsersIds}});
-                    }
-                }
-            }
-
-            if (!queueIsEmpty) {
-                let pipe = matchConditions.map(cond => ({'$match': cond}));
-                let foundUsers = await db.collection('users').aggregate(pipe).toArray();
-                queue = queue.concat(foundUsers.map(user => ({
-                    mailing: this.id,
-                    bot: bot.id,
-                    userId: user.user.id,
-                    chatId: user.chat.id,
-                    status: STATUS_NEW
-                })));
-            }
-        }
-
-        return queue;
-    }
-
-    async initQueue() {
-        if (!this.id) {
-            return false;
-        }
-
-        let mailingDb = await getDb(MAILING_DB_NAME);
-        let queueCount = await mailingDb.collection('mailingQueue').countDocuments({mailing: this.id});
-        if (queueCount > 0) {
-            return;
-        }
-
-        let queue = await this.makeQueue();
-
-        if (queue.length > 0) {
-            let result = await mailingDb.collection('mailingQueue').insertMany(queue);
-            return result && result.result && result.result.ok;
-        }
-
-        return false;
+    getTelegram(token) {
+        return new Telegram(token, {apiRoot: API_ROOT});
     }
 
     async loadMailing() {
@@ -216,6 +88,7 @@ class Sender {
         let db = await getDb(MAILING_DB_NAME);
         let chats = await db.collection('mailingQueue').find({
             mailing: this.id,
+            bot: this.botId,
             status: STATUS_NEW,
         }).limit(chunkSize).toArray();
         return chats;
@@ -231,6 +104,14 @@ class Sender {
         if (this.mailing.buttons && this.mailing.buttons.length > 0) {
             let buttons = this.mailing.buttons.map(button => Markup.urlButton(button.text, button.link));
             extra = Markup.inlineKeyboard(buttons).extra();
+        }
+
+        if (this.mailing.disablePreview) {
+            extra.disable_web_page_preview = true;
+        }
+
+        if (this.mailing.disableNotification) {
+            extra.disable_notification = true;
         }
 
         extra.parse_mode = 'HTML';
@@ -249,7 +130,8 @@ class Sender {
         }
 
         let db = await getDb(MAILING_DB_NAME);
-        return db.collection('mailingQueue').updateOne({_id: chat._id}, {$set: {status: STATUS_BLOCKED}});
+        await db.collection('mailingQueue').updateOne({_id: chat._id}, {$set: {status: STATUS_BLOCKED}});
+        return this.updateCounters('blocks');
     }
 
     async setChatFailed(chat, error) {
@@ -258,7 +140,8 @@ class Sender {
         }
 
         let db = await getDb(MAILING_DB_NAME);
-        return db.collection('mailingQueue').updateOne({_id: chat._id}, {$set: {status: STATUS_FAILED, error}});
+        await db.collection('mailingQueue').updateOne({_id: chat._id}, {$set: {status: STATUS_FAILED, error}});
+        return this.updateCounters('errors');
     }
 
     async setChatFinished(chat, messageId) {
@@ -267,7 +150,16 @@ class Sender {
         }
 
         let db = await getDb(MAILING_DB_NAME);
-        return db.collection('mailingQueue').updateOne({_id: chat._id}, {$set: {status: STATUS_FINISHED, messageId}});
+        await db.collection('mailingQueue').updateOne({_id: chat._id}, {$set: {status: STATUS_FINISHED, messageId}});
+        return this.updateCounters('success');
+    }
+
+    async updateCounters(counterCode) {
+        let query = {processed: 1};
+        query[counterCode] = 1;
+
+        let mailingDb = await getDb(MAILING_DB_NAME);
+        return mailingDb.collection('mailings').updateOne({id: this.id}, {$inc: query});
     }
 
     dataUriToBuffer(uri) {
@@ -301,33 +193,31 @@ class Sender {
         let options = this.getExtra();
         options['caption'] = this.getMessage();
 
-        if (this.mailing.cachedImage) {
-            return telegram.sendPhoto(chatId, this.mailing.cachedImage.file_id, options);
+        if (this.cachedImage && this.cachedImage.file_id) {
+            return telegram.sendPhoto(chatId, this.cachedImage.file_id, options);
         }
         else {
             let image = this.mailing.photos[0];
             let buffer = this.dataUriToBuffer(image.src);
             let apiMessage = await telegram.sendPhoto(chatId, {source: buffer}, options);
-            this.mailing.cachedImage = this.getBestPhoto(apiMessage.photo);
-            await this.saveMailingState();
+            this.cachedImage = this.getBestPhoto(apiMessage.photo);
             return apiMessage;
         }
     }
 
     async sendLinkedPhotoMessage(chatId, telegram) {
-        if (!this.mailing.cachedImage) {
+        if (!this.cachedImage) {
             let image = this.mailing.photos[0];
             let buffer = this.dataUriToBuffer(image.src);
             let uploadedImage = await this.uploadImage(buffer);
             if (!uploadedImage) {
                 return false;
             }
-            this.mailing.cachedImage = uploadedImage;
-            await this.saveMailingState();
+            this.cachedImage = uploadedImage;
         }
 
         const emptyChar = '‎';
-        let imageUrl = this.mailing.cachedImage.url;
+        let imageUrl = this.cachedImage.url;
         let text = this.getMessage();
 
         text = `<a href="${imageUrl}">${emptyChar}</a> ${text}`;
@@ -336,8 +226,8 @@ class Sender {
 
     async sendMediaGroupMessage(chatId, telegram) {
         let media;
-        if (this.mailing.cachedImage) {
-            media = this.mailing.cachedImage.map(photo => photo.file_id);
+        if (this.cachedImage) {
+            media = this.cachedImage.map(photo => photo.file_id);
         }
         else {
             media = this.mailing.photos.map(image => {
@@ -360,14 +250,12 @@ class Sender {
             result = mediaGroup[0];
         }
 
-        if (!this.mailing.cachedImage) {
-            this.mailing.cachedImage = mediaGroup.reduce((files, message) => {
+        if (!this.cachedImage) {
+            this.cachedImage = mediaGroup.reduce((files, message) => {
                 let photo = this.getBestPhoto(message.photo);
                 files.push(photo);
                 return files;
             }, []);
-
-            await this.saveMailingState();
         }
 
         return result;
@@ -387,7 +275,7 @@ class Sender {
             return false;
         }
 
-        let telegram = new Telegram(bot.token);
+        let telegram = this.getTelegram(bot.token);
 
         try {
             let method = this.sendPlainTextMessage;
@@ -404,6 +292,7 @@ class Sender {
             }
 
             response = await method.call(this, chat.chatId, telegram);
+
             if (this.id) {
                 if (!response) {
                     await this.setChatFailed(chat, false);
@@ -425,66 +314,20 @@ class Sender {
                 }
 
                 if (sendError.code === 429) {
-                    let waitTimeMs = sendError.parameters && sendError.parameters.retry_after
+                    let waitTimeMs = sendError.parameters && sendError.parameters.retry_after > 0
                         ? (sendError.parameters.retry_after || 1) * 1000
                         : 1000;
 
                     await wait(waitTimeMs);
                     return this.sendMailingToChat(chat);
                 }
-
-                await this.setChatFailed(chat, sendError);
-                return false;
             }
-        }
 
-        return response;
-    }
-
-    async saveMailingState() {
-        if (!this.id) {
+            await this.setChatFailed(chat, sendError);
             return false;
         }
 
-        const db = await getDb(MAILING_DB_NAME);
-        const mailings = db.collection('mailings');
-
-        if (!this.mailing.id) {
-            this.mailing.id = shortid.generate();
-        }
-
-        if (this.mailing._id) {
-            delete this.mailing['_id'];
-        }
-
-        let updateResult = await mailings.findOneAndReplace({id: this.mailing.id}, this.mailing, {upsert: true, returnOriginal: false});
-        return updateResult.value || false;
-    }
-
-    async initProgress() {
-        if (!this.mailing.total) {
-            this.mailing.dateStarted = moment().unix();
-            this.mailing.status = MAILING_STATUS_PROCESSING;
-
-            let mailingDb = await getDb(MAILING_DB_NAME);
-            let queueCount = await mailingDb.collection('mailingQueue').countDocuments({mailing: this.id});
-            this.mailing.total = queueCount;
-
-            return this.saveMailingState();
-        }
-    }
-
-    async updateProgress() {
-        let mailingDb = await getDb(MAILING_DB_NAME);
-
-        let finishedCount = await mailingDb.collection('mailingQueue').countDocuments({mailing: this.id, status: {'$in': STATUSES_SUCCESS}});
-        let errorsCount = await mailingDb.collection('mailingQueue').countDocuments({mailing: this.id, status: {'$in': STATUSES_FAILED}});
-        let finishedTotal = finishedCount + errorsCount;
-
-        this.mailing.success = finishedCount;
-        this.mailing.errors = errorsCount;
-        this.mailing.processed = finishedTotal;
-        this.mailing.progress = this.mailing.total ? finishedTotal / this.mailing.total : 0;
+        return response;
     }
 
     stopSending() {
@@ -499,11 +342,9 @@ class Sender {
             return false;
         }
 
-        await this.initQueue();
-        await this.initProgress();
-
         let firstChunk = true;
-        while (!this.isFinished()) {
+        let isFinished = false;
+        while (!isFinished) {
             if (firstChunk) {
                 await this.sendNextChunk(1);
                 firstChunk = false;
@@ -511,29 +352,32 @@ class Sender {
             else {
                 await this.sendNextChunk();
             }
-            await this.updateProgress();
-            await this.saveMailingState();
+
+            isFinished = await this.checkFinished();
         }
 
         if (this.stop) {
-            this.mailing.datePaused = moment().unix();
-            this.mailing.status = MAILING_STATUS_PAUSED;
-            await this.saveMailingState();
             if (this.stopResolve) {
                 this.stopResolve();
             }
         }
         else {
-            this.mailing.dateFinished = moment().unix();
-            this.mailing.status = MAILING_STATUS_FINISHED;
-            await this.saveMailingState();
-            process.exit();
+            process.exit(SIG_STOPPED);
         }
     }
 
-    isFinished() {
-        return (this.mailing.processed === this.mailing.total) || this.stop;
+    async checkFinished() {
+        let chats = await this.getNextChats();
+        let hasChats = chats && chats.length > 0;
+        let noChatsLeft = !hasChats;
+        return noChatsLeft || this.stop;
     }
 }
 
-module.exports = {Sender, MAILING_DB_NAME, MAILING_STATUS_NEW, MAILING_STATUS_PROCESSING, MAILING_STATUS_PAUSED, TEST_BOT_ID, MAILER_BOT_ID, STATUS_NEW};
+module.exports = {
+    Sender, MAILING_DB_NAME, MAILING_STATUS_NEW, MAILING_STATUS_PROCESSING, MAILING_STATUS_PAUSED, MAILING_STATUS_FINISHED,
+    MAILER_BOT_ID,
+    TEST_QUEUE_SIZE, TEST_BOT_ID, TEST_USER_ID, TEST_CHAT_ID,
+    STATUS_NEW, STATUSES_SUCCESS,
+    SIG_STOPPED
+};

@@ -75,7 +75,7 @@ module.exports = function (finance, profile, periodic) {
         let selectedTags = finance.getSavedTags(ctx.session.profile || {});
         let isSubscribed = ctx.session && ctx.session.profile && ctx.session.profile.subscribed;
 
-        return ctx.reply(__(categoryText, ['settings', 'menu']), await tagsMenu(selectedTags, finance, isSubscribed));
+        return ctx.replyWithHTML(__(categoryText, ['settings', 'menu']), await tagsMenu(selectedTags, finance, isSubscribed));
     });
 
     scene.action(/^tag\/([^\/]+)\/page\/(\d+)\/([^\/]+)$/, async ctx => {
@@ -154,7 +154,7 @@ module.exports = function (finance, profile, periodic) {
     scene.action('subscribe', async ctx => {
         await finance.subscribe(ctx.session.profile, periodic, profile);
 
-        return ctx.reply(__('Вы подписались на ежедневную рассылку статей. Следующая статья будет завтра.', ['subscribe', 'info', 'success']));
+        return ctx.replyWithHTML(__('Вы подписались на ежедневную рассылку статей. Следующая статья будет завтра.', ['subscribe', 'info', 'success']));
     });
 
     scene.action('unsubscribe', async ctx => {
@@ -162,7 +162,7 @@ module.exports = function (finance, profile, periodic) {
         await profile.saveProfile(ctx.session.profile);
         await finance.unsubscribe(ctx.session.profile, periodic, profile);
 
-        return ctx.reply(
+        return ctx.replyWithHTML(
             __('Вы отписались от рассылки. Новые статьи больше не будут приходить.', ['unsubscribe', 'info']),
             menu([{text: '📨 Подписаться', code: 'subscribe'}])
         );

@@ -7,16 +7,16 @@ function getMarkupButtons(buttons, columns = false) {
     }
 
     let markupButtons = buttons.map(button => {
-        let btn = Markup.callbackButton(button.text, button.code);
-        if (button.type === 'location') {
-            btn = Markup.locationRequestButton(button.text);
+        if (button.url) {
+            return Markup.urlButton(button.text, button.url);
         }
-
-        return btn;
+        else {
+            return Markup.callbackButton(button.text, button.code);
+        }
     });
 
     let columnButtons = [];
-    if (columns !== false) {
+    if (columns > 0) {
         let row = [];
         for (const button of markupButtons) {
 
@@ -47,6 +47,10 @@ function menu(buttons, columns = false, oneTime = false) {
         keyboard = keyboard.oneTime(true);
     }
 
+    return keyboard.extra();
+}
+function hMenu(buttonRows) {
+    let keyboard = Markup.inlineKeyboard(buttonRows.map(row => getMarkupButtons(row, false)));
     return keyboard.extra();
 }
 function menuWithControls(buttons, buttonColumns, controls) {
@@ -98,4 +102,4 @@ function buttonStep(actions = [], events = []) {
     return handler;
 }
 
-module.exports = {menu, yesNoMenu, buttonStep, urlButton, menuWithControls};
+module.exports = {menu, yesNoMenu, buttonStep, urlButton, menuWithControls, hMenu};

@@ -2,8 +2,23 @@ const got = require('got');
 const { JSDOM } = require("jsdom");
 const Iconv = require('iconv').Iconv;
 
-async function parseUrl(url, queries) {
-    const response = await got(url, {responseType: 'buffer'});
+async function parseUrl(url, queries, cookieJar = false, ua = false, agent = false) {
+    let params = {responseType: 'buffer'};
+    if (cookieJar) {
+        params.cookieJar = cookieJar;
+    }
+
+    if (ua) {
+        params.headers = {
+            'user-agent': ua
+        }
+    }
+
+    if (agent) {
+        params.agent = {http: agent, https: agent};
+    }
+
+    const response = await got(url, params);
     let html = response.body.toString();
 
     let charsetSearch = html.match(/\<meta[^>]*?charset=['"]*([a-zA-Z\-0-9]+)['"]/i);
@@ -16,7 +31,7 @@ async function parseUrl(url, queries) {
 
     const { document } = (new JSDOM(html, {contentType: 'text/html; charset=utf-8'})).window;
 
-    let parsedData = {};
+    let parsedData = {cookieJar};
 
     for (const key in queries) {
         const selector = queries[key];

@@ -49,7 +49,7 @@ initManagers(['chat', 'bus', 'profile', 'business', 'periodic']).then(async ({ch
 
         try {
             ctx.session.introShown = true;
-            return ctx.reply(
+            return ctx.replyWithHTML(
                 __(`Этот бот поможет найти идею для нового бизнеса. Заходите, выбирайте, развивайте.`, ['content', 'intro']),
                 menu([{code: 'accept', text: 'Понятно'}])
             );

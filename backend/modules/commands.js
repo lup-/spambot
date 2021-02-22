@@ -10,15 +10,15 @@ function wait(msec) {
 }
 
 function startListen(channel, callback) {
-    let recieveMessage = (channel, textMessage) => {
+    let receiveMessage = (channel, textMessage) => {
         let message = JSON.parse(textMessage);
         return callback(message);
     }
 
-    client.on("message", recieveMessage);
+    client.on("message", receiveMessage);
     client.subscribe(channel);
 
-    return recieveMessage;
+    return receiveMessage;
 }
 
 function stopListen(channel, listener) {
@@ -39,7 +39,7 @@ function publishCommand(command, botNames, args = []) {
     }
 }
 
-function publishCommandWithReply(command, botNames, args = [], WAIT_TIMEOUT = 15 * 1000) {
+function publishCommandWithReply(command, botNames, args = [], WAIT_TIMEOUT = 30 * 1000) {
     const REPLY_CHANNEL = 'reply';
     const WAIT_STEP = 100;
 
@@ -60,7 +60,7 @@ function publishCommandWithReply(command, botNames, args = [], WAIT_TIMEOUT = 15
         }
 
         if (noAnswerFromBots.length > 0) {
-            let emptyAnswers = noAnswerFromBots.map(botName => ({bot: botName, data: null}));
+            let emptyAnswers = noAnswerFromBots.map(botName => ({bot: botName, data: null, timeout: true}));
             replies = replies.concat( emptyAnswers );
         }
 

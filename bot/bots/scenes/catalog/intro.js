@@ -15,13 +15,22 @@ function routeToNextStep(ctx) {
     catch (e) {}
 }
 
-module.exports = function ({disclaimer, getLastVisit, setLastVisit}) {
+module.exports = function (params) {
     const scene = new BaseScene('intro');
+    const {disclaimer, getLastVisit, setLastVisit} = params;
+
+    const introAction = typeof (params.introAction) !== 'undefined'
+        ? params.introAction
+        : false;
 
     scene.enter(async ctx => {
         let messageShown = ctx.session.introShown || false;
         let hasFavorites = ctx.session.profile && ctx.session.profile.favorite && ctx.session.profile.favorite.length > 0;
         let hasCategories = ctx.session.profile && ctx.session.profile.category && ctx.session.profile.category.length > 0;
+
+        if (introAction) {
+            await introAction(ctx);
+        }
 
         if (hasFavorites || hasCategories) {
             let buttons = [];
@@ -44,7 +53,7 @@ module.exports = function ({disclaimer, getLastVisit, setLastVisit}) {
 
         try {
             ctx.session.introShown = true;
-            return ctx.reply(__(disclaimer.text, disclaimer.tags), menu([{code: 'accept', text: 'Понятно'}]));
+            return ctx.replyWithHTML(__(disclaimer.text, disclaimer.tags), menu([{code: 'accept', text: 'Понятно'}]));
         }
         catch (e) {
         }

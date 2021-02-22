@@ -8,7 +8,7 @@ let botRoutes = require('../routes/bot');
 let statRoutes = require('../routes/stats');
 
 function homeMenu(ctx) {
-    return ctx.reply( __('startMessage'), getMenu('root', ctx.session) );
+    return ctx.replyWithHTML( __('startMessage'), getMenu('root', ctx.session) );
 }
 
 const routes = [

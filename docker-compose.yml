@@ -1,23 +1,6 @@
 version: "3.7"
 
 services:
-  bot:
-    image: node
-    container_name: 'spambot_bot'
-    ports:
-      - ${BOT_DEBUG_PORT}:9229
-    depends_on:
-      - mongo
-    volumes:
-      - ./bot:/var/www
-    working_dir: /var/www
-    environment:
-      - NODE_ENV=development
-      - MONGO_HOST=spambot_mongo
-      - MONGO_DB=spambot
-      - BOT_TOKEN=${BOT_TOKEN}
-    command: npm run admin_bot
-
   horoscope_bot:
     image: node
     container_name: 'horoscope_bot'
@@ -164,29 +147,9 @@ services:
       - BOT_NAME=mailer_bot
       - BOT_TOKEN=${MAILER_BOT_TOKEN}
       - IMGBB_TOKEN=${IMGBB_TOKEN}
+      - TGAPI_ROOT=https://tgapi_proxy
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
     command: npm run mailer_bot_debug
-
-  mongo:
-    image: mongo
-    container_name: 'spambot_mongo'
-    volumes:
-      - ./database:/data/db
-    ports:
-      - ${MONGO_PORT}:27017
-
-  languagetool:
-    build:
-      context: "."
-      dockerfile: "./build/Dockerfile_languagetool"
-    container_name: 'languagetool'
-    ports:
-      - ${LANGUAGETOOL_PORT}:8010
-    working_dir: /LanguageTool-5.1
-    command: "java -cp languagetool-server.jar  org.languagetool.server.HTTPServer --port 8010 --public --allow-origin '*'"
-
-  redis:
-    image: redis
-    container_name: 'spambot_redis'
 
   podcast_bot:
     image: node
@@ -213,6 +176,87 @@ services:
       - NODE_TLS_REJECT_UNAUTHORIZED=0
     command: npm run podcast_bot_debug
 
+  bookie_bot:
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_books"
+    container_name: 'bookie_bot'
+    ports:
+      - 9200:9229
+    depends_on:
+      - mongo
+      - redis
+      - tgapi_proxy
+    volumes:
+      - ./bot:/var/www
+      - ./files:/var/www/files
+      - ./lib:/var/www/lib
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=spambot_mongo
+      - REDIS_HOST=spambot_redis
+      - MONGO_DB=bookie_bot
+      - BOT_NAME=bookie_bot
+      - BOT_TOKEN=${BOOKIE_BOT_TOKEN}
+      - TGAPI_ROOT=https://tgapi_proxy
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - FILES_LOCAL_PATH=/var/www/files
+      - FILES_REMOTE_PATH=/files
+      - LIB_PATH=/var/www/lib
+      - PROXY_DISABLED=1
+    command: node --inspect=0.0.0.0 bots/books.js
+
+  monitor:
+    image: node
+    ports:
+      - ${MONITOR_PORT}:3000
+      - ${BOT_DEBUG_PORT}:9229
+    volumes:
+      - ./monitor:/var/monitor
+      - type: bind
+        source: ./docker-compose-prod.yml
+        target: /var/monitor/docker-compose.yml
+      - type: bind
+        source: ./.env
+        target: /var/monitor/.env
+    working_dir: /var/monitor
+    environment:
+      - NODE_ENV=development
+      - TGAPI_ROOT=https://tgapi_proxy
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - PORT=3000
+    command: nodejs --inspect=0.0.0.0 queue.js
+
+  mongo:
+    image: mongo
+    container_name: 'spambot_mongo'
+    volumes:
+      - ./database:/data/db
+    ports:
+      - ${MONGO_PORT}:27017
+
+  languagetool:
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_languagetool"
+    container_name: 'languagetool'
+    ports:
+      - ${LANGUAGETOOL_PORT}:8010
+    working_dir: /LanguageTool-5.1
+    command: "java -cp languagetool-server.jar  org.languagetool.server.HTTPServer --port 8010 --public --allow-origin '*'"
+
+  unoconv:
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_unoconv"
+
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    container_name: 'spambot_redis'
+
   tglib:
     build:
       context: "."
@@ -234,12 +278,26 @@ services:
       - API_HASH=${API_HASH}
     command: npm run tglib
 
+  tgapi_proxy:
+    image: outrigger/https-proxy:1.0
+    container_name: 'tgapi_proxy'
+    ports:
+      - ${HTTPS_API_PORT}:443
+    depends_on:
+      - tgapi
+    environment:
+      UPSTREAM_DOMAIN: tgapi
+      UPSTREAM_PORT: 8081
+      PROXY_DOMAIN: tgapi_proxy
+
   tgapi:
     build:
       context: "."
       dockerfile: "./build/Dockerfile_tgapi"
     container_name: 'tgapi'
-    command: telegram-bot-api --api-id ${API_ID} --api-hash ${API_HASH} --http-port=8081 --log=/proc/self/fd/1 --verbosity=4
+    volumes:
+      - ./files:/files
+    command: telegram-bot-api --api-id ${API_ID} --api-hash ${API_HASH} --http-port=8081 --log=/proc/self/fd/1 --local --verbosity=2
 
   admin:
     image: nginx

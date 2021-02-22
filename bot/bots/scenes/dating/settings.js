@@ -29,7 +29,7 @@ module.exports = function (datingManager) {
         await ctx.reply('Задайте настройки поиска');
         await ctx.reply('Учитывать город?', cityMenu(settings));
         await ctx.reply('Возраст?', ageMenu(settings));
-        return ctx.reply(
+        return ctx.replyWithHTML(
             __('После настройки нажмите', ['settings', 'save']),
             menu([{code: 'ready', text: 'Готово'}])
         );

@@ -24,7 +24,7 @@ function limbsMenu(diseases) {
 async function startDialog(ctx, diseases) {
     try {
         ctx.session.started = true;
-        return ctx.reply(
+        return ctx.replyWithHTML(
             __('Здравствуйте! На что жалуетесь?', ['menu', 'main', 'start']),
             limbsMenu(diseases)
         );
@@ -41,7 +41,7 @@ function rateMenu() {
 
 function replyWithRestart(text, ctx) {
     text = __(text, ['menu', 'restart']);
-    return ctx.reply(text, menu([{code: 'restart', text: 'Главное меню'}]));
+    return ctx.replyWithHTML(text, menu([{code: 'restart', text: 'Главное меню'}]));
 }
 
 initManagers(['chat', 'diseases', 'bus']).then(async ({chat, diseases, bus}) => {
@@ -54,7 +54,7 @@ initManagers(['chat', 'diseases', 'bus']).then(async ({chat, diseases, bus}) => 
     app.use(SaveActivityMiddleware);
 
     app.start(ctx => {
-        return ctx.reply(
+        return ctx.replyWithHTML(
             __(`Этот бот несет строго ознакомительный характер и не является руководством к действию/лечению.
 
 Точную информацию можно получить только при консультации у врача.`, ['content', 'start', 'disclaimer']),
@@ -75,7 +75,7 @@ initManagers(['chat', 'diseases', 'bus']).then(async ({chat, diseases, bus}) => 
         let symptoms = await diseases.getLimbSymptoms(limb);
         let symptomMenu = menu( symptoms.map( symptom => {
             return {code: `complain_${symptom.id}_initial`, text: symptom.text}
-        }), 1)
+        }), 1);
         return ctx.editMessageText('Теперь укажите основную проблему', symptomMenu);
     });
 

@@ -6,7 +6,7 @@ module.exports = function (pddManager) {
     const scene = new BaseScene('main');
 
     scene.enter(async ctx => {
-        return ctx.reply(
+        return ctx.replyWithHTML(
             __('Потренируемся, или сразу экзамен?', ['menu', 'main', 'start']),
             menu([
                 {code: 'exam', text: 'Экзамен'},

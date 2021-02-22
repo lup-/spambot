@@ -75,14 +75,14 @@ initManagers(['chat', 'bus']).then(async ({chat, bus}) => {
     app.start(async (ctx) => {
         let messageShown = ctx && ctx.session && ctx.session.introShown;
         if (messageShown) {
-            return ctx.reply(
+            return ctx.replyWithHTML(
                 __('Напишите название болезни или обследования. Я поищу его в нашей энциклопедии', ['main', 'start'])
             );
         }
 
         try {
             ctx.session.introShown = true;
-            return ctx.reply(__(`Этот бот поможет вам разобраться с: диагнозами, болезнями, процедурами и в целом странными врачебными названиями.
+            return ctx.replyWithHTML(__(`Этот бот поможет вам разобраться с: диагнозами, болезнями, процедурами и в целом странными врачебными названиями.
 
 Если у ваших болей и дискомфорта не определена болезнь, попробуйте диагностировать её сначала тут: @yourhealthy_bot
 
@@ -99,7 +99,8 @@ initManagers(['chat', 'bus']).then(async ({chat, bus}) => {
 
     app.action('accept', ctx => {
         return ctx.editMessageText(
-            __('Напишите название болезни или обследования. Я поищу его в нашей энциклопедии', ['main', 'start'])
+            __('Напишите название болезни или обследования. Я поищу его в нашей энциклопедии', ['main', 'start']),
+            {parse_mode: "HTML"}
         );
     });
 

@@ -43,7 +43,7 @@ initManagers(['chat', 'bus', 'periodic', 'profile', 'finance']).then(async ({cha
 
         try {
             ctx.session.introShown = true;
-            return ctx.reply(__(`Выберите интересующую вас категорию для подписки. Каждая из них содержит темы, которые могут быть вам интересны.
+            return ctx.replyWithHTML(__(`Выберите интересующую вас категорию для подписки. Каждая из них содержит темы, которые могут быть вам интересны.
 
 Нажимая на кнопку ПОДПИСАТЬСЯ вы подписываетесь на все категории`, ['content', 'intro']), menu([{code: 'accept', text: 'Понятно'}]));
         }

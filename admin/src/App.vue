@@ -1,38 +1,26 @@
 <template>
     <v-app id="botofarmer">
         <v-alert type="error" v-model="showError" dismissible tile class="global-error">{{appError}}</v-alert>
-        <v-navigation-drawer v-model="drawer" app clipped>
+        <v-navigation-drawer v-model="drawer" app clipped v-if="isLoggedIn">
             <v-list dense>
-                <v-list-item link @click="$router.push({name: 'stats'})" :disabled="$route.name === 'stats'">
+                <v-list-item v-for="route in routes" :key="route.code"
+                    link
+                    @click="$router.push({name: route.code})"
+                    :disabled="$route.name === route.code"
+                >
                     <v-list-item-action>
-                        <v-icon>mdi-database</v-icon>
+                        <v-icon v-text="route.icon"></v-icon>
                     </v-list-item-action>
                     <v-list-item-content>
-                        <v-list-item-title>Статистика</v-list-item-title>
+                        <v-list-item-title>{{route.title}}</v-list-item-title>
                     </v-list-item-content>
                 </v-list-item>
-                <v-list-item link @click="$router.push({name: 'adsList'})" :disabled="$route.name === 'adsList'">
+                <v-list-item v-if="$store.getters.isLoggedIn" link @click="logout">
                     <v-list-item-action>
-                        <v-icon>mdi-cash-usd</v-icon>
+                        <v-icon>mdi-logout</v-icon>
                     </v-list-item-action>
                     <v-list-item-content>
-                        <v-list-item-title>Приписки</v-list-item-title>
-                    </v-list-item-content>
-                </v-list-item>
-                <v-list-item link @click="$router.push({name: 'mailingList'})" :disabled="$route.name === 'mailingList'">
-                    <v-list-item-action>
-                        <v-icon>mdi-email</v-icon>
-                    </v-list-item-action>
-                    <v-list-item-content>
-                        <v-list-item-title>Рассылки</v-list-item-title>
-                    </v-list-item-content>
-                </v-list-item>
-                <v-list-item link @click="$router.push({name: 'refUsersList'})" :disabled="$route.name === 'refUsersList'">
-                    <v-list-item-action>
-                        <v-icon>mdi-account-multiple</v-icon>
-                    </v-list-item-action>
-                    <v-list-item-content>
-                        <v-list-item-title>Админы</v-list-item-title>
+                        <v-list-item-title>Выход</v-list-item-title>
                     </v-list-item-content>
                 </v-list-item>
             </v-list>
@@ -49,6 +37,13 @@
 
         <v-footer app>
         </v-footer>
+
+        <v-snackbar v-model="showMessage" :timeout="5000" :color="appMessage.color">
+            {{ appMessage.text }}
+            <template v-slot:action="{ attrs }">
+                <v-btn icon v-bind="attrs" @click="showMessage = false"> <v-icon>mdi-close</v-icon> </v-btn>
+            </template>
+        </v-snackbar>
     </v-app>
 </template>
 
@@ -58,22 +53,42 @@
         data: () => ({
             drawer: null,
             showError: false,
+            showMessage: false,
         }),
         watch: {
             appError() {
                 this.showError = true;
+            },
+            appMessage() {
+                this.showMessage = true;
             }
         },
         async created() {
+            await this.$store.dispatch('loginLocalUser');
             await this.$store.dispatch('loadAds');
             await this.$store.dispatch('loadBots');
             await this.$store.dispatch('loadMessages');
             return true;
         },
+        methods: {
+            async logout() {
+                await this.$store.dispatch('logoutUser');
+                return this.$router.push({name: 'login'});
+            }
+        },
         computed: {
             appError() {
                 return this.$store.state.appError;
             },
+            appMessage() {
+                return this.$store.state.appMessage;
+            },
+            routes() {
+                return this.$store.getters.allowedRoutes;
+            },
+            isLoggedIn() {
+                return this.$store.getters.isLoggedIn;
+            }
         }
     }
 </script>

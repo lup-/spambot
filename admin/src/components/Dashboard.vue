@@ -1,5 +1,5 @@
 <template>
-    <v-container v-if="dashboard">
+    <v-container v-if="dashboard && dashboard.totalUsers">
 
         <v-row align="center">
             <v-col cols="3">
@@ -8,7 +8,7 @@
                     max-width="100%">
                     <v-card-title class="headline">
                         <span class="text--primary"><v-icon>mdi-account-group</v-icon> Всего: </span>
-                        <span class="text--primary">{{ dashboard ? dashboard.totalTodayBotUsers : 'Нет данных'}} <small></small></span>
+                        <span class="text--primary">{{ dashboard ? dashboard.totalUsers.dayTotalUsers : 'Нет данных'}} <small></small></span>
 
                     </v-card-title>
 

@@ -21,7 +21,6 @@ export default new Vuex.Store({
         messages,
         vacancy,
         user,
-        messages,
         dashboard
     },
     state: {

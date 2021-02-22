@@ -3,6 +3,11 @@ const {getPg} = require('../modules/pgdb');
 const moment = require('moment');
 const config = require('../config');
 
+const activeUsersBot = require('./stats/active');
+const totalUsersBot = require('./stats/total');
+const blockedUsersBot = require('./stats/blocked');
+const uniqueUsersBot = require('./stats/unique');
+
 module.exports = {
     async botList(ctx) {
         ctx.body = {bots: await config.botList()}
@@ -64,7 +69,9 @@ module.exports = {
             const refRes = queries.refs ? await db.query(queries.refs) : false;
             await db.end();
 
-            let usersStat = countRes && countRes.rows ? countRes.rows[0] : false;
+            let usersStat = countRes && countRes.rows
+                ? {count: parseInt(countRes.rows[0].count)}
+                : false;
             let refsStat = refRes.rows;
 
             botstats.push({botId: bot.id, users: usersStat, refs: refsStat, external: true});
@@ -180,7 +187,7 @@ module.exports = {
                 let activeUserCount = activeUsersResult.find(item => item.tag === tag);
 
                 let count = userCount && userCount['count'] ? userCount['count'] : 0;
-                let total = totalUsersResult[0][`count_${index}`] || 0;
+                let total = totalUserResult && totalUserResult[0][`count_${index}`] || 0;
                 let active = activeUserCount && activeUserCount['count'] ? activeUserCount['count'] : 0;
 
                 return {tag, count, active, total};
@@ -266,5 +273,105 @@ module.exports = {
         }
 
         ctx.body = {refs};
-    }
-}
+    },
+    async dashboard(ctx) {
+        ctx.body = await this.getStats();
+    },
+    // async dashboardOld(ctx) {
+    //
+    //     let userAllCount = [];
+    //     let botsAll = await config.botList();
+    //
+    //     let totalTodayBotUsers = 0;
+    //     let totalYesterdayBotUsers = 0;
+    //     let allFoundUsers = [];
+    //     let totalActivityRecords = [];
+    //     let totalActivityWeek = 0;
+    //     let totalActivityMoonts = 0;
+    //
+    //     for (const bot of botsAll) {
+    //         let db = await getDb(bot.dbName);
+    //         let usersTable = db.collection('users');
+    //         let activityTable = db.collection('activity');
+    //
+    //         let yesterday = moment().subtract(1, 'd').startOf('d').unix(); //moment.js
+    //         let today = moment().unix();
+    //
+    //         let findUsersToday = await usersTable.count({registered: {$lt: today}});
+    //         let yesterdayBotUsers = await usersTable.count({registered: {$lt: yesterday}});
+    //         let botUsers = await usersTable.find({registered: {$lt: today}}).toArray();
+    //
+    //         let activityRecords = await  activityTable.find({date: {$gte: activityToday} }).toArray();
+    //
+    //         let activityWeekRecords = await usersTable.count({registered: {$lt: activityWeek}});
+    //
+    //         let activityMoontsRecords = await usersTable.count({registered: {$lt: activityMoonts}});
+    //
+    //                 totalActivityRecords = totalActivityRecords.concat(activityRecords);
+    //
+    //         totalTodayBotUsers += findUsersToday;
+    //
+    //         totalYesterdayBotUsers += yesterdayBotUsers;
+    //
+    //         totalActivityWeek += activityWeekRecords;
+    //
+    //         totalActivityMoonts += activityMoontsRecords;
+    //
+    //         allFoundUsers = allFoundUsers.concat(botUsers);
+    //     }
+    //
+    //     function onlyUnique(value, index, self) {
+    //         return self.indexOf(value) === index;
+    //     }
+    //
+    //     let allUserIds = allFoundUsers.map(function (user) {
+    //         return user.id;
+    //     });
+    //
+    //     let allActivityUser = totalActivityRecords.map(function (record) {
+    //        return  record.userId;
+    //     });
+    //
+    //     let usersForWeek = totalActivityWeek.filter(onlyUnique);
+    //
+    //     let userAllMoonts = totalActivityMoonts.filter(onlyUnique);
+    //
+    //     let uniqueIds = allUserIds.filter(onlyUnique);
+    //     let uniqueRecordsUser = allActivityUser.filter(onlyUnique);
+    //
+    //
+    //     let countUniqueId = uniqueIds.length;
+    //     let countRecordsUser = uniqueRecordsUser.length;
+    //
+    //     let deltaUsers = totalTodayBotUsers - totalYesterdayBotUsers;
+    //     let procentOfAllUsersYesterday = parseFloat((deltaUsers / totalYesterdayBotUsers * 100).toFixed(2));
+    //
+    //
+    //
+    //     ctx.body = {
+    //         totalTodayBotUsers,
+    //         totalYesterdayBotUsers,
+    //         procentOfAllUsersYesterday,
+    //         countUniqueId,
+    //         countRecordsUser,
+    //         usersForWeek,
+    //     };
+    // },
+    async getStats() {
+        let totalUsers = await totalUsersBot.getTotalUsers();
+        let uniqueUsers = await uniqueUsersBot.getUniqueUsers();
+        let activeUsers = await activeUsersBot.getActiveUsers();
+        let blockedUsers = await blockedUsersBot.getBlockedUsers();
+
+        return {totalUsers, uniqueUsers, activeUsers, blockedUsers};
+    },
+
+    async getBotsList() {
+        return config.botList();
+    },
+
+    dateTo(days) {
+        return moment().subtract(days, 'd').startOf('d').unix();
+    },
+
+};

@@ -6,9 +6,10 @@ import MailingEdit from "@/components/Mailings/Edit";
 import MailingsList from "@/components/Mailings/List";
 import RefUserEdit from "@/components/RefUsers/Edit";
 import RefUsersList from "@/components/RefUsers/List";
+import Dashboard from "@/components/Dashboard";
 
 export default [
-    { name: 'home', path: '/', component: Stats },
+    { name: 'home', path: '/', component: Dashboard },
     { name: 'stats', path: '/stats', component: Stats },
     { name: 'adsList', path: '/ads/', component: AdsList },
     { name: 'adsNew', path: '/ads/new', component: AdsEdit },

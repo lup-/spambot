@@ -115,6 +115,7 @@ services:
       - MONGO_DB=film_bot
       - BOT_NAME=film_bot
       - BOT_TOKEN=${FILM_BOT_TOKEN}
+      - TMDB_KEY=${TMDB_V3_KEY}
     command: npm run film_bot_debug
 
   familyname_bot:

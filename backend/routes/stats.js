@@ -3,6 +3,11 @@ const {getPg} = require('../modules/pgdb');
 const moment = require('moment');
 const config = require('../config');
 
+const activeUsersBot = require('./stats/active');
+const totalUsersBot = require('./stats/total');
+const blockedUsersBot = require('./stats/blocked');
+const uniqueUsersBot = require('./stats/unique');
+
 module.exports = {
     async botList(ctx) {
         ctx.body = {bots: await config.botList()}
@@ -147,7 +152,7 @@ module.exports = {
                 let activeUserCount = activeUsersResult.find(item => item.tag === tag);
 
                 let count = userCount && userCount['count'] ? userCount['count'] : 0;
-                let total = totalUsersResult[0][`count_${index}`] || 0;
+                let total = totalUserResult && totalUserResult[0][`count_${index}`] || 0;
                 let active = activeUserCount && activeUserCount['count'] ? activeUserCount['count'] : 0;
 
                 return {tag, count, active, total};
@@ -233,5 +238,26 @@ module.exports = {
         }
 
         ctx.body = {refs};
-    }
-}
+    },
+    async dashboard(ctx) {
+        ctx.body = await this.getStats();
+    },
+
+    async getStats() {
+        let totalUsers = await totalUsersBot.getTotalUsers();
+        let uniqueUsers = await uniqueUsersBot.getUniqueUsers();
+        let activeUsers = await activeUsersBot.getActiveUsers();
+        let blockedUsers = await blockedUsersBot.getBlockedUsers();
+
+        return {totalUsers, uniqueUsers, activeUsers, blockedUsers};
+    },
+
+    async getBotsList() {
+        return config.botList();
+    },
+
+    dateTo(days) {
+        return moment().subtract(days, 'd').startOf('d').unix();
+    },
+
+};

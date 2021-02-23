@@ -8,6 +8,7 @@ import messages from "@/store/modules/messages";
 import mailing from "@/store/modules/mailing";
 import vacancy from "./modules/vacancy";
 import user from "./modules/user";
+import dashboard from "@/store/modules/dashboard";
 
 Vue.use(Vuex);
 
@@ -19,7 +20,8 @@ export default new Vuex.Store({
         bots,
         messages,
         vacancy,
-        user
+        user,
+        dashboard
     },
     state: {
         appError: false,

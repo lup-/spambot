@@ -18,6 +18,7 @@ const router = new Router();
 
 router
     .post('/api/stats/list', stats.general)
+    .post('/api/stats/dashboard', stats.dashboard.bind(stats))
     .post('/api/stats/details', stats.details);
 
 router

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
+    <data-source source="LOCAL" name="bots remoteworkdb" uuid="91fc14c5-bb1c-4108-9918-748b27a029b6">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://db-postgresql-fra1-27804-do-user-7199787-0.a.db.ondigitalocean.com:25060/remoteworkdb</jdbc-url>
+    </data-source>
+    <data-source source="LOCAL" name="bots promo-bot-db" uuid="4f90dac9-886d-479f-b634-fb6e13c04c2b">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://db-postgresql-fra1-27804-do-user-7199787-0.a.db.ondigitalocean.com:25060/promo-bot-db</jdbc-url>
+    </data-source>
+    <data-source source="LOCAL" name="bots promo-bot-db1" uuid="5e7bd883-9e45-482d-94d5-924bccf09f5a">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://db-postgresql-fra1-27804-do-user-7199787-0.a.db.ondigitalocean.com:25060/promo-bot-db1</jdbc-url>
+    </data-source>
+    <data-source source="LOCAL" name="bots bookdb" uuid="29bc2624-3e9d-4805-a13e-490e640e0cfc">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://db-postgresql-fra1-27804-do-user-7199787-0.a.db.ondigitalocean.com:25060/bookdb</jdbc-url>
+    </data-source>
+    <data-source source="LOCAL" name="bots music_bot" uuid="a245b101-a793-4a5e-81c0-dc838ac4f083">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://db-postgresql-fra1-27804-do-user-7199787-0.a.db.ondigitalocean.com:25060/music_bot</jdbc-url>
+    </data-source>
+  </component>
+</project>

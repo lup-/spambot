@@ -26,6 +26,22 @@ module.exports = function () {
             let updateResult = await profiles.findOneAndReplace({id}, profile, {upsert: true, returnOriginal: false});
             return updateResult.value || false;
         },
+        async toggleInFavourites(profile, item) {
+            if (!profile.favorite) {
+                profile.favorite = [];
+            }
+
+            let favIndex = profile.favorite.indexOf(item.id);
+            if (favIndex === -1) {
+                profile.favorite.push(item.id)
+            }
+            else {
+                profile.favorite.splice(favIndex, 1);
+            }
+
+            return this.saveProfile(profile);
+        },
+
         initSessionProfileMiddleware() {
             return async (ctx, next) => {
                 if (ctx.session.profile) {

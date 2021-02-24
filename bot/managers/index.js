@@ -19,6 +19,8 @@ const MessageBus = require('./MessageBus');
 const PerformanceManager = require('./Perfomance');
 const ProxyManager = require('./Proxy');
 const CouponManager = require('./Coupon');
+const PlumcoreManager = require('./Plumcore');
+const PaymentManager = require('./Payment');
 
 let instances = {};
 
@@ -68,6 +70,10 @@ function init(manager, params = {}) {
             return new ProxyManager();
         case 'coupon':
             return new CouponManager();
+        case 'payment':
+            return new PaymentManager();
+        case 'plumcore':
+            return new PlumcoreManager();
         default:
             return null;
     }

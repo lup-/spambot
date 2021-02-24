@@ -17,7 +17,7 @@ function routeToNextStep(ctx) {
 
 module.exports = function (params) {
     const scene = new BaseScene('intro');
-    const {disclaimer, getLastVisit, setLastVisit} = params;
+    const {disclaimer, getLastVisit, setLastVisit, skipCategories} = params;
 
     const introAction = typeof (params.introAction) !== 'undefined'
         ? params.introAction
@@ -38,7 +38,7 @@ module.exports = function (params) {
                 buttons.push( {code: 'favorite', text: 'В избранное'});
             }
 
-            if (hasCategories) {
+            if (hasCategories && !skipCategories) {
                 buttons.push( {code: 'new', text: 'Рекомендации'});
             }
 

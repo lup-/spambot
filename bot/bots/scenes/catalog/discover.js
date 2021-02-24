@@ -1,8 +1,6 @@
 const BaseScene = require('telegraf/scenes/base');
 const {menu} = require('../../helpers/wizard');
-const {clone} = require('../../helpers/common');
-
-const EMPTY_FILE_ID = 'AgACAgIAAxkDAAIF3V-0xDwAAZxgtMPCLuAv-dYMDWkVvAACZbAxG68woEnFDINlmSGWEGdyGZguAAMBAAMCAANtAAMFLQMAAR4E';
+const EMPTY_FILE = {source: new Buffer('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64')};
 
 function itemMenu({hasPrev, hasNext, totalItems, isFavorite, item}, hasSubmenu, action, hasFavorite = true, hasRandom = true) {
     let buttons = [];
@@ -65,7 +63,7 @@ async function replyWithItem(ctx, showNewMessage, withPhoto, params) {
             let text = getEmptyText(ctx);
             emptyExtra.caption = text;
             return withPhoto
-                ? ctx.replyWithPhoto(EMPTY_FILE_ID, emptyExtra)
+                ? ctx.replyWithPhoto(EMPTY_FILE, emptyExtra)
                 : ctx.replyWithHTML(text, noItemsMenu());
         }
         else {
@@ -93,7 +91,7 @@ async function replyWithItem(ctx, showNewMessage, withPhoto, params) {
 
     let media = imageUrl
         ? {url: imageUrl}
-        : EMPTY_FILE_ID;
+        : EMPTY_FILE;
 
     if (withPhoto) {
         return ctx.safeReply(

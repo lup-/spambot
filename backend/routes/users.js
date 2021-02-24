@@ -39,8 +39,10 @@ module.exports = {
     },
     async update(ctx) {
         let db = await getDb();
+        let filter = ctx.request.body.filter || {};
         let userData = ctx.request.body.user;
         let id = userData.id;
+        let query = Object.assign({id, deleted: {$in: [null, false]}}, filter);
 
         if (!id) {
             ctx.body = { user: false };
@@ -56,17 +58,20 @@ module.exports = {
             delete userData.password;
         }
 
-        let updateResult = await db.collection('users').findOneAndReplace({id, deleted: {$in: [null, false]}}, userData, {returnOriginal: false});
+        let updateResult = await db.collection('users').findOneAndReplace(query, userData, {returnOriginal: false});
         let user = updateResult.value || false;
 
         ctx.body = { user };
     },
     async login(ctx) {
+        let filter = ctx.request.body.filter || {};
         let login = ctx.request.body.login;
         let passwordHash = md5(ctx.request.body.password);
 
+        let query = Object.assign({login, passwordHash, deleted: {$in: [null, false]}}, filter);
+
         let db = await getDb();
-        let user = await db.collection('users').findOne({login, passwordHash, deleted: {$in: [null, false]}});
+        let user = await db.collection('users').findOne(query);
         let isLoaded = Boolean(user);
 
         if (isLoaded) {
@@ -80,18 +85,22 @@ module.exports = {
     },
     async check(ctx) {
         let id = ctx.request.body.id;
+        let filter = ctx.request.body.filter || {};
+        let query = Object.assign({ id, deleted: {$in: [null, false]} }, filter);
 
         let db = await getDb();
-        let user = await db.collection('users').findOne({ id, deleted: {$in: [null, false]} });
+        let user = await db.collection('users').findOne(query);
         ctx.body = {success: Boolean(user)};
     },
     async delete(ctx) {
         let userData = ctx.request.body.user;
+        let filter = ctx.request.body.filter || {};
         let id = userData.id;
+        let query = Object.assign({id}, filter);
 
         let db = await getDb();
         let deleted = moment().unix();
-        let updateResult = await db.collection('users').findOneAndUpdate({id}, {$set: {deleted}}, {returnOriginal: false});
+        let updateResult = await db.collection('users').findOneAndUpdate(query, {$set: {deleted}}, {returnOriginal: false});
         let user = updateResult.value || false;
 
         ctx.body = { user };

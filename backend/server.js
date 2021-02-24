@@ -10,6 +10,10 @@ const mailings = require('./routes/mailings');
 const vacancies = require('./routes/vacancies');
 const users = require('./routes/users');
 
+const plumcoreCourses = require('./routes/plumcore/courses');
+const plumcoreCategories = require('./routes/plumcore/categories');
+const plumcorePayments = require('./routes/plumcore/payments');
+
 const PORT = 3000;
 const HOST = '0.0.0.0';
 
@@ -71,6 +75,21 @@ router
     .post('/api/user/delete', users.delete)
     .post('/api/user/check', users.check)
     .post('/api/user/login', users.login);
+
+router
+    .post('/api/plumcore/course/list', plumcoreCourses.list)
+    .post('/api/plumcore/course/add', plumcoreCourses.add)
+    .post('/api/plumcore/course/update', plumcoreCourses.update)
+    .post('/api/plumcore/course/delete', plumcoreCourses.delete);
+
+router
+    .post('/api/plumcore/category/list', plumcoreCategories.list)
+    .post('/api/plumcore/category/add', plumcoreCategories.add)
+    .post('/api/plumcore/category/update', plumcoreCategories.update)
+    .post('/api/plumcore/category/delete', plumcoreCategories.delete);
+
+router
+    .post('/api/plumcore/payment/list', plumcorePayments.list)
 
 app
     .use(bodyParser({

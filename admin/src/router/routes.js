@@ -12,10 +12,11 @@ import VacanciesList from "../components/Vacancies/List";
 import Login from '../components/Users/Login';
 import UsersEdit from '../components/Users/Edit';
 import UsersList from '../components/Users/List';
-import Dashboard from '../components/Dashboard';
+//import Dashboard from '../components/Dashboard';
+import Home from '../components/Home';
 
 export default [
-    { name: 'home', path: '/', component: Dashboard, meta: {requiresAuth: true, group: 'home'} },
+    { name: 'home', path: '/', component: Home, meta: {requiresAuth: true, group: 'home'} },
     { name: 'login', path: '/login', component: Login },
     { name: 'stats', path: '/stats', component: Stats, meta: {requiresAuth: true, group: 'stats'} },
     { name: 'botSettings', path: '/bots/:botName', component: BotSettings, meta: {requiresAuth: true, group: 'stats'} },

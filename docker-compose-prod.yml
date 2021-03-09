@@ -713,6 +713,7 @@ services:
       - tgapi_proxy
     volumes:
       - ./backend:/var/backend
+      - ./uploads:/var/backend/uploads
       - ./bot:/var/www
       - type: bind
         source: ./docker-compose-prod.yml
@@ -731,6 +732,8 @@ services:
       - IMGBB_TOKEN=${IMGBB_TOKEN}
       - TGAPI_ROOT=https://tgapi_proxy
       - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - UPLOAD_DIR=/var/backend/uploads
+      - BASE_DOWNLOAD_URL=${BASE_DOWNLOAD_URL}
     command: npm run mailer_bot
 
   languagetool:
@@ -769,6 +772,7 @@ services:
       - ${HTTP_PORT}:80
     volumes:
       - ./admin/dist:/var/www/public
+      - ./uploads:/var/www/downloads
       - ./etc/nginx/site.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - backend
@@ -799,6 +803,7 @@ services:
       - ./bot:/var/bot
       - ./backend:/var/www
       - ./backend:/var/backend
+      - ./uploads:/var/backend/uploads
       - type: bind
         source: ./docker-compose-prod.yml
         target: /var/docker-compose.yml
@@ -816,6 +821,8 @@ services:
       - PG_USER=${PG_USER}
       - PG_PASS=${PG_PASS}
       - IMGBB_TOKEN=${IMGBB_TOKEN}
+      - UPLOAD_DIR=/var/backend/uploads
+      - BASE_DOWNLOAD_URL=${BASE_DOWNLOAD_URL}
     command: npm run debug
 
   tgapi_proxy:

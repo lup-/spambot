@@ -1,5 +1,7 @@
 const Koa = require('koa');
 const Router = require('@koa/router');
+const multer = require('@koa/multer');
+
 const bodyParser = require('koa-bodyparser');
 
 const stats = require('./routes/stats');
@@ -9,6 +11,7 @@ const messages = require('./routes/messages');
 const mailings = require('./routes/mailings');
 const vacancies = require('./routes/vacancies');
 const users = require('./routes/users');
+const files = require('./routes/files');
 
 const plumcoreCourses = require('./routes/plumcore/courses');
 const plumcoreCategories = require('./routes/plumcore/categories');
@@ -16,9 +19,11 @@ const plumcorePayments = require('./routes/plumcore/payments');
 
 const PORT = 3000;
 const HOST = '0.0.0.0';
+const UPLOAD_DIR = process.env.UPLOAD_DIR;
 
 const app = new Koa();
 const router = new Router();
+const upload = multer({dest: UPLOAD_DIR});
 
 router
     .post('/api/stats/list', stats.general)
@@ -75,6 +80,11 @@ router
     .post('/api/user/delete', users.delete)
     .post('/api/user/check', users.check)
     .post('/api/user/login', users.login);
+
+router
+    .post('/api/file/link', upload.single('file'), files.getLink.bind(files))
+    .post('/api/file/delete', files.deleteFile.bind(files));
+
 
 router
     .post('/api/plumcore/course/list', plumcoreCourses.list)

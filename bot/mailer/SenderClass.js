@@ -3,6 +3,7 @@ const Markup = require('telegraf/markup');
 const imgbbUploader = require('imgbb-uploader');
 const tempWrite = require('temp-write');
 const fs = require('fs');
+const path = require('path');
 
 const {wait} = require('../modules/Helpers');
 const {getDb} = require('../modules/Database');
@@ -33,6 +34,7 @@ const MAILING_STATUS_PAUSED = 'paused';
 const MAILING_STATUS_FINISHED = 'finished';
 
 const IMGBB_TOKEN = process.env.IMGBB_TOKEN;
+const UPLOAD_DIR = process.env.UPLOAD_DIR;
 
 const API_ROOT = process.env.TGAPI_ROOT || 'https://api.telegram.org'
 const SIG_STOPPED = 10;
@@ -46,6 +48,7 @@ class Sender {
         this.stop = false;
         this.stopResolve = false;
         this.cachedImage = false;
+        this.cachedVideo = false;
     }
 
     async init(mailing = false) {
@@ -96,7 +99,7 @@ class Sender {
 
     getMessage() {
         let rawHTML = this.mailing.text;
-        return escapeHTML(rawHTML);
+        return escapeHTML(rawHTML, true);
     }
 
     getExtra() {
@@ -189,6 +192,12 @@ class Sender {
         return photos.find(photo => photo.width === maxWidth);
     }
 
+    getVideoMedia(video) {
+        let uploadPath = path.join(UPLOAD_DIR, video.serverFile.filename);
+        let videoStream = fs.createReadStream(uploadPath);
+        return {source: videoStream};
+    }
+
     async sendSinglePhotoMessage(chatId, telegram) {
         let options = this.getExtra();
         options['caption'] = this.getMessage();
@@ -201,6 +210,21 @@ class Sender {
             let buffer = this.dataUriToBuffer(image.src);
             let apiMessage = await telegram.sendPhoto(chatId, {source: buffer}, options);
             this.cachedImage = this.getBestPhoto(apiMessage.photo);
+            return apiMessage;
+        }
+    }
+
+    async sendSingeVideoMessage(chatId, telegram) {
+        let options = this.getExtra();
+        options['caption'] = this.getMessage();
+
+        if (this.cachedVideo && this.cachedVideo.file_id) {
+            return telegram.sendVideo(chatId, this.cachedVideo.file_id, options);
+        }
+        else {
+            let video = this.getVideoMedia(this.mailing.videos[0]);
+            let apiMessage = await telegram.sendVideo(chatId, video, options);
+            this.cachedVideo = apiMessage.video;
             return apiMessage;
         }
     }
@@ -225,14 +249,23 @@ class Sender {
     }
 
     async sendMediaGroupMessage(chatId, telegram) {
-        let media;
+        let media = [];
         if (this.cachedImage) {
             media = this.cachedImage.map(photo => photo.file_id);
         }
-        else {
+        else if (this.mailing.photos && this.mailing.photos.length > 0) {
             media = this.mailing.photos.map(image => {
                 return {media: {source: this.dataUriToBuffer(image.src)}, type: 'photo'};
             });
+        }
+
+        if (this.cachedVideo) {
+            media = media.concat(this.cachedVideo.map(video => video.file_id));
+        }
+        else if (this.mailing.videos && this.mailing.videos.length > 0) {
+            media = media.concat(this.mailing.videos.map(video => {
+                return {media: this.getVideoMedia(video), type: 'video'};
+            }));
         }
 
         let mediaGroup;
@@ -251,11 +284,15 @@ class Sender {
         }
 
         if (!this.cachedImage) {
-            this.cachedImage = mediaGroup.reduce((files, message) => {
+            this.cachedImage = mediaGroup.filter(message => Boolean(message.photo)).reduce((files, message) => {
                 let photo = this.getBestPhoto(message.photo);
                 files.push(photo);
                 return files;
             }, []);
+        }
+
+        if (!this.cachedVideo) {
+            this.cachedVideo = mediaGroup.filter(message => Boolean(message.video)).map(message => message.video);
         }
 
         return result;
@@ -279,8 +316,17 @@ class Sender {
 
         try {
             let method = this.sendPlainTextMessage;
-            if (this.mailing.photos && this.mailing.photos.length > 0) {
-                if (this.mailing.photos.length > 1 && !this.mailing.photoAsLink) {
+            let hasPhotos = this.mailing.photos && this.mailing.photos.length > 0;
+            let hasVideos = this.mailing.videos && this.mailing.videos.length > 0;
+            let hasManyPhotos = hasPhotos && this.mailing.photos.length > 1;
+            let hasManyVideos = hasVideos && this.mailing.videos.length > 1;
+
+            if (hasPhotos && hasVideos) {
+                method = this.sendMediaGroupMessage;
+            }
+
+            if (hasPhotos && !hasVideos) {
+                if (hasManyPhotos && !this.mailing.photoAsLink) {
                     method = this.sendMediaGroupMessage;
                 }
                 else if (this.mailing.photoAsLink) {
@@ -288,6 +334,15 @@ class Sender {
                 }
                 else {
                     method = this.sendSinglePhotoMessage;
+                }
+            }
+
+            if (hasVideos && !hasPhotos) {
+                if (hasManyVideos) {
+                    method = this.sendMediaGroupMessage;
+                }
+                else {
+                    method = this.sendSingeVideoMessage;
                 }
             }
 

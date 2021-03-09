@@ -2,6 +2,8 @@ const moment = require('moment');
 const axios = require('axios');
 const FileType = require('file-type');
 const shortid = require('shortid');
+const fs = require('fs');
+const path = require('path');
 
 const cp = require('child_process');
 const {getDb} = require('../modules/Database');
@@ -14,11 +16,52 @@ const {
 } = require('./SenderClass');
 
 const MAILINGS_CHECK_INTERVAL_SEC = 60;
+const BASE_DOWNLOAD_URL = process.env.BASE_DOWNLOAD_URL;
+const UPLOAD_DIR = process.env.UPLOAD_DIR;
 
 const eventLoopQueue = () => {
     return new Promise(resolve =>
         setImmediate(resolve)
     );
+}
+
+function getHTMLFromMessage(message) {
+    let text = message.text || message.caption;
+    let entities = message.entities || message.caption_entities || [];
+
+    let offsetShift = 0;
+    let html = text;
+    for (const entity of entities) {
+        let offset = entity.offset + offsetShift;
+        let oldText = html.substring(offset, offset + entity.length);
+
+        let newText;
+        switch (entity.type) {
+            case 'text_link':
+                newText = `<a href="${entity.url}">${oldText}</a>`;
+            break;
+            case 'bold':
+                newText = `<strong>${oldText}</strong>`;
+            break;
+            case 'italic':
+                newText = `<em>${oldText}</em>`;
+            break;
+            case 'strikethrough':
+                newText = `<del>${oldText}</del>`;
+            break;
+            default:
+                newText = oldText;
+            break;
+        }
+
+        html = html.substr(0, offset) + newText + html.substr(offset + entity.length);
+        let newShift = newText.length - oldText.length;
+        offsetShift += newShift;
+    }
+
+    html = html.replace(/\n/gs, '<br>');
+
+    return `<div>${html}</div>`
 }
 
 module.exports = class Mailer {
@@ -42,10 +85,12 @@ module.exports = class Mailer {
             status: 'new',
             created: moment().unix(),
             updated: moment().unix(),
-            text: message.text,
+            text: getHTMLFromMessage(message),
         }
 
         let photo = false;
+        let video = false;
+
         if (message.photo) {
             let photoFile = message.photo.reduce((maxSize, current) => {
                 if (!maxSize) {
@@ -76,12 +121,62 @@ module.exports = class Mailer {
             }
         }
 
+        if (message.video) {
+            let videoLink = await ctx.tg.getFileLink(message.video.file_id);
+            let {data: videoStream} = await axios.get(videoLink, {responseType: 'stream'});
+
+            let newFileName = message.video.file_name;
+            let targetPath = path.join(UPLOAD_DIR, newFileName);
+
+            videoStream.pipe(fs.createWriteStream(targetPath));
+            let link = BASE_DOWNLOAD_URL + newFileName;
+            let serverFile = {
+                fieldname: "message",
+                originalname: newFileName,
+                encoding: "7bit",
+                mimetype: message.video.mime_type,
+                destination: UPLOAD_DIR,
+                filename: newFileName,
+                path: targetPath,
+                size: message.video.file_size,
+            }
+
+            video = {
+                file: {},
+                serverFile,
+                src: link,
+                type: message.video.mime_type,
+                name: newFileName,
+            }
+        }
+
         if (photo) {
             if (!mailing.photos) {
                 mailing.photos = [];
             }
 
             mailing.photos.push(photo);
+        }
+
+        if (video) {
+            if (!mailing.videos) {
+                mailing.videos = [];
+            }
+
+            mailing.videos.push(video);
+        }
+
+        let hasButtons = message.reply_markup && message.reply_markup.inline_keyboard && message.reply_markup.inline_keyboard.length > 0;
+        if (hasButtons) {
+            let firstRow = message.reply_markup.inline_keyboard[0];
+            let buttons = firstRow.map(tgButton => {
+                return {
+                    text: tgButton.text,
+                    link: tgButton.url || ''
+                }
+            });
+
+            mailing.buttons = buttons;
         }
 
         let result = await db.collection('mailings').insertOne(mailing);

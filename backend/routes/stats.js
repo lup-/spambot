@@ -152,7 +152,7 @@ module.exports = {
                 let activeUserCount = activeUsersResult.find(item => item.tag === tag);
 
                 let count = userCount && userCount['count'] ? userCount['count'] : 0;
-                let total = totalUserResult && totalUserResult[0][`count_${index}`] || 0;
+                let total = totalUsersResult && totalUsersResult[0][`count_${index}`] || 0;
                 let active = activeUserCount && activeUserCount['count'] ? activeUserCount['count'] : 0;
 
                 return {tag, count, active, total};

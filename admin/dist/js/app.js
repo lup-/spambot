@@ -732,66 +732,70 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var core_js_modules_es_object_to_string__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_object_to_string__WEBPACK_IMPORTED_MODULE_7__);
 /* harmony import */ var core_js_modules_es_regexp_exec__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! core-js/modules/es.regexp.exec */ "./node_modules/core-js/modules/es.regexp.exec.js");
 /* harmony import */ var core_js_modules_es_regexp_exec__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_regexp_exec__WEBPACK_IMPORTED_MODULE_8__);
-/* harmony import */ var core_js_modules_es_string_pad_start__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! core-js/modules/es.string.pad-start */ "./node_modules/core-js/modules/es.string.pad-start.js");
-/* harmony import */ var core_js_modules_es_string_pad_start__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_pad_start__WEBPACK_IMPORTED_MODULE_9__);
-/* harmony import */ var core_js_modules_es_string_split__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! core-js/modules/es.string.split */ "./node_modules/core-js/modules/es.string.split.js");
-/* harmony import */ var core_js_modules_es_string_split__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_split__WEBPACK_IMPORTED_MODULE_10__);
-/* harmony import */ var core_js_modules_es_typed_array_uint8_array__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! core-js/modules/es.typed-array.uint8-array */ "./node_modules/core-js/modules/es.typed-array.uint8-array.js");
-/* harmony import */ var core_js_modules_es_typed_array_uint8_array__WEBPACK_IMPORTED_MODULE_11___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_uint8_array__WEBPACK_IMPORTED_MODULE_11__);
-/* harmony import */ var core_js_modules_es_typed_array_copy_within__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! core-js/modules/es.typed-array.copy-within */ "./node_modules/core-js/modules/es.typed-array.copy-within.js");
-/* harmony import */ var core_js_modules_es_typed_array_copy_within__WEBPACK_IMPORTED_MODULE_12___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_copy_within__WEBPACK_IMPORTED_MODULE_12__);
-/* harmony import */ var core_js_modules_es_typed_array_every__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! core-js/modules/es.typed-array.every */ "./node_modules/core-js/modules/es.typed-array.every.js");
-/* harmony import */ var core_js_modules_es_typed_array_every__WEBPACK_IMPORTED_MODULE_13___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_every__WEBPACK_IMPORTED_MODULE_13__);
-/* harmony import */ var core_js_modules_es_typed_array_fill__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! core-js/modules/es.typed-array.fill */ "./node_modules/core-js/modules/es.typed-array.fill.js");
-/* harmony import */ var core_js_modules_es_typed_array_fill__WEBPACK_IMPORTED_MODULE_14___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_fill__WEBPACK_IMPORTED_MODULE_14__);
-/* harmony import */ var core_js_modules_es_typed_array_filter__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! core-js/modules/es.typed-array.filter */ "./node_modules/core-js/modules/es.typed-array.filter.js");
-/* harmony import */ var core_js_modules_es_typed_array_filter__WEBPACK_IMPORTED_MODULE_15___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_filter__WEBPACK_IMPORTED_MODULE_15__);
-/* harmony import */ var core_js_modules_es_typed_array_find__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! core-js/modules/es.typed-array.find */ "./node_modules/core-js/modules/es.typed-array.find.js");
-/* harmony import */ var core_js_modules_es_typed_array_find__WEBPACK_IMPORTED_MODULE_16___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_find__WEBPACK_IMPORTED_MODULE_16__);
-/* harmony import */ var core_js_modules_es_typed_array_find_index__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! core-js/modules/es.typed-array.find-index */ "./node_modules/core-js/modules/es.typed-array.find-index.js");
-/* harmony import */ var core_js_modules_es_typed_array_find_index__WEBPACK_IMPORTED_MODULE_17___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_find_index__WEBPACK_IMPORTED_MODULE_17__);
-/* harmony import */ var core_js_modules_es_typed_array_for_each__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! core-js/modules/es.typed-array.for-each */ "./node_modules/core-js/modules/es.typed-array.for-each.js");
-/* harmony import */ var core_js_modules_es_typed_array_for_each__WEBPACK_IMPORTED_MODULE_18___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_for_each__WEBPACK_IMPORTED_MODULE_18__);
-/* harmony import */ var core_js_modules_es_typed_array_includes__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! core-js/modules/es.typed-array.includes */ "./node_modules/core-js/modules/es.typed-array.includes.js");
-/* harmony import */ var core_js_modules_es_typed_array_includes__WEBPACK_IMPORTED_MODULE_19___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_includes__WEBPACK_IMPORTED_MODULE_19__);
-/* harmony import */ var core_js_modules_es_typed_array_index_of__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! core-js/modules/es.typed-array.index-of */ "./node_modules/core-js/modules/es.typed-array.index-of.js");
-/* harmony import */ var core_js_modules_es_typed_array_index_of__WEBPACK_IMPORTED_MODULE_20___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_index_of__WEBPACK_IMPORTED_MODULE_20__);
-/* harmony import */ var core_js_modules_es_typed_array_iterator__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! core-js/modules/es.typed-array.iterator */ "./node_modules/core-js/modules/es.typed-array.iterator.js");
-/* harmony import */ var core_js_modules_es_typed_array_iterator__WEBPACK_IMPORTED_MODULE_21___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_iterator__WEBPACK_IMPORTED_MODULE_21__);
-/* harmony import */ var core_js_modules_es_typed_array_join__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! core-js/modules/es.typed-array.join */ "./node_modules/core-js/modules/es.typed-array.join.js");
-/* harmony import */ var core_js_modules_es_typed_array_join__WEBPACK_IMPORTED_MODULE_22___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_join__WEBPACK_IMPORTED_MODULE_22__);
-/* harmony import */ var core_js_modules_es_typed_array_last_index_of__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! core-js/modules/es.typed-array.last-index-of */ "./node_modules/core-js/modules/es.typed-array.last-index-of.js");
-/* harmony import */ var core_js_modules_es_typed_array_last_index_of__WEBPACK_IMPORTED_MODULE_23___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_last_index_of__WEBPACK_IMPORTED_MODULE_23__);
-/* harmony import */ var core_js_modules_es_typed_array_map__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! core-js/modules/es.typed-array.map */ "./node_modules/core-js/modules/es.typed-array.map.js");
-/* harmony import */ var core_js_modules_es_typed_array_map__WEBPACK_IMPORTED_MODULE_24___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_map__WEBPACK_IMPORTED_MODULE_24__);
-/* harmony import */ var core_js_modules_es_typed_array_reduce__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! core-js/modules/es.typed-array.reduce */ "./node_modules/core-js/modules/es.typed-array.reduce.js");
-/* harmony import */ var core_js_modules_es_typed_array_reduce__WEBPACK_IMPORTED_MODULE_25___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_reduce__WEBPACK_IMPORTED_MODULE_25__);
-/* harmony import */ var core_js_modules_es_typed_array_reduce_right__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! core-js/modules/es.typed-array.reduce-right */ "./node_modules/core-js/modules/es.typed-array.reduce-right.js");
-/* harmony import */ var core_js_modules_es_typed_array_reduce_right__WEBPACK_IMPORTED_MODULE_26___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_reduce_right__WEBPACK_IMPORTED_MODULE_26__);
-/* harmony import */ var core_js_modules_es_typed_array_reverse__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! core-js/modules/es.typed-array.reverse */ "./node_modules/core-js/modules/es.typed-array.reverse.js");
-/* harmony import */ var core_js_modules_es_typed_array_reverse__WEBPACK_IMPORTED_MODULE_27___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_reverse__WEBPACK_IMPORTED_MODULE_27__);
-/* harmony import */ var core_js_modules_es_typed_array_set__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! core-js/modules/es.typed-array.set */ "./node_modules/core-js/modules/es.typed-array.set.js");
-/* harmony import */ var core_js_modules_es_typed_array_set__WEBPACK_IMPORTED_MODULE_28___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_set__WEBPACK_IMPORTED_MODULE_28__);
-/* harmony import */ var core_js_modules_es_typed_array_slice__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! core-js/modules/es.typed-array.slice */ "./node_modules/core-js/modules/es.typed-array.slice.js");
-/* harmony import */ var core_js_modules_es_typed_array_slice__WEBPACK_IMPORTED_MODULE_29___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_slice__WEBPACK_IMPORTED_MODULE_29__);
-/* harmony import */ var core_js_modules_es_typed_array_some__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! core-js/modules/es.typed-array.some */ "./node_modules/core-js/modules/es.typed-array.some.js");
-/* harmony import */ var core_js_modules_es_typed_array_some__WEBPACK_IMPORTED_MODULE_30___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_some__WEBPACK_IMPORTED_MODULE_30__);
-/* harmony import */ var core_js_modules_es_typed_array_sort__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(/*! core-js/modules/es.typed-array.sort */ "./node_modules/core-js/modules/es.typed-array.sort.js");
-/* harmony import */ var core_js_modules_es_typed_array_sort__WEBPACK_IMPORTED_MODULE_31___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_sort__WEBPACK_IMPORTED_MODULE_31__);
-/* harmony import */ var core_js_modules_es_typed_array_subarray__WEBPACK_IMPORTED_MODULE_32__ = __webpack_require__(/*! core-js/modules/es.typed-array.subarray */ "./node_modules/core-js/modules/es.typed-array.subarray.js");
-/* harmony import */ var core_js_modules_es_typed_array_subarray__WEBPACK_IMPORTED_MODULE_32___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_subarray__WEBPACK_IMPORTED_MODULE_32__);
-/* harmony import */ var core_js_modules_es_typed_array_to_locale_string__WEBPACK_IMPORTED_MODULE_33__ = __webpack_require__(/*! core-js/modules/es.typed-array.to-locale-string */ "./node_modules/core-js/modules/es.typed-array.to-locale-string.js");
-/* harmony import */ var core_js_modules_es_typed_array_to_locale_string__WEBPACK_IMPORTED_MODULE_33___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_to_locale_string__WEBPACK_IMPORTED_MODULE_33__);
-/* harmony import */ var core_js_modules_es_typed_array_to_string__WEBPACK_IMPORTED_MODULE_34__ = __webpack_require__(/*! core-js/modules/es.typed-array.to-string */ "./node_modules/core-js/modules/es.typed-array.to-string.js");
-/* harmony import */ var core_js_modules_es_typed_array_to_string__WEBPACK_IMPORTED_MODULE_34___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_to_string__WEBPACK_IMPORTED_MODULE_34__);
-/* harmony import */ var _var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_slicedToArray__WEBPACK_IMPORTED_MODULE_35__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/slicedToArray */ "./node_modules/@babel/runtime/helpers/esm/slicedToArray.js");
-/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_36__ = __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
-/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_36___default = /*#__PURE__*/__webpack_require__.n(regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_36__);
-/* harmony import */ var _var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_37__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
-/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_38__ = __webpack_require__(/*! moment */ "./node_modules/moment/moment.js");
-/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_38___default = /*#__PURE__*/__webpack_require__.n(moment__WEBPACK_IMPORTED_MODULE_38__);
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_39__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_39___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_39__);
+/* harmony import */ var core_js_modules_es_regexp_to_string__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! core-js/modules/es.regexp.to-string */ "./node_modules/core-js/modules/es.regexp.to-string.js");
+/* harmony import */ var core_js_modules_es_regexp_to_string__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_regexp_to_string__WEBPACK_IMPORTED_MODULE_9__);
+/* harmony import */ var core_js_modules_es_string_pad_start__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! core-js/modules/es.string.pad-start */ "./node_modules/core-js/modules/es.string.pad-start.js");
+/* harmony import */ var core_js_modules_es_string_pad_start__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_pad_start__WEBPACK_IMPORTED_MODULE_10__);
+/* harmony import */ var core_js_modules_es_string_split__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! core-js/modules/es.string.split */ "./node_modules/core-js/modules/es.string.split.js");
+/* harmony import */ var core_js_modules_es_string_split__WEBPACK_IMPORTED_MODULE_11___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_split__WEBPACK_IMPORTED_MODULE_11__);
+/* harmony import */ var core_js_modules_es_string_link__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! core-js/modules/es.string.link */ "./node_modules/core-js/modules/es.string.link.js");
+/* harmony import */ var core_js_modules_es_string_link__WEBPACK_IMPORTED_MODULE_12___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_link__WEBPACK_IMPORTED_MODULE_12__);
+/* harmony import */ var core_js_modules_es_typed_array_uint8_array__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! core-js/modules/es.typed-array.uint8-array */ "./node_modules/core-js/modules/es.typed-array.uint8-array.js");
+/* harmony import */ var core_js_modules_es_typed_array_uint8_array__WEBPACK_IMPORTED_MODULE_13___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_uint8_array__WEBPACK_IMPORTED_MODULE_13__);
+/* harmony import */ var core_js_modules_es_typed_array_copy_within__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! core-js/modules/es.typed-array.copy-within */ "./node_modules/core-js/modules/es.typed-array.copy-within.js");
+/* harmony import */ var core_js_modules_es_typed_array_copy_within__WEBPACK_IMPORTED_MODULE_14___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_copy_within__WEBPACK_IMPORTED_MODULE_14__);
+/* harmony import */ var core_js_modules_es_typed_array_every__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! core-js/modules/es.typed-array.every */ "./node_modules/core-js/modules/es.typed-array.every.js");
+/* harmony import */ var core_js_modules_es_typed_array_every__WEBPACK_IMPORTED_MODULE_15___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_every__WEBPACK_IMPORTED_MODULE_15__);
+/* harmony import */ var core_js_modules_es_typed_array_fill__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! core-js/modules/es.typed-array.fill */ "./node_modules/core-js/modules/es.typed-array.fill.js");
+/* harmony import */ var core_js_modules_es_typed_array_fill__WEBPACK_IMPORTED_MODULE_16___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_fill__WEBPACK_IMPORTED_MODULE_16__);
+/* harmony import */ var core_js_modules_es_typed_array_filter__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! core-js/modules/es.typed-array.filter */ "./node_modules/core-js/modules/es.typed-array.filter.js");
+/* harmony import */ var core_js_modules_es_typed_array_filter__WEBPACK_IMPORTED_MODULE_17___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_filter__WEBPACK_IMPORTED_MODULE_17__);
+/* harmony import */ var core_js_modules_es_typed_array_find__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! core-js/modules/es.typed-array.find */ "./node_modules/core-js/modules/es.typed-array.find.js");
+/* harmony import */ var core_js_modules_es_typed_array_find__WEBPACK_IMPORTED_MODULE_18___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_find__WEBPACK_IMPORTED_MODULE_18__);
+/* harmony import */ var core_js_modules_es_typed_array_find_index__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! core-js/modules/es.typed-array.find-index */ "./node_modules/core-js/modules/es.typed-array.find-index.js");
+/* harmony import */ var core_js_modules_es_typed_array_find_index__WEBPACK_IMPORTED_MODULE_19___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_find_index__WEBPACK_IMPORTED_MODULE_19__);
+/* harmony import */ var core_js_modules_es_typed_array_for_each__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! core-js/modules/es.typed-array.for-each */ "./node_modules/core-js/modules/es.typed-array.for-each.js");
+/* harmony import */ var core_js_modules_es_typed_array_for_each__WEBPACK_IMPORTED_MODULE_20___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_for_each__WEBPACK_IMPORTED_MODULE_20__);
+/* harmony import */ var core_js_modules_es_typed_array_includes__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! core-js/modules/es.typed-array.includes */ "./node_modules/core-js/modules/es.typed-array.includes.js");
+/* harmony import */ var core_js_modules_es_typed_array_includes__WEBPACK_IMPORTED_MODULE_21___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_includes__WEBPACK_IMPORTED_MODULE_21__);
+/* harmony import */ var core_js_modules_es_typed_array_index_of__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! core-js/modules/es.typed-array.index-of */ "./node_modules/core-js/modules/es.typed-array.index-of.js");
+/* harmony import */ var core_js_modules_es_typed_array_index_of__WEBPACK_IMPORTED_MODULE_22___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_index_of__WEBPACK_IMPORTED_MODULE_22__);
+/* harmony import */ var core_js_modules_es_typed_array_iterator__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! core-js/modules/es.typed-array.iterator */ "./node_modules/core-js/modules/es.typed-array.iterator.js");
+/* harmony import */ var core_js_modules_es_typed_array_iterator__WEBPACK_IMPORTED_MODULE_23___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_iterator__WEBPACK_IMPORTED_MODULE_23__);
+/* harmony import */ var core_js_modules_es_typed_array_join__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! core-js/modules/es.typed-array.join */ "./node_modules/core-js/modules/es.typed-array.join.js");
+/* harmony import */ var core_js_modules_es_typed_array_join__WEBPACK_IMPORTED_MODULE_24___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_join__WEBPACK_IMPORTED_MODULE_24__);
+/* harmony import */ var core_js_modules_es_typed_array_last_index_of__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! core-js/modules/es.typed-array.last-index-of */ "./node_modules/core-js/modules/es.typed-array.last-index-of.js");
+/* harmony import */ var core_js_modules_es_typed_array_last_index_of__WEBPACK_IMPORTED_MODULE_25___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_last_index_of__WEBPACK_IMPORTED_MODULE_25__);
+/* harmony import */ var core_js_modules_es_typed_array_map__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! core-js/modules/es.typed-array.map */ "./node_modules/core-js/modules/es.typed-array.map.js");
+/* harmony import */ var core_js_modules_es_typed_array_map__WEBPACK_IMPORTED_MODULE_26___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_map__WEBPACK_IMPORTED_MODULE_26__);
+/* harmony import */ var core_js_modules_es_typed_array_reduce__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! core-js/modules/es.typed-array.reduce */ "./node_modules/core-js/modules/es.typed-array.reduce.js");
+/* harmony import */ var core_js_modules_es_typed_array_reduce__WEBPACK_IMPORTED_MODULE_27___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_reduce__WEBPACK_IMPORTED_MODULE_27__);
+/* harmony import */ var core_js_modules_es_typed_array_reduce_right__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! core-js/modules/es.typed-array.reduce-right */ "./node_modules/core-js/modules/es.typed-array.reduce-right.js");
+/* harmony import */ var core_js_modules_es_typed_array_reduce_right__WEBPACK_IMPORTED_MODULE_28___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_reduce_right__WEBPACK_IMPORTED_MODULE_28__);
+/* harmony import */ var core_js_modules_es_typed_array_reverse__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! core-js/modules/es.typed-array.reverse */ "./node_modules/core-js/modules/es.typed-array.reverse.js");
+/* harmony import */ var core_js_modules_es_typed_array_reverse__WEBPACK_IMPORTED_MODULE_29___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_reverse__WEBPACK_IMPORTED_MODULE_29__);
+/* harmony import */ var core_js_modules_es_typed_array_set__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! core-js/modules/es.typed-array.set */ "./node_modules/core-js/modules/es.typed-array.set.js");
+/* harmony import */ var core_js_modules_es_typed_array_set__WEBPACK_IMPORTED_MODULE_30___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_set__WEBPACK_IMPORTED_MODULE_30__);
+/* harmony import */ var core_js_modules_es_typed_array_slice__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(/*! core-js/modules/es.typed-array.slice */ "./node_modules/core-js/modules/es.typed-array.slice.js");
+/* harmony import */ var core_js_modules_es_typed_array_slice__WEBPACK_IMPORTED_MODULE_31___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_slice__WEBPACK_IMPORTED_MODULE_31__);
+/* harmony import */ var core_js_modules_es_typed_array_some__WEBPACK_IMPORTED_MODULE_32__ = __webpack_require__(/*! core-js/modules/es.typed-array.some */ "./node_modules/core-js/modules/es.typed-array.some.js");
+/* harmony import */ var core_js_modules_es_typed_array_some__WEBPACK_IMPORTED_MODULE_32___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_some__WEBPACK_IMPORTED_MODULE_32__);
+/* harmony import */ var core_js_modules_es_typed_array_sort__WEBPACK_IMPORTED_MODULE_33__ = __webpack_require__(/*! core-js/modules/es.typed-array.sort */ "./node_modules/core-js/modules/es.typed-array.sort.js");
+/* harmony import */ var core_js_modules_es_typed_array_sort__WEBPACK_IMPORTED_MODULE_33___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_sort__WEBPACK_IMPORTED_MODULE_33__);
+/* harmony import */ var core_js_modules_es_typed_array_subarray__WEBPACK_IMPORTED_MODULE_34__ = __webpack_require__(/*! core-js/modules/es.typed-array.subarray */ "./node_modules/core-js/modules/es.typed-array.subarray.js");
+/* harmony import */ var core_js_modules_es_typed_array_subarray__WEBPACK_IMPORTED_MODULE_34___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_subarray__WEBPACK_IMPORTED_MODULE_34__);
+/* harmony import */ var core_js_modules_es_typed_array_to_locale_string__WEBPACK_IMPORTED_MODULE_35__ = __webpack_require__(/*! core-js/modules/es.typed-array.to-locale-string */ "./node_modules/core-js/modules/es.typed-array.to-locale-string.js");
+/* harmony import */ var core_js_modules_es_typed_array_to_locale_string__WEBPACK_IMPORTED_MODULE_35___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_to_locale_string__WEBPACK_IMPORTED_MODULE_35__);
+/* harmony import */ var core_js_modules_es_typed_array_to_string__WEBPACK_IMPORTED_MODULE_36__ = __webpack_require__(/*! core-js/modules/es.typed-array.to-string */ "./node_modules/core-js/modules/es.typed-array.to-string.js");
+/* harmony import */ var core_js_modules_es_typed_array_to_string__WEBPACK_IMPORTED_MODULE_36___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_to_string__WEBPACK_IMPORTED_MODULE_36__);
+/* harmony import */ var _var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_slicedToArray__WEBPACK_IMPORTED_MODULE_37__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/slicedToArray */ "./node_modules/@babel/runtime/helpers/esm/slicedToArray.js");
+/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_38__ = __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
+/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_38___default = /*#__PURE__*/__webpack_require__.n(regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_38__);
+/* harmony import */ var _var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_39__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_40__ = __webpack_require__(/*! moment */ "./node_modules/moment/moment.js");
+/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_40___default = /*#__PURE__*/__webpack_require__.n(moment__WEBPACK_IMPORTED_MODULE_40__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_41__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_41___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_41__);
 
 
 
@@ -830,6 +834,22 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -1102,6 +1122,7 @@ __webpack_require__.r(__webpack_exports__);
         disablePreview: true
       },
       photos: [],
+      videos: [],
       buttons: [],
       target: [],
       targetTypes: [{
@@ -1120,15 +1141,15 @@ __webpack_require__.r(__webpack_exports__);
       targetType: false,
       targetCmp: false,
       menuTargetDate: false,
-      targetDate: moment__WEBPACK_IMPORTED_MODULE_38___default()().format('YYYY-MM-DD'),
-      targetDateFormatted: moment__WEBPACK_IMPORTED_MODULE_38___default()().format('DD.MM.YYYY'),
+      targetDate: moment__WEBPACK_IMPORTED_MODULE_40___default()().format('YYYY-MM-DD'),
+      targetDateFormatted: moment__WEBPACK_IMPORTED_MODULE_40___default()().format('DD.MM.YYYY'),
       targetValue: [],
       menuDate: false,
       menuTime: false,
       showNewTarget: false,
-      startTime: moment__WEBPACK_IMPORTED_MODULE_38___default()().startOf('h').add(1, 'h').format('HH:mm'),
-      startDate: moment__WEBPACK_IMPORTED_MODULE_38___default()().format('YYYY-MM-DD'),
-      startDateFormatted: moment__WEBPACK_IMPORTED_MODULE_38___default()().format('DD.MM.YYYY'),
+      startTime: moment__WEBPACK_IMPORTED_MODULE_40___default()().startOf('h').add(1, 'h').format('HH:mm'),
+      startDate: moment__WEBPACK_IMPORTED_MODULE_40___default()().format('YYYY-MM-DD'),
+      startDateFormatted: moment__WEBPACK_IMPORTED_MODULE_40___default()().format('DD.MM.YYYY'),
       testUsers: [],
       testUser: false
     };
@@ -1136,7 +1157,7 @@ __webpack_require__.r(__webpack_exports__);
   created: function created() {
     var _this = this;
 
-    return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_37__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+    return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_39__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
       return regeneratorRuntime.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
@@ -1177,7 +1198,7 @@ __webpack_require__.r(__webpack_exports__);
       handler: function handler() {
         var _this2 = this;
 
-        return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_37__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+        return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_39__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
           return regeneratorRuntime.wrap(function _callee2$(_context2) {
             while (1) {
               switch (_context2.prev = _context2.next) {
@@ -1210,15 +1231,16 @@ __webpack_require__.r(__webpack_exports__);
         this.mailing = this.storeMailing;
 
         if (this.mailing.startAt) {
-          var mailingDate = moment__WEBPACK_IMPORTED_MODULE_38___default.a.unix(this.mailing.startAt);
+          var mailingDate = moment__WEBPACK_IMPORTED_MODULE_40___default.a.unix(this.mailing.startAt);
           this.startTime = mailingDate.format('HH:mm');
           this.startDate = mailingDate.format('YYYY-MM-DD');
           this.startDateFormatted = mailingDate.format('DD.MM.YYYY');
         }
 
-        this.target = this.mailing.target;
-        this.photos = this.mailing.photos;
-        this.buttons = this.mailing.buttons;
+        this.target = this.mailing.target || [];
+        this.photos = this.mailing.photos || [];
+        this.videos = this.mailing.videos || [];
+        this.buttons = this.mailing.buttons || [];
       } else {
         this.mailing = this.defaultMailing;
       }
@@ -1239,13 +1261,14 @@ __webpack_require__.r(__webpack_exports__);
       var mailing = this.mailing;
       mailing.target = this.target;
       mailing.photos = this.photos;
+      mailing.videos = this.videos;
       mailing.buttons = this.buttons;
       return mailing;
     },
     save: function save() {
       var _this3 = this;
 
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_37__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_39__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
         var mailing;
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
@@ -1284,7 +1307,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     loadToBrowser: function loadToBrowser(file) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_37__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_39__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
@@ -1321,22 +1344,60 @@ __webpack_require__.r(__webpack_exports__);
 
       return btoa(binary);
     },
-    addFile: function addFile(event) {
-      var _this4 = this;
+    uploadToServer: function uploadToServer(file) {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_39__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee5() {
+        var requestData, _yield$axios$post, data;
 
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_37__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee5() {
-        var file, buffer, base64Src, dataUrl;
         return regeneratorRuntime.wrap(function _callee5$(_context5) {
           while (1) {
             switch (_context5.prev = _context5.next) {
               case 0:
-                event.preventDefault();
-                file = event.file;
+                requestData = new FormData();
+                requestData.append('file', file);
                 _context5.next = 4;
-                return _this4.loadToBrowser(file);
+                return axios__WEBPACK_IMPORTED_MODULE_41___default.a.post('/api/file/link', requestData, {
+                  headers: {
+                    'Content-Type': 'multipart/form-data'
+                  }
+                });
 
               case 4:
-                buffer = _context5.sent;
+                _yield$axios$post = _context5.sent;
+                data = _yield$axios$post.data;
+                return _context5.abrupt("return", data);
+
+              case 7:
+              case "end":
+                return _context5.stop();
+            }
+          }
+        }, _callee5);
+      }))();
+    },
+    addFile: function addFile(event) {
+      var _this4 = this;
+
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_39__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee6() {
+        var file, _file$type$split, _file$type$split2, fileType, uploadData, buffer, base64Src, dataUrl;
+
+        return regeneratorRuntime.wrap(function _callee6$(_context6) {
+          while (1) {
+            switch (_context6.prev = _context6.next) {
+              case 0:
+                event.preventDefault();
+                _context6.prev = 1;
+                file = event.file;
+                _file$type$split = file.type.split('/'), _file$type$split2 = Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_slicedToArray__WEBPACK_IMPORTED_MODULE_37__["default"])(_file$type$split, 1), fileType = _file$type$split2[0];
+                _context6.t0 = fileType;
+                _context6.next = _context6.t0 === 'image' ? 7 : _context6.t0 === 'video' ? 15 : 21;
+                break;
+
+              case 7:
+                _context6.next = 9;
+                return _this4.loadToBrowser(file);
+
+              case 9:
+                buffer = _context6.sent;
                 base64Src = _this4.arrayBufferToBase64(buffer);
                 dataUrl = "data:".concat(file.type, ";base64,").concat(base64Src);
 
@@ -1352,19 +1413,89 @@ __webpack_require__.r(__webpack_exports__);
                   name: file.name
                 });
 
-              case 9:
+                return _context6.abrupt("break", 22);
+
+              case 15:
+                _context6.next = 17;
+                return _this4.uploadToServer(file);
+
+              case 17:
+                uploadData = _context6.sent;
+
+                if (!_this4.videos) {
+                  _this4.videos = [];
+                }
+
+                _this4.videos.push({
+                  file: file,
+                  serverFile: uploadData.file,
+                  src: uploadData.link,
+                  type: file.type,
+                  name: file.name
+                });
+
+                return _context6.abrupt("break", 22);
+
+              case 21:
+                return _context6.abrupt("break", 22);
+
+              case 22:
+                _context6.next = 27;
+                break;
+
+              case 24:
+                _context6.prev = 24;
+                _context6.t1 = _context6["catch"](1);
+
+                _this4.$store.commit('setErrorMessage', 'Ошибка загрузки файла: ' + _context6.t1.toString());
+
+              case 27:
               case "end":
-                return _context5.stop();
+                return _context6.stop();
             }
           }
-        }, _callee5);
+        }, _callee6, null, [[1, 24]]);
+      }))();
+    },
+    deleteVideo: function deleteVideo(index) {
+      var _this5 = this;
+
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_39__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee7() {
+        var video, _yield$axios$post2, data;
+
+        return regeneratorRuntime.wrap(function _callee7$(_context7) {
+          while (1) {
+            switch (_context7.prev = _context7.next) {
+              case 0:
+                video = _this5.videos[index];
+                _context7.next = 3;
+                return axios__WEBPACK_IMPORTED_MODULE_41___default.a.post('/api/file/delete', {
+                  file: video.serverFile
+                });
+
+              case 3:
+                _yield$axios$post2 = _context7.sent;
+                data = _yield$axios$post2.data;
+
+                if (data.success) {
+                  _this5.videos.splice(index, 1);
+                } else {
+                  _this5.$store.commit('setErrorMessage', 'Ошибка удаления файла: ' + data.error);
+                }
+
+              case 6:
+              case "end":
+                return _context7.stop();
+            }
+          }
+        }, _callee7);
       }))();
     },
     parseDate: function parseDate(date) {
       if (!date) return null;
 
       var _date$split = date.split('.'),
-          _date$split2 = Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_slicedToArray__WEBPACK_IMPORTED_MODULE_35__["default"])(_date$split, 3),
+          _date$split2 = Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_slicedToArray__WEBPACK_IMPORTED_MODULE_37__["default"])(_date$split, 3),
           day = _date$split2[0],
           month = _date$split2[1],
           year = _date$split2[2];
@@ -1375,7 +1506,7 @@ __webpack_require__.r(__webpack_exports__);
       if (!date) return null;
 
       var _date$split3 = date.split('-'),
-          _date$split4 = Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_slicedToArray__WEBPACK_IMPORTED_MODULE_35__["default"])(_date$split3, 3),
+          _date$split4 = Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_slicedToArray__WEBPACK_IMPORTED_MODULE_37__["default"])(_date$split3, 3),
           year = _date$split4[0],
           month = _date$split4[1],
           day = _date$split4[2];
@@ -1383,11 +1514,11 @@ __webpack_require__.r(__webpack_exports__);
       return "".concat(day, ".").concat(month, ".").concat(year);
     },
     updateMailingDate: function updateMailingDate() {
-      var date = this.startDate ? moment__WEBPACK_IMPORTED_MODULE_38___default()(this.startDate).startOf('d') : moment__WEBPACK_IMPORTED_MODULE_38___default()().startOf('d');
+      var date = this.startDate ? moment__WEBPACK_IMPORTED_MODULE_40___default()(this.startDate).startOf('d') : moment__WEBPACK_IMPORTED_MODULE_40___default()().startOf('d');
 
       if (this.startTime) {
         var _this$startTime$split = this.startTime.split(':'),
-            _this$startTime$split2 = Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_slicedToArray__WEBPACK_IMPORTED_MODULE_35__["default"])(_this$startTime$split, 2),
+            _this$startTime$split2 = Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_slicedToArray__WEBPACK_IMPORTED_MODULE_37__["default"])(_this$startTime$split, 2),
             hh = _this$startTime$split2[0],
             mm = _this$startTime$split2[1];
 
@@ -1417,8 +1548,8 @@ __webpack_require__.r(__webpack_exports__);
       this.targetType = false;
       this.targetCmp = false;
       this.menuTargetDate = false;
-      this.targetDate = moment__WEBPACK_IMPORTED_MODULE_38___default()().format('YYYY-MM-DD');
-      this.targetDateFormatted = moment__WEBPACK_IMPORTED_MODULE_38___default()().format('DD.MM.YYYY');
+      this.targetDate = moment__WEBPACK_IMPORTED_MODULE_40___default()().format('YYYY-MM-DD');
+      this.targetDateFormatted = moment__WEBPACK_IMPORTED_MODULE_40___default()().format('DD.MM.YYYY');
       this.targetValue = [];
       this.showNewTarget = false;
     },
@@ -1442,47 +1573,47 @@ __webpack_require__.r(__webpack_exports__);
       return "".concat(item.type, " ").concat(item.cmp || '', " ").concat(this.formatDate(item.value));
     },
     loadPredictedUsers: function loadPredictedUsers() {
-      var _this5 = this;
+      var _this6 = this;
 
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_37__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee6() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_39__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee8() {
         var mailing, response;
-        return regeneratorRuntime.wrap(function _callee6$(_context6) {
+        return regeneratorRuntime.wrap(function _callee8$(_context8) {
           while (1) {
-            switch (_context6.prev = _context6.next) {
+            switch (_context8.prev = _context8.next) {
               case 0:
-                mailing = _this5.getMailingToSend();
-                _context6.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_39___default.a.post("/api/mailing/predictUsers", {
+                mailing = _this6.getMailingToSend();
+                _context8.next = 3;
+                return axios__WEBPACK_IMPORTED_MODULE_41___default.a.post("/api/mailing/predictUsers", {
                   mailing: mailing
                 });
 
               case 3:
-                response = _context6.sent;
-                _this5.predictedUsers = response && response.data ? response.data.count : false;
+                response = _context8.sent;
+                _this6.predictedUsers = response && response.data ? response.data.count : false;
 
               case 5:
               case "end":
-                return _context6.stop();
+                return _context8.stop();
             }
           }
-        }, _callee6);
+        }, _callee8);
       }))();
     },
     loadTestUsers: function loadTestUsers() {
-      var _this6 = this;
+      var _this7 = this;
 
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_37__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee7() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_39__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee9() {
         var response;
-        return regeneratorRuntime.wrap(function _callee7$(_context7) {
+        return regeneratorRuntime.wrap(function _callee9$(_context9) {
           while (1) {
-            switch (_context7.prev = _context7.next) {
+            switch (_context9.prev = _context9.next) {
               case 0:
-                _context7.next = 2;
-                return axios__WEBPACK_IMPORTED_MODULE_39___default.a.post("/api/mailing/testUsers");
+                _context9.next = 2;
+                return axios__WEBPACK_IMPORTED_MODULE_41___default.a.post("/api/mailing/testUsers");
 
               case 2:
-                response = _context7.sent;
-                _this6.testUsers = response && response.data ? response.data.users.map(function (user) {
+                response = _context9.sent;
+                _this7.testUsers = response && response.data ? response.data.users.map(function (user) {
                   return {
                     text: [user.user.first_name, user.user.last_name].join(' ') + ' (@' + user.user.username + ')',
                     value: user.chat.id
@@ -1491,42 +1622,42 @@ __webpack_require__.r(__webpack_exports__);
 
               case 4:
               case "end":
-                return _context7.stop();
+                return _context9.stop();
             }
           }
-        }, _callee7);
+        }, _callee9);
       }))();
     },
     sendPreview: function sendPreview() {
-      var _this7 = this;
+      var _this8 = this;
 
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_37__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee8() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_39__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee10() {
         var mailing, chatId, response;
-        return regeneratorRuntime.wrap(function _callee8$(_context8) {
+        return regeneratorRuntime.wrap(function _callee10$(_context10) {
           while (1) {
-            switch (_context8.prev = _context8.next) {
+            switch (_context10.prev = _context10.next) {
               case 0:
-                mailing = _this7.getMailingToSend();
-                chatId = _this7.testUser;
-                _context8.next = 4;
-                return axios__WEBPACK_IMPORTED_MODULE_39___default.a.post("/api/mailing/preview", {
+                mailing = _this8.getMailingToSend();
+                chatId = _this8.testUser;
+                _context10.next = 4;
+                return axios__WEBPACK_IMPORTED_MODULE_41___default.a.post("/api/mailing/preview", {
                   mailing: mailing,
                   chatId: chatId
                 });
 
               case 4:
-                response = _context8.sent;
+                response = _context10.sent;
 
                 if (response && response.data && response.data.error) {
-                  _this7.$store.commit('setErrorMessage', response.data.error.description);
+                  _this8.$store.commit('setErrorMessage', response.data.error.description);
                 }
 
               case 6:
               case "end":
-                return _context8.stop();
+                return _context10.stop();
             }
           }
-        }, _callee8);
+        }, _callee10);
       }))();
     }
   },
@@ -1646,6 +1777,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 function trimHTML(html) {
+  if (!html) {
+    return '';
+  }
+
   return html.replace(/<!--.*?-->/ig, ' ').replace(/<\/*[a-z]+.*?>/ig, ' ').replace(/ +/, ' ').trim();
 }
 
@@ -1731,7 +1866,7 @@ function clone(obj) {
             switch (_context2.prev = _context2.next) {
               case 0:
                 newMailing = {};
-                allowedFields = ['target', 'photos', 'buttons', 'text', 'photoAsLink', 'isTest'];
+                allowedFields = ['target', 'photos', 'videos', 'buttons', 'text', 'photoAsLink', 'isTest'];
 
                 for (_i = 0, _allowedFields = allowedFields; _i < _allowedFields.length; _i++) {
                   field = _allowedFields[_i];
@@ -5260,6 +5395,9 @@ var render = function() {
                             "v-row",
                             { staticClass: "my-4" },
                             [
+                              _c("v-col", { attrs: { cols: "12" } }, [
+                                _vm._v("Фото:")
+                              ]),
                               _c(
                                 "v-col",
                                 { attrs: { cols: "12" } },
@@ -5300,6 +5438,42 @@ var render = function() {
                             ],
                             1
                           ),
+                          _vm.videos && _vm.videos.length > 0
+                            ? _c(
+                                "v-row",
+                                { staticClass: "my-4" },
+                                [
+                                  _c("v-col", { attrs: { cols: "12" } }, [
+                                    _vm._v("Видео:")
+                                  ]),
+                                  _c(
+                                    "v-col",
+                                    { attrs: { cols: "12" } },
+                                    _vm._l(_vm.videos, function(video, index) {
+                                      return _c(
+                                        "v-chip",
+                                        {
+                                          key: video.name,
+                                          staticClass: "mr-2 mb-2",
+                                          attrs: {
+                                            close: "",
+                                            "close-icon": "mdi-delete"
+                                          },
+                                          on: {
+                                            "click:close": function($event) {
+                                              return _vm.deleteVideo(index)
+                                            }
+                                          }
+                                        },
+                                        [_vm._v(" " + _vm._s(video.name) + " ")]
+                                      )
+                                    }),
+                                    1
+                                  )
+                                ],
+                                1
+                              )
+                            : _vm._e(),
                           _c(
                             "v-row",
                             [

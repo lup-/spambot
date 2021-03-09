@@ -198,6 +198,7 @@
                                 </v-col>
                             </v-row>
                             <v-row class="my-4">
+                                <v-col cols="12">Фото:</v-col>
                                 <v-col cols="12">
                                     <v-chip v-for="(photo, index) in photos" :key="photo.name"
                                             class="mr-2 mb-2"
@@ -209,6 +210,19 @@
                                             <v-img :src="photo.src"></v-img>
                                         </v-avatar>
                                         {{photo.name}}
+                                    </v-chip>
+                                </v-col>
+                            </v-row>
+                            <v-row class="my-4" v-if="videos && videos.length > 0">
+                                <v-col cols="12">Видео:</v-col>
+                                <v-col cols="12">
+                                    <v-chip v-for="(video, index) in videos" :key="video.name"
+                                            class="mr-2 mb-2"
+                                            close
+                                            close-icon="mdi-delete"
+                                            @click:close="deleteVideo(index)"
+                                    >
+                                        {{video.name}}
                                     </v-chip>
                                 </v-col>
                             </v-row>
@@ -270,6 +284,7 @@
                 predictedUsers: false,
                 defaultMailing: {disablePreview: true},
                 photos: [],
+                videos: [],
                 buttons: [],
                 target: [],
                 targetTypes: [
@@ -335,9 +350,10 @@
                         this.startDateFormatted = mailingDate.format('DD.MM.YYYY');
                     }
 
-                    this.target = this.mailing.target;
-                    this.photos = this.mailing.photos;
-                    this.buttons = this.mailing.buttons;
+                    this.target = this.mailing.target || [];
+                    this.photos = this.mailing.photos || [];
+                    this.videos = this.mailing.videos || [];
+                    this.buttons = this.mailing.buttons || [];
                 }
                 else {
                     this.mailing = this.defaultMailing;
@@ -359,6 +375,7 @@
                 let mailing = this.mailing;
                 mailing.target = this.target;
                 mailing.photos = this.photos;
+                mailing.videos = this.videos;
                 mailing.buttons = this.buttons;
 
                 return mailing;
@@ -392,25 +409,83 @@
                 }
                 return btoa( binary );
             },
+            async uploadToServer(file) {
+                let requestData = new FormData();
+                requestData.append('file', file);
+
+                let {data} = await axios.post( '/api/file/link',
+                    requestData,
+                    {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    }
+                );
+
+                return data;
+            },
             async addFile(event) {
                 event.preventDefault();
 
-                let file = event.file;
-                let buffer = await this.loadToBrowser(file);
-                let base64Src = this.arrayBufferToBase64(buffer);
-                let dataUrl = `data:${file.type};base64,${base64Src}`;
+                try {
+                    let file = event.file;
+                    let [fileType] = file.type.split('/');
 
-                if (this.mailing.photoAsLink) {
-                    this.photos = [];
+                    let uploadData;
+                    let buffer;
+                    let base64Src;
+                    let dataUrl;
+
+                    switch (fileType) {
+                        case 'image':
+                            buffer = await this.loadToBrowser(file);
+                            base64Src = this.arrayBufferToBase64(buffer);
+                            dataUrl = `data:${file.type};base64,${base64Src}`;
+
+                            if (this.mailing.photoAsLink) {
+                                this.photos = [];
+                            }
+
+                            this.photos.push({
+                                buffer,
+                                file,
+                                src: dataUrl,
+                                type: file.type,
+                                name: file.name,
+                            });
+                            break;
+                        case 'video':
+                            uploadData = await this.uploadToServer(file);
+
+                            if (!this.videos) {
+                                this.videos = [];
+                            }
+
+                            this.videos.push({
+                                file,
+                                serverFile: uploadData.file,
+                                src: uploadData.link,
+                                type: file.type,
+                                name: file.name,
+                            });
+                            break;
+                        default:
+                            break;
+                    }
                 }
-
-                this.photos.push({
-                    buffer,
-                    file,
-                    src: dataUrl,
-                    type: file.type,
-                    name: file.name,
-                });
+                catch (e) {
+                    this.$store.commit('setErrorMessage', 'Ошибка загрузки файла: ' + e.toString());
+                }
+            },
+            async deleteVideo(index) {
+                let video = this.videos[index];
+                let {data} = await axios.post( '/api/file/delete', {file: video.serverFile});
+                if (data.success) {
+                    this.videos.splice(index, 1);
+                }
+                else {
+                    this.$store.commit('setErrorMessage', 'Ошибка удаления файла: ' + data.error);
+                }
             },
             parseDate (date) {
                 if (!date) return null
@@ -437,6 +512,10 @@
                 this.mailing.startAt = date.unix();
             },
             addButton() {
+                if (!this.buttons) {
+                    this.buttons = [];
+                }
+
                 this.buttons.push({text: '', link: ''});
             },
             removeButton(index = 0) {
@@ -459,6 +538,10 @@
                     type: this.targetType,
                     cmp: this.targetHasCmp ? this.targetCmp : false,
                     value: this.targetIsDate ? this.targetDate : this.targetValue,
+                }
+
+                if (!this.target) {
+                    this.target = [];
                 }
 
                 this.target.push(target);

@@ -21,13 +21,19 @@ bus.registerCommand('stopMailing', async mailingId => {
 });
 
 app.start(ctx => ctx.reply('О.К. Ты знаешь, что делать'));
-app.on('message', async ctx => {
-    let savedMailing = mailer.createMailing(ctx);
-    if (savedMailing) {
-        return ctx.reply('Черновик рассылки сохранен');
-    }
+app.on('message', async (ctx, next) => {
+    let isForward = ctx.updateSubTypes.indexOf('forward') !== -1;
+    if (isForward) {
+        let savedMailing = await mailer.createMailing(ctx);
+        if (savedMailing) {
+            return ctx.reply('Черновик рассылки сохранен');
+        }
 
-    return ctx.reply('Ошибка сохранения черновика рассылки');
+        return ctx.reply('Ошибка сохранения черновика рассылки');
+    }
+    else {
+        return next();
+    }
 });
 
 // process.once('SIGINT', () => app.stop());

@@ -43,6 +43,10 @@
     import moment from "moment";
 
     function trimHTML(html) {
+        if (!html) {
+            return '';
+        }
+
         return html
             .replace(/<!--.*?-->/ig, ' ')
             .replace(/<\/*[a-z]+.*?>/ig, ' ')
@@ -85,7 +89,7 @@
         methods: {
             async copyMailing(mailing) {
                 let newMailing = {};
-                const allowedFields = ['target', 'photos', 'buttons', 'text', 'photoAsLink', 'isTest'];
+                const allowedFields = ['target', 'photos', 'videos', 'buttons', 'text', 'photoAsLink', 'isTest'];
                 for (const field of allowedFields) {
                     if (typeof(mailing[field]) !== 'undefined') {
                         newMailing[field] = mailing[field];

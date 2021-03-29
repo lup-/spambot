@@ -6,6 +6,8 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 const WEBHOOK_DOMAIN = process.env.BOT_NAME;
 const WEBHOOK_PORT = 8081;
 const WEBHOOK_CONNECTIONS = 1000;
+const ONLY_BOOKS = process.env.ONLY_BOOKS === '1' || false;
+const ONLY_AUDIO = process.env.ONLY_AUDIO === '1' || false;
 
 let app = new Telegraf(BOT_TOKEN, {
     telegram: {apiRoot: process.env.TGAPI_ROOT}
@@ -21,7 +23,8 @@ let introParams = {
 Я найду для тебя любую книгу в библиотеке Флибусты, а так же аудиокниги из большой базы.
 
 Используй кнопки ниже, для выбора режима поиска.`, tags: ['content', 'books', 'intro']},
-    onlyBooks: false
+    onlyBooks: ONLY_BOOKS,
+    onlyAudio: ONLY_AUDIO
 }
 let booksSearchParams = {
     sceneCode: 'bookSearch',

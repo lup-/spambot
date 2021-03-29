@@ -407,6 +407,7 @@ services:
       - FILES_REMOTE_PATH=/files
       - LIB_PATH=/var/www/lib
       - PROXY_DISABLED=${BOOKS_PROXY_DISABLED}
+      - ONLY_AUDIO=1
     command: node bots/books.js
 
   b3okie_bot:
@@ -438,6 +439,7 @@ services:
       - FILES_REMOTE_PATH=/files
       - LIB_PATH=/var/www/lib
       - PROXY_DISABLED=${BOOKS_PROXY_DISABLED}
+      - ONLY_AUDIO=1
     command: node bots/books.js
 
   booksforfree_bot:

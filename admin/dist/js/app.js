@@ -1532,6 +1532,10 @@ __webpack_require__.r(__webpack_exports__);
       this.mailing.startAt = date.unix();
     },
     addButton: function addButton() {
+      if (!this.buttons) {
+        this.buttons = [];
+      }
+
       this.buttons.push({
         text: '',
         link: ''
@@ -1559,6 +1563,11 @@ __webpack_require__.r(__webpack_exports__);
         cmp: this.targetHasCmp ? this.targetCmp : false,
         value: this.targetIsDate ? this.targetDate : this.targetValue
       };
+
+      if (!this.target) {
+        this.target = [];
+      }
+
       this.target.push(target);
       this.resetTargetValues();
     },

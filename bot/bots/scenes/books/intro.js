@@ -20,13 +20,15 @@ async function removeKeyboard(ctx) {
 
 module.exports = function (params) {
     const scene = new BaseScene('intro');
-    const {disclaimer, onlyBooks} = params;
+    const {disclaimer, onlyBooks, onlyAudio} = params;
 
     scene.enter(async ctx => {
         let messageShown = ctx.session.introShown || false;
 
         if (messageShown) {
-            if (!onlyBooks) {
+            let booksAndAudio = !onlyBooks && !onlyAudio;
+
+            if (booksAndAudio) {
                 let buttons = [];
 
                 buttons.push({code: 'book', text: 'Найти книгу'});
@@ -41,8 +43,11 @@ module.exports = function (params) {
                 ctx.perfStop('introReply');
                 return await ctx.perfCommit();
             }
-            else {
+            else if (onlyBooks) {
                 return books(ctx);
+            }
+            else if (onlyAudio) {
+                return audioBooks(ctx);
             }
         }
 

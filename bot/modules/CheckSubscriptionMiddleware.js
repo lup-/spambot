@@ -53,6 +53,7 @@ module.exports = async (ctx, next) => {
     }
 
     let botName = process.env.BOT_NAME;
+    let botDb = await getDb();
     let db = await getDb('botofarmer');
     let settings = db.collection('botSettings');
     let botSettings = await settings.findOne({botName});
@@ -81,7 +82,7 @@ module.exports = async (ctx, next) => {
                     isSubscriber = await waitForSubscription(ctx.tg, chatUsername, userId);
                     if (isSubscriber) {
                         await tg.sendMessage(chatId,'Спасибо, что подписались!');
-                        await db.collection('users').updateOne({"user.id": userId, "chat.id": chatId}, {$set: {
+                        await botDb.collection('users').updateOne({"user.id": userId, "chat.id": chatId}, {$set: {
                             subscribed: {
                                 date: moment().unix(),
                                 channel: chatUsername,

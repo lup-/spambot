@@ -8,6 +8,7 @@ const {initManagers} = require('../managers');
 const {catchErrors} = require('./helpers/common');
 
 const SaveActivityMiddleware = require('../modules/SaveActivityMiddleware');
+const toggleBlockedMiddleware = require('../modules/toggleBlockedMiddleware');
 
 const getCategoryMenu = require('./scenes/present/categoryMenu');
 const getDiscover = require('./scenes/present/discover');
@@ -20,6 +21,7 @@ initManagers(['chat', 'present', 'bus']).then(async ({chat, present, bus}) => {
     stage.register(getCategoryMenu(present));
     stage.register(getDiscover(present));
 
+    app.use(toggleBlockedMiddleware);
     app.use(session({store}));
     app.use(chat.initIdsMiddleware());
     app.use(chat.saveRefMiddleware());

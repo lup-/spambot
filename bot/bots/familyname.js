@@ -61,9 +61,11 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 let tbot = new Telegraf(BOT_TOKEN);
 
 tbot = setupBot(tbot)
+    .addHandleBlocks()
     .addRefSave()
     .addUserSave()
-    .addSaveActivity().get()
+    .addSaveActivity()
+    .get()
 
 tbot.catch(catchErrors);
 

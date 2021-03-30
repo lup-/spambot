@@ -8,6 +8,7 @@ const {catchErrors} = require('./helpers/common');
 
 const SafeReplyMiddleware = require('../modules/SafeReplyMiddleware');
 const SaveActivityMiddleware = require('../modules/SaveActivityMiddleware');
+const toggleBlockedMiddleware = require('../modules/toggleBlockedMiddleware');
 
 const getSettings = require('./scenes/finance/settings');
 const {__} = require('../modules/Messages');
@@ -26,6 +27,7 @@ initManagers(['chat', 'bus', 'periodic', 'profile', 'finance']).then(async ({cha
     let safeReply = new SafeReplyMiddleware();
     safeReply.setDefaultFallback(catchErrors);
 
+    app.use(toggleBlockedMiddleware);
     app.use(safeReply.getMiddleware());
     app.use(session({store}));
     app.use(chat.initIdsMiddleware());

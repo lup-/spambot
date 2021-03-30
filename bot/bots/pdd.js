@@ -3,6 +3,7 @@ const {initManagers} = require('../managers');
 const {catchErrors} = require('./helpers/common');
 
 const SaveActivityMiddleware = require('../modules/SaveActivityMiddleware');
+const toggleBlockedMiddleware = require('../modules/toggleBlockedMiddleware');
 
 const session = require('telegraf/session');
 const store = new Map();
@@ -25,6 +26,7 @@ initManagers(['chat', 'pdd', 'bus']).then(async ({chat, pdd, bus}) => {
     stage.register(topicsStage(pdd));
     stage.register(questionStage(pdd));
 
+    app.use(toggleBlockedMiddleware);
     app.use(session({store}));
     app.use(chat.saveRefMiddleware());
     app.use(chat.saveUserMiddleware());

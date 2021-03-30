@@ -10,6 +10,7 @@ const {__} = require('../modules/Messages');
 const {trimHTML} = require('../modules/Helpers');
 
 const SaveActivityMiddleware = require('../modules/SaveActivityMiddleware');
+const toggleBlockedMiddleware = require('../modules/toggleBlockedMiddleware');
 const BOT_TOKEN = process.env.BOT_TOKEN;
 
 let app = new Telegraf(BOT_TOKEN);
@@ -66,6 +67,7 @@ function getMessages(article) {
 }
 
 initManagers(['chat', 'bus']).then(async ({chat, bus}) => {
+    app.use(toggleBlockedMiddleware);
     app.use(session({store}));
     app.use(chat.initIdsMiddleware());
     app.use(chat.saveRefMiddleware());

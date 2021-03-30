@@ -11,6 +11,7 @@ const tzStage = require('./scenes/todo/tzsetup');
 const {postpone, complete, postponeMenu} = require('./helpers/postpone');
 
 const SaveActivityMiddleware = require('../modules/SaveActivityMiddleware');
+const toggleBlockedMiddleware = require('../modules/toggleBlockedMiddleware');
 
 const {__} = require('../modules/Messages');
 
@@ -24,6 +25,7 @@ initManagers(['chat', 'periodic', 'profile', 'bus']).then(async ({chat, periodic
 
     app.catch(catchErrors);
 
+    app.use(toggleBlockedMiddleware);
     app.use(session({store}));
     app.use(chat.saveRefMiddleware());
     app.use(chat.saveUserMiddleware());

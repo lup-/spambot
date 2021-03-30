@@ -10,6 +10,7 @@ const {menu} = require('./helpers/wizard');
 const {__} = require('../modules/Messages');
 const SafeReplyMiddleware = require('../modules/SafeReplyMiddleware');
 const SaveActivityMiddleware = require('../modules/SaveActivityMiddleware');
+const toggleBlockedMiddleware = require('../modules/toggleBlockedMiddleware');
 
 const getIntro = require('./scenes/podcasts/intro');
 const getDiscover = require('./scenes/podcasts/discover');
@@ -37,6 +38,7 @@ initManagers(['chat', 'profile', 'podcasts', 'bus']).then(async ({chat, profile,
     let safeReply = new SafeReplyMiddleware();
     safeReply.setDefaultFallback(catchErrors);
 
+    app.use(toggleBlockedMiddleware);
     app.use(safeReply.getMiddleware());
     app.use(session({store}));
     app.use(chat.initIdsMiddleware());

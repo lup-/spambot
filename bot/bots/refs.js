@@ -40,6 +40,7 @@ function getStatMessage(bot, stats) {
 }
 
 app = setupBot(app)
+    .addHandleBlocks()
     .addSession()
     .addSafeReply()
     .addIdsToSession()

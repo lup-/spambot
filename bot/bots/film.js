@@ -8,6 +8,7 @@ const {initManagers} = require('../managers');
 const {catchErrors} = require('./helpers/common');
 const SafeReplyMiddleware = require('../modules/SafeReplyMiddleware');
 const SaveActivityMiddleware = require('../modules/SaveActivityMiddleware');
+const toggleBlockedMiddleware = require('../modules/toggleBlockedMiddleware');
 
 const getSearchMenu = require('./scenes/film/searchMenu');
 const getSettings = require('./scenes/film/settings');
@@ -25,6 +26,7 @@ initManagers(['chat', 'film', 'bus']).then(async ({chat, film, bus}) => {
     let safeReply = new SafeReplyMiddleware();
     safeReply.setDefaultFallback(catchErrors);
 
+    app.use(toggleBlockedMiddleware);
     app.use(safeReply.getMiddleware());
     app.use(session({store}));
     app.use(chat.saveRefMiddleware());

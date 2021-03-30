@@ -15,6 +15,7 @@ let app = new Telegraf(BOT_TOKEN);
 let format = 'best[filesize<50M]/worst';
 
 const SaveActivityMiddleware = require('../modules/SaveActivityMiddleware');
+const toggleBlockedMiddleware = require('../modules/toggleBlockedMiddleware');
 
 function download(url, onProgress) {
     return new Promise((resolve, reject) => {
@@ -101,6 +102,7 @@ async function waitForFile(path, maxTimeoutMs = 1000) {
 }
 
 initManagers(['chat', 'bus']).then(async ({chat, bus}) => {
+    app.use(toggleBlockedMiddleware);
     app.use(session({store}));
     app.use(chat.saveRefMiddleware());
     app.use(chat.saveUserMiddleware());

@@ -9,6 +9,7 @@ let bus = init('bus');
 let payment = plumcoreParams.payment;
 
 app = setupBot(app)
+        .addHandleBlocks()
         .addSession()
         .addSafeReply()
         .addIdsToSession()

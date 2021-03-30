@@ -10,6 +10,7 @@ let bus = init('bus');
 let periodic = init('periodic');
 
 app = setupBot(app)
+        .addHandleBlocks()
         .addSession()
         .addSafeReply()
         .addIdsToSession()

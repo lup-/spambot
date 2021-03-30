@@ -11,6 +11,7 @@ let app = new Telegraf(BOT_TOKEN);
 const headers = {'User-Agent': 'wikipedia-tlg-search-bot-requests @reflexum'};
 
 const SaveActivityMiddleware = require('../modules/SaveActivityMiddleware');
+const toggleBlockedMiddleware = require('../modules/toggleBlockedMiddleware');
 
 async function loadPage(query) {
     try {
@@ -32,6 +33,7 @@ async function loadSearchResults(titles) {
 }
 
 initManagers(['chat', 'bus']).then(async ({chat, bus}) => {
+    app.use(toggleBlockedMiddleware);
     app.use(chat.saveRefMiddleware());
     app.use(chat.saveUserMiddleware());
     app.use(SaveActivityMiddleware);

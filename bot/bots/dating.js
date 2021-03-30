@@ -26,6 +26,7 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 let telegram = new Telegram(BOT_TOKEN);
 
 let app = setupBot(new Telegraf(BOT_TOKEN))
+    .addHandleBlocks()
     .blockNonPrivate()
     .addSession({}, 3600)
     .addSafeReply(blockedHandler)

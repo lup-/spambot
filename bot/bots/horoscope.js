@@ -7,6 +7,7 @@ const horoscope = manager('horoscope');
 const bus = manager('bus');
 
 let app = setupBot(new Telegraf(BOT_TOKEN))
+    .addHandleBlocks()
     .blockNonPrivate()
     .addSession({}, 3600)
     .addSafeReply()

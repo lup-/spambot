@@ -6,6 +6,7 @@ const {trimHTML} = require('../modules/Helpers');
 const {__} = require('../modules/Messages');
 
 const SaveActivityMiddleware = require('../modules/SaveActivityMiddleware');
+const toggleBlockedMiddleware = require('../modules/toggleBlockedMiddleware');
 
 const session = require('telegraf/session');
 const store = new Map();
@@ -47,6 +48,7 @@ function replyWithRestart(text, ctx) {
 initManagers(['chat', 'diseases', 'bus']).then(async ({chat, diseases, bus}) => {
     app.catch(catchErrors);
 
+    app.use(toggleBlockedMiddleware);
     app.use(session({store}));
     app.use(chat.initIdsMiddleware());
     app.use(chat.saveRefMiddleware());

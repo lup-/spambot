@@ -40,6 +40,7 @@ function settingsOrMenu(ctx) {
 }
 
 app = setupBot(app)
+    .addHandleBlocks()
     .blockNonPrivate()
     .addPerformance()
     .addSession()

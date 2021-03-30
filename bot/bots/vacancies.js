@@ -13,6 +13,7 @@ let {periodic, vacancies, showVacancy} = catalogParams;
 let profile = init('profile');
 
 app = setupBot(app)
+    .addHandleBlocks()
     .addSession()
     .addSafeReply()
     .addIdsToSession()

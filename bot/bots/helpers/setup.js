@@ -10,6 +10,7 @@ const {catchErrors, clone} = require('../helpers/common');
 const SafeReplyMiddleware = require('../../modules/SafeReplyMiddleware');
 const SaveActivityMiddleware = require('../../modules/SaveActivityMiddleware');
 const checkSubscriptionMiddleware = require('../../modules/CheckSubscriptionMiddleware');
+const toggleBlockedMiddleware = require('../../modules/toggleBlockedMiddleware');
 const {menu} = require('../helpers/wizard');
 const {__} = require('../../modules/Messages');
 
@@ -89,6 +90,11 @@ class Injector {
 
     addSubscription() {
         this.app.use(checkSubscriptionMiddleware);
+        return this;
+    }
+
+    addHandleBlocks() {
+        this.app.use(toggleBlockedMiddleware);
         return this;
     }
 

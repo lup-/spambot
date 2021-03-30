@@ -6,6 +6,7 @@ const {catchErrors} = require('./helpers/common');
 const {getDb} = require('../modules/Database');
 const checkSubscriptionMiddleware = require('../modules/CheckSubscriptionMiddleware');
 const SaveActivityMiddleware = require('../modules/SaveActivityMiddleware');
+const toggleBlockedMiddleware = require('../modules/toggleBlockedMiddleware');
 const {__} = require('../modules/Messages');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
@@ -112,6 +113,7 @@ async function saveUserStat(userId, text) {
 initManagers(['chat', 'bus']).then(async ({chat, bus}) => {
     app.catch(catchErrors);
 
+    app.use(toggleBlockedMiddleware);
     app.use(chat.saveRefMiddleware());
     app.use(chat.saveUserMiddleware());
     app.use(SaveActivityMiddleware);

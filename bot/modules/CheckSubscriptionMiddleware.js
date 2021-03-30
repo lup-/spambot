@@ -1,5 +1,7 @@
 const {getDb} = require('./Database');
 const Telegram = require('telegraf/telegram');
+const moment = require('moment');
+
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const tg = new Telegram(BOT_TOKEN);
 
@@ -78,7 +80,13 @@ module.exports = async (ctx, next) => {
                     await tg.sendMessage(chatId,'Сначала необходимо подписаться на '+chatUsername);
                     isSubscriber = await waitForSubscription(ctx.tg, chatUsername, userId);
                     if (isSubscriber) {
-                        await tg.sendMessage(chatId,'Спасибо, что подписались! Повторите последнее действие, пожалуйста');
+                        await tg.sendMessage(chatId,'Спасибо, что подписались!');
+                        await db.collection('users').updateOne({"user.id": userId, "chat.id": chatId}, {$set: {
+                            subscribed: {
+                                date: moment().unix(),
+                                channel: chatUsername,
+                            }
+                        }});
                         return next();
                     }
                 }

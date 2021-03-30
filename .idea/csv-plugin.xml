@@ -31,6 +31,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/docker-compose-prod.yml">
+          <value>
+            <Attribute>
+              <option name="separator" value=":" />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/../funnels_bot/backend/package.json">
           <value>
             <Attribute>

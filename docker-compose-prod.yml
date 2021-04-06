@@ -692,6 +692,7 @@ services:
       - redis
     volumes:
       - ./bot:/var/www
+      - ./uploads:/var/www/files
     working_dir: /var/www
     environment:
       - NODE_ENV=development
@@ -703,6 +704,7 @@ services:
       - YOO_SHOP_ID=${YOO_SHOP_ID}
       - YOO_SECRET_KEY=${YOO_SECRET_KEY}
       - YOO_TEST=${YOO_TEST}
+      - FILES_DIR=/var/www/files
     command: node bots/plumcore.js
 
   mailer_bot:

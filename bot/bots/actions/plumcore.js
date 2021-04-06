@@ -1,24 +1,28 @@
 const {init} = require('../../managers');
 const {__} = require('../../modules/Messages');
 const moment = require('moment');
-const {Telegram} = require('telegraf');
 
-const BOT_TOKEN = process.env.BOT_TOKEN;
-const telegram = new Telegram(BOT_TOKEN);
-
-let plumcore = init('plumcore');
 let profileManager = init('profile');
+let plumcore = init('plumcore', profileManager);
 let payment = init('payment');
 
 function toggleFavorite(item, ctx) {
     return profileManager.toggleInFavourites(ctx.session.profile, item);
 }
 
-async function getAction() {
-    return {button: {code: 'action', text: 'Оплатить'},
-        route: async (item, ctx) => {
-            return ctx.scene.enter('payment', {item});
-        }};
+async function getAction(ctx, item) {
+    let profile = ctx.session.profile;
+    let hasAccess = plumcore.hasItemAccess(item, profile);
+
+    return hasAccess
+        ? {button: {code: 'action', text: '📥 Скачать'}, route: async (item, ctx) => {
+                let chatId = ctx.from.id;
+                await plumcore.sendFiles(chatId, item);
+                return ctx.scene.reenter();
+            }}
+        : {button: {code: 'action', text: '💳 Оплатить'}, route: async (item, ctx) => {
+                return ctx.scene.enter('payment', {item});
+            }};
 }
 
 async function saveSettings(profile, ctx) {
@@ -36,9 +40,8 @@ function getAllCategories() {
 async function getItemAtIndex(currentIndex, ctx) {
     let searchType = ctx.scene.state.type || false;
     let categoryIds = getSelectedCategoryIds(ctx);
-    let favoriteIds = ctx.session.profile.favorite || [];
 
-    return plumcore.discoverAtIndex(categoryIds, favoriteIds, currentIndex, searchType);
+    return plumcore.discoverAtIndex(categoryIds, ctx.session.profile, currentIndex, searchType);
 }
 
 function getEmptyText() {
@@ -75,14 +78,6 @@ async function setLastVisit(ctx) {
     return saveSettings(profile, ctx);
 }
 
-async function onSuccessfulPayment(payment, profile) {
-    let chatId = profile.chatId;
-    let item = payment.item;
-
-    let message = `Вы успешно купили ${item.title}`;
-    return telegram.sendMessage(chatId, message);
-}
-
 module.exports = {
     disclaimer: {text: `Добро пожаловать!
 
@@ -91,6 +86,7 @@ module.exports = {
 Приятного пользования!`, tags: ['content', 'intro', 'learn']},
     skipCategories: true,
     payment,
+    plumcore,
     toggleFavorite,
     getAction,
     saveSettings,
@@ -103,5 +99,6 @@ module.exports = {
     getItemImage,
     getLastVisit,
     setLastVisit,
-    onSuccessfulPayment
+    onSuccessfulPayment: plumcore.finishPayment.bind(plumcore),
+    checkSubmenu() { return true; }
 }

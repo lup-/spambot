@@ -40,7 +40,7 @@ function noItemsMenu() {
     return menu([{code: 'settings', text: '🔧'}, {code: 'menu', text: '↩'}]);
 }
 async function replyWithItem(ctx, showNewMessage, withPhoto, params) {
-    let {getItemAtIndex, getEmptyText, getItemDescription, getItemImage, getAction} = params;
+    let {getItemAtIndex, getEmptyText, getItemDescription, getItemImage, getAction, checkSubmenu} = params;
 
     const hasFavorite = typeof (params.hasFavorite) !== 'undefined'
         ? params.hasFavorite
@@ -75,10 +75,17 @@ async function replyWithItem(ctx, showNewMessage, withPhoto, params) {
     ctx.session.totalItems = results.totalItems;
 
     let imageUrl = getItemImage(results.item) || false;
-    let action = await getAction(ctx);
-    let hasSubmenu = hasFavorite
-        ? favorites.length > 0 || category.length > 0
-        : true;
+    let action = await getAction(ctx, results.item);
+
+    let hasSubmenu = true;
+    if (checkSubmenu) {
+        hasSubmenu = checkSubmenu(ctx);
+    }
+    else {
+        hasSubmenu = hasFavorite
+            ? favorites.length > 0 || category.length > 0
+            : true;
+    }
 
     let itemText = getItemDescription(results.item);
     let messageMenu = itemMenu(results, hasSubmenu, action, hasFavorite, hasRandom);
@@ -205,7 +212,7 @@ module.exports = function (params) {
         let currentIndex = ctx.session.index || 0;
         let {item} = await getItemAtIndex(currentIndex, ctx);
 
-        let action = await getAction(ctx);
+        let action = await getAction(ctx, item);
         return action.route(item, ctx);
     });
 

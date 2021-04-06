@@ -61,9 +61,9 @@
             items() {
                 return this.isLoading ? [] : this.$store.state.payment.list.map(item => {
                     let newItem = clone(item);
-                    let userName = [item.profile.firstName, item.profile.lastName].join(' ');
-                    if (item.profile.userName) {
-                        userName += ` (@${item.profile.userName})`;
+                    let userName = [item.user.first_name, item.user.last_name].join(' ');
+                    if (item.user.username) {
+                        userName += ` (@${item.user.username})`;
                     }
 
                     newItem.user = userName;

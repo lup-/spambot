@@ -42,14 +42,26 @@
                             <v-row class="mt-4">
                                 <v-col cols="12">
                                     <v-file-input
-                                            v-model="files"
-                                            chips
-                                            clearable
-                                            counter
-                                            multiple
-                                            hint="Файлы курса"
+                                            ref="fileInput"
+                                            v-model="file"
+                                            @change="addFile"
+                                            hint="Прикрепить файл"
                                             persistent-hint
                                     ></v-file-input>
+                                </v-col>
+                            </v-row>
+
+                            <v-row class="my-4" v-if="files && files.length > 0">
+                                <v-col cols="12">Файлы:</v-col>
+                                <v-col cols="12">
+                                    <v-chip v-for="(file, index) in files" :key="file.name"
+                                            class="mr-2 mb-2"
+                                            close
+                                            close-icon="mdi-delete"
+                                            @click:close="deleteFile(index)"
+                                    >
+                                        {{file.name}}
+                                    </v-chip>
                                 </v-col>
                             </v-row>
 
@@ -92,6 +104,7 @@
 </template>
 
 <script>
+    import axios from "axios";
     import CrudEdit from '@/components/CrudEdit';
 
     export default {
@@ -99,6 +112,7 @@
         data() {
             return {
                 item: {},
+                file: null,
                 files: [],
 
                 ACTION_LOAD: 'course/loadItems',
@@ -118,6 +132,14 @@
                 this.$store.dispatch(this.ACTION_SET_EDIT_ITEM, this.itemId);
                 this.$store.dispatch('category/loadItems');
             }
+        },
+        watch: {
+            storeItem() {
+                if (this.storeItem) {
+                    this.item = this.storeItem;
+                    this.files = this.storeItem.files || [];
+                }
+            },
         },
         methods: {
             async loadToBrowser(file) {
@@ -179,10 +201,7 @@
                 return filesToSave;
             },
             async save() {
-                if (this.files.length > 0) {
-                    this.item.files = await this.prepareFiles();
-                }
-
+                this.item.files = this.files;
                 this.item.price = parseFloat(this.item.price) || 0;
 
                 if (this.isNew()) {
@@ -194,6 +213,60 @@
 
                 return this.gotoList();
             },
+
+            async uploadToServer(file) {
+                let requestData = new FormData();
+                requestData.append('file', file);
+
+                let {data} = await axios.post( '/api/file/link',
+                    requestData,
+                    {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    }
+                );
+
+                return data;
+            },
+
+            async addFile(file) {
+                if (!file) {
+                    return;
+                }
+                let uploadData = await this.uploadToServer(file);
+
+                if (!this.files) {
+                    this.files = [];
+                }
+
+                this.files.push({
+                    file,
+                    serverFile: uploadData.file,
+                    src: uploadData.link,
+                    type: file.type,
+                    name: file.name,
+                });
+
+                this.file = null;
+            },
+
+            async deleteFile(index) {
+                let file = this.files[index];
+                let isValidFile = file && file.serverFile;
+
+                if (isValidFile) {
+                    let {data} = await axios.post('/api/file/delete', {file: file.serverFile});
+                    if (data.success) {
+                        this.files.splice(index, 1);
+                    }
+                    else {
+                        this.$store.commit('setErrorMessage', 'Ошибка удаления файла: ' + data.error);
+                    }
+                }
+
+                this.files.splice(index, 1);
+            }
         },
         computed: {
             categories() {

@@ -16,7 +16,7 @@ module.exports = function (params) {
         let paymentUrl = await payment.addPaymentAndGetPaymentUrl(ctx, item);
         let text = `После нажатия на кнопку вы будете направлены на страницу для совершения оплаты.
 
-Пожалуйста, используйте кнопку эту оплаты только один раз`
+Пожалуйста, используйте кнопку эту оплаты только один раз и дождитесь сообщения о статусе оплаты`
         let buttons = [{text: `Оплатить ${item.price} руб`, url: paymentUrl}];
         return ctx.safeReply(
             ctx => ctx.editMessageText(text, menu(buttons)),

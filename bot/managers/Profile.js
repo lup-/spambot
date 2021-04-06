@@ -42,20 +42,44 @@ module.exports = function () {
             return this.saveProfile(profile);
         },
 
+        async addToOwnedItems(profile, item) {
+            if (!profile.owned) {
+                profile.owned = [];
+            }
+
+            let notAlreadyOwned = profile.owned.findIndex(owned => owned.id === item.id) === -1;
+            if (notAlreadyOwned) {
+                profile.owned.push(item);
+                return this.saveProfile(profile);
+            }
+            else {
+                return profile;
+            }
+        },
+
         initSessionProfileMiddleware() {
             return async (ctx, next) => {
-                if (ctx.session.profile) {
-                    return next();
-                }
-
                 const fromInfo = ctx.update.callback_query
                     ? ctx.update.callback_query.from
                     : ctx.update.message.from;
                 const chatInfo = ctx.update.callback_query
                     ? ctx.update.callback_query.message.chat
                     : ctx.update.message.chat;
-
                 const userId = fromInfo.id;
+
+                let hasProfile = Boolean(ctx.session.profile);
+                let doReload = ctx.globalState && ctx.globalState.has('reloadProfile', userId);
+                let noReload = !doReload;
+
+                let skipProfile = hasProfile && noReload;
+
+                if (skipProfile) {
+                    return next();
+                }
+
+                if (doReload) {
+                    ctx.globalState.delete('reloadProfile', userId);
+                }
 
                 ctx.session.userId = userId;
                 ctx.session.chatId = chatInfo.id;
@@ -65,10 +89,7 @@ module.exports = function () {
                     chatId: chatInfo.id,
                 }
 
-                if (!ctx.session.profile) {
-                    ctx.session.profile = await this.loadProfileByUserId(userId) || defaultProfile;
-                }
-
+                ctx.session.profile = await this.loadProfileByUserId(userId) || defaultProfile;
                 return next();
             }
         },

@@ -13,6 +13,7 @@ const YOO_BASE_URL = 'https://api.yookassa.ru/v3/';
 const YOO_SHOP_ID = process.env.YOO_SHOP_ID;
 const YOO_SECRET_KEY = process.env.YOO_SECRET_KEY;
 const YOO_TEST = process.env.YOO_TEST === '1';
+const YOO_TEST_SUM = process.env.YOO_TEST_SUM === '1';
 const USE_REPEATING_PAYMENTS = process.env.USE_REPEATING_PAYMENTS === '1';
 const ORDER_DESCRIPTION = 'Оплата покупки';
 
@@ -73,6 +74,25 @@ module.exports = class Payment {
             return data;
         }
     }
+
+    getTariffs() {
+        return [
+            { duration: '1 месяц', days: 30, price: YOO_TEST_SUM ? 1 : 3500, full: false },
+            { duration: '3 месяца', days: 90, price: 9500, full: 10500 },
+            { duration: '6 месяцев', days: 180, price: 18000, full: 21000 },
+            { duration: '1 год', days: 365, price: 34000, full: 42000 },
+        ];
+    }
+    getTariff(days) {
+        return this.getTariffs().find(tariff => tariff.days === days) || false;
+    }
+    async getPrice(days) {
+        let tariff = this.getTariff(days);
+        return tariff
+            ? tariff.price
+            : null;
+    }
+
     async addPayment(price, returnUrl, isTwoStage = false) {
         return this.callYooApi('payments', {
             amount: {
@@ -134,8 +154,43 @@ module.exports = class Payment {
                 id: yooPayment.id,
                 created: moment().unix(),
                 status: yooPayment.status,
+                type: 'item',
                 item,
                 price,
+                repeating: USE_REPEATING_PAYMENTS,
+                profile,
+                yooPayment,
+                paymentUrl
+            });
+
+            return result.ops && result.ops[0] ? paymentUrl : false;
+        }
+        else {
+            return false;
+        }
+    }
+
+    async addSubscriptionPaymentAndGetPaymentUrl(ctx, price = false, days = false) {
+        if (!price) {
+            price = await this.getPrice(days);
+        }
+
+        let profile = ctx.session.profile;
+        let returnUrl = this.getReturnUrl(ctx);
+        let yooPayment = await this.addPayment(price, returnUrl);
+        let paymentUrl = yooPayment && yooPayment.confirmation && yooPayment.confirmation.confirmation_url
+            ? yooPayment.confirmation.confirmation_url
+            : false;
+
+        if (yooPayment && paymentUrl) {
+            let db = await getDb();
+            let result = await db.collection('payments').insertOne({
+                id: yooPayment.id,
+                created: moment().unix(),
+                status: yooPayment.status,
+                type: 'subscription',
+                price,
+                days,
                 repeating: USE_REPEATING_PAYMENTS,
                 profile,
                 yooPayment,

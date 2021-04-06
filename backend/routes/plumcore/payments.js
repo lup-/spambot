@@ -1,5 +1,6 @@
 const {getDb} = require('../../../bot/modules/Database');
 
+const DB_NAME = 'plumcore_bot';
 const COLLECTION_NAME = 'payments';
 const ITEMS_NAME = 'payments';
 
@@ -15,8 +16,18 @@ module.exports = {
 
         filter = Object.assign(defaultFilter, filter);
 
-        let db = await getDb();
-        let items = await db.collection(COLLECTION_NAME).find(filter).toArray();
+        let db = await getDb(DB_NAME);
+        let items = await db.collection(COLLECTION_NAME).aggregate([
+            { $match: filter },
+            { $lookup: {
+                from: 'users',
+                localField: 'profile.userId',
+                foreignField: 'id',
+                as: 'user'
+            }},
+            { $unwind: '$user' },
+            { $set: {'user': '$user.user'} }
+        ]).toArray();
         let response = {};
         response[ITEMS_NAME] = items;
 

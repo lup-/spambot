@@ -11,6 +11,7 @@ const SafeReplyMiddleware = require('../../modules/SafeReplyMiddleware');
 const SaveActivityMiddleware = require('../../modules/SaveActivityMiddleware');
 const checkSubscriptionMiddleware = require('../../modules/CheckSubscriptionMiddleware');
 const toggleBlockedMiddleware = require('../../modules/toggleBlockedMiddleware');
+const State = require('../../managers/State');
 const {menu} = require('../helpers/wizard');
 const {__} = require('../../modules/Messages');
 
@@ -41,6 +42,14 @@ class Injector {
                 return next();
             });
         }
+        return this;
+    }
+
+    addState() {
+        this.app.use(async (ctx, next) => {
+            ctx.globalState = new State();
+            return next();
+        });
         return this;
     }
 

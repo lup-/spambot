@@ -10,6 +10,7 @@ let payment = plumcoreParams.payment;
 
 app = setupBot(app)
         .addHandleBlocks()
+        .addState()
         .addSession()
         .addSafeReply()
         .addIdsToSession()
@@ -18,9 +19,12 @@ app = setupBot(app)
         .addProfile()
         .addSaveActivity()
         .addScenes('catalog', plumcoreParams)
+        .addScenes('plumcore', plumcoreParams)
         .addDefaultRoute(ctx => ctx.scene.enter('intro'))
         .get();
 
 payment.launchPaymentWatch(plumcoreParams.onSuccessfulPayment);
+payment.launchPaymentReminder();
+
 app.launch();
 bus.listenCommands();

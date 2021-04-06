@@ -318,9 +318,10 @@ services:
   admin_plumcore:
     image: nginx
     ports:
-      - ${HTTP_PORT}:80
+      - ${PLUMCORE_HTTP_PORT}:80
     volumes:
       - ./adminPlumcore/dist:/var/www/public
+      - ./uploads:/var/www/downloads
       - ./etc/nginx/site.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - backend

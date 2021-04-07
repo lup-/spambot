@@ -3,18 +3,21 @@
         <v-alert type="error" v-model="showError" dismissible tile class="global-error">{{appError}}</v-alert>
         <v-navigation-drawer v-model="drawer" app clipped v-if="isLoggedIn">
             <v-list dense>
-                <v-list-item v-for="route in routes" :key="route.code"
-                        link
-                        @click="$router.push({name: route.code})"
-                        :disabled="$route.name === route.code"
-                >
-                    <v-list-item-action>
-                        <v-icon v-text="route.icon"></v-icon>
-                    </v-list-item-action>
-                    <v-list-item-content>
-                        <v-list-item-title>{{route.title}}</v-list-item-title>
-                    </v-list-item-content>
-                </v-list-item>
+                <div v-for="route in routes" :key="route.code">
+                    <v-list-item
+                            link
+                            @click="$router.push({name: route.code})"
+                            :disabled="$route.name === route.code"
+                    >
+                        <v-list-item-action>
+                            <v-icon v-text="route.icon"></v-icon>
+                        </v-list-item-action>
+                        <v-list-item-content>
+                            <v-list-item-title>{{route.title}}</v-list-item-title>
+                        </v-list-item-content>
+                    </v-list-item>
+                    <v-spacer v-if="route.space"></v-spacer>
+                </div>
                 <v-list-item v-if="$store.getters.isLoggedIn" link @click="logout">
                     <v-list-item-action>
                         <v-icon>mdi-logout</v-icon>

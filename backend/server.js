@@ -16,6 +16,7 @@ const files = require('./routes/files');
 const plumcoreCourses = require('./routes/plumcore/courses');
 const plumcoreCategories = require('./routes/plumcore/categories');
 const plumcorePayments = require('./routes/plumcore/payments');
+const plumcoreSubscribers = require('./routes/plumcore/subscribers');
 
 const PORT = 3000;
 const HOST = '0.0.0.0';
@@ -99,12 +100,16 @@ router
     .post('/api/plumcore/category/delete', plumcoreCategories.delete);
 
 router
+    .post('/api/plumcore/subscriber/list', plumcoreSubscribers.list.bind(plumcoreSubscribers))
+    .post('/api/plumcore/subscriber/update', plumcoreSubscribers.update.bind(plumcoreSubscribers));
+
+router
     .post('/api/plumcore/payment/list', plumcorePayments.list)
 
 app
     .use(bodyParser({
         formLimit: '50mb',
-        jsonLimit: '1mb',
+        jsonLimit: '10mb',
     }))
     .use(router.routes())
     .use(router.allowedMethods());

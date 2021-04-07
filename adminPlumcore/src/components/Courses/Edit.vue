@@ -32,7 +32,19 @@
                                 <v-col cols="12">
                                     <v-text-field
                                             v-model="item.price"
-                                            hint="Стоимость"
+                                            hint="Стоимость выжимки"
+                                            persistent-hint
+                                            type="number"
+                                    ></v-text-field>
+                                </v-col>
+                            </v-row>
+
+
+                            <v-row class="mt-4">
+                                <v-col cols="12">
+                                    <v-text-field
+                                            v-model="item.originalPrice"
+                                            hint="Оригинальная стоимость"
                                             persistent-hint
                                             type="number"
                                     ></v-text-field>

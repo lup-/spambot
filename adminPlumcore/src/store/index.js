@@ -5,6 +5,7 @@ import user from "./modules/user";
 import payment from "./modules/payment";
 import course from "@/store/modules/course";
 import category from "@/store/modules/category";
+import subscriber from "@/store/modules/subscriber";
 
 Vue.use(Vuex);
 
@@ -16,7 +17,8 @@ export default new Vuex.Store({
             {code: 'coursesList', title: 'Курсы', icon: 'mdi-account-cash'},
             {code: 'categoriesList', title: 'Категории', icon: 'mdi-account-cash'},
             {code: 'paymentsList', title: 'Платежи', icon: 'mdi-cash'},
-            {code: 'usersList', title: 'Пользователи админки', icon: 'mdi-account'},
+            {code: 'subscribersList', title: 'Подписчики', icon: 'mdi-account-cash'},
+            {code: 'usersList', title: 'Пользователи админки', icon: 'mdi-account', space: true},
         ]
     },
     getters: {
@@ -43,6 +45,7 @@ export default new Vuex.Store({
         user,
         payment,
         course,
-        category
+        category,
+        subscriber
     }
 })

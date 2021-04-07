@@ -10,6 +10,8 @@ import CoursesList from '../components/Courses/List';
 import CourseEdit from '../components/Courses/Edit';
 import CategoriesList from '../components/Categories/List';
 import CategoryEdit from '../components/Categories/Edit';
+import SubscribersList from '../components/Subscribers/List';
+import SubscriberEdit from '../components/Subscribers/Edit';
 
 import store from "../store";
 
@@ -30,6 +32,9 @@ const routes = [
     { name: 'categoriesList', path: '/categories/', component: CategoriesList, meta: {requiresAuth: true, group: 'categoriesList'} },
     { name: 'categoryNew', path: '/categories/new', component: CategoryEdit, meta: {requiresAuth: true, group: 'categoriesList'} },
     { name: 'categoryEdit', path: '/categories/:id', component: CategoryEdit, meta: {requiresAuth: true, group: 'categoriesList'} },
+
+    { name: 'subscribersList', path: '/subscribers/', component: SubscribersList, meta: {requiresAuth: true, group: 'subscribersList'} },
+    { name: 'subscriberEdit', path: '/subscribers/:id', component: SubscriberEdit, meta: {requiresAuth: true, group: 'subscribersList'} },
 ]
 
 const router = new VueRouter({

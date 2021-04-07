@@ -1,5 +1,4 @@
 const {getDb} = require('../../bot/modules/Database');
-const {getPg} = require('../modules/pgdb');
 const moment = require('moment');
 const config = require('../config');
 
@@ -25,6 +24,7 @@ module.exports = {
             let refs = db.collection('refs');
 
             let usersCount = await users.count({});
+            let aliveUsersCount = await users.count({blocked: {$in: [null, false]}});
             let refsResult = await refs.aggregate([
                 { $group: {"_id": "$ref", "count": {"$sum": 1}} },
                 { $sort: { count: -1 } }
@@ -35,7 +35,13 @@ module.exports = {
                 return {code: refDb._id, count: refDb.count};
             });
 
-            botstats.push({botId: bot.id, users: usersStat, refs: refsStat});
+            botstats.push({
+                botId: bot.id,
+                users: usersStat,
+                alive: {count: aliveUsersCount},
+                blocked: {count: usersCount - aliveUsersCount},
+                refs: refsStat
+            });
         }
 
         ctx.body = {stats: botstats};
@@ -108,7 +114,8 @@ module.exports = {
             let usersResult = await users.aggregate([
                 {$match: {$or: [
                     {blocked: {$in: [null, false]}},
-                    {$and: [ {blocked: true}, {blockedSince: {$gt: range.end}} ]}
+                    {$and: [ {blocked: true}, {blockedSince: {$gt: range.end}} ]},
+                    {blocked: {$gt: range.end}}
                 ]}},
                 {$match: {$and: [{registered: {$gte: range.start}}, {registered: {$lt: range.end}}]}},
                 {$set: {registered_date: {$toDate: {$multiply: ["$registered", 1000]}}}},

@@ -39,6 +39,12 @@ function itemMenu({hasPrev, hasNext, totalItems, isFavorite, item}, hasSubmenu, 
 function noItemsMenu() {
     return menu([{code: 'settings', text: '🔧'}, {code: 'menu', text: '↩'}]);
 }
+
+function dataUriToBuffer(uri) {
+    let data = uri.split(',')[1];
+    return Buffer.from(data,'base64');
+}
+
 async function replyWithItem(ctx, showNewMessage, withPhoto, params) {
     let {getItemAtIndex, getEmptyText, getItemDescription, getItemImage, getAction, checkSubmenu} = params;
 
@@ -74,7 +80,9 @@ async function replyWithItem(ctx, showNewMessage, withPhoto, params) {
     ctx.session.hasNext = results.hasNext;
     ctx.session.totalItems = results.totalItems;
 
-    let imageUrl = getItemImage(results.item) || false;
+    let image = getItemImage(results.item) || false;
+    let imageUrl = typeof (image) === 'string' ? image : false;
+    let imageSrc = image && image.src ?  image.src : false;
     let action = await getAction(ctx, results.item);
 
     let hasSubmenu = true;
@@ -96,9 +104,15 @@ async function replyWithItem(ctx, showNewMessage, withPhoto, params) {
     let editExtra = itemMenu(results, hasSubmenu, action, hasFavorite, hasRandom);
     editExtra.parse_mode = 'html';
 
-    let media = imageUrl
-        ? {url: imageUrl}
-        : EMPTY_FILE;
+    let media = EMPTY_FILE;
+
+    if (imageUrl) {
+        media = {url: imageUrl};
+    }
+
+    if (imageSrc) {
+        media = {source: dataUriToBuffer(imageSrc)};
+    }
 
     if (withPhoto) {
         return ctx.safeReply(

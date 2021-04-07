@@ -3052,6 +3052,12 @@ __webpack_require__.r(__webpack_exports__);
         text: 'Пользователи',
         value: 'count'
       }, {
+        text: 'Живых',
+        value: 'alive'
+      }, {
+        text: 'Блокировок',
+        value: 'blocked'
+      }, {
         text: 'Внешний',
         value: 'external'
       }, {
@@ -3070,6 +3076,8 @@ __webpack_require__.r(__webpack_exports__);
           botId: stat.botId,
           userName: userName ? '@' + userName : false,
           count: stat.users.count,
+          alive: stat.alive.count,
+          blocked: stat.blocked.count,
           external: stat.external,
           refs: stat.refs
         };
@@ -9777,7 +9785,7 @@ __webpack_require__.r(__webpack_exports__);
   component: _components_Users_Login__WEBPACK_IMPORTED_MODULE_11__["default"]
 }, {
   name: 'stats',
-  path: '/stats',
+  path: '/bots',
   component: _components_Stats_Stats__WEBPACK_IMPORTED_MODULE_0__["default"],
   meta: {
     requiresAuth: true,
@@ -9793,7 +9801,7 @@ __webpack_require__.r(__webpack_exports__);
   }
 }, {
   name: 'statsDetails',
-  path: '/stats/details/:id?',
+  path: '/bots/stat/:id?',
   component: _components_Stats_Details__WEBPACK_IMPORTED_MODULE_1__["default"],
   meta: {
     requiresAuth: true,
@@ -9964,8 +9972,8 @@ vue__WEBPACK_IMPORTED_MODULE_1__["default"].use(vuex__WEBPACK_IMPORTED_MODULE_2_
     appMessage: false,
     routes: [{
       code: 'stats',
-      title: 'Статистика',
-      icon: 'mdi-database'
+      title: 'Боты',
+      icon: 'mdi-robot'
     }, {
       code: 'adsList',
       title: 'Приписки',

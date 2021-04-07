@@ -93,6 +93,8 @@
                     {text: 'Код бода', value: 'botId'},
                     {text: 'Подключено к', value: 'userName'},
                     {text: 'Пользователи', value: 'count'},
+                    {text: 'Живых', value: 'alive'},
+                    {text: 'Блокировок', value: 'blocked'},
                     {text: 'Внешний', value: 'external'},
                     {text: 'Действия', value: 'actions', sortable: false},
                 ]
@@ -104,6 +106,8 @@
                         botId: stat.botId,
                         userName: userName ? '@' + userName : false,
                         count: stat.users.count,
+                        alive: stat.alive.count,
+                        blocked: stat.blocked.count,
                         external: stat.external,
                         refs: stat.refs,
                     }

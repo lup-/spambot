@@ -27,7 +27,7 @@ export default new Vuex.Store({
         appError: false,
         appMessage: false,
         routes: [
-            {code: 'stats', title: 'Статистика', icon: 'mdi-database'},
+            {code: 'stats', title: 'Боты', icon: 'mdi-robot'},
             {code: 'adsList', title: 'Приписки', icon: 'mdi-cash-usd'},
             {code: 'mailingList', title: 'Рассылки', icon: 'mdi-email'},
             {code: 'refUsersList', title: 'Админы каналов', icon: 'mdi-account-multiple'},

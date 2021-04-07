@@ -18,9 +18,9 @@ import Home from '../components/Home';
 export default [
     { name: 'home', path: '/', component: Home, meta: {requiresAuth: true, group: 'home'} },
     { name: 'login', path: '/login', component: Login },
-    { name: 'stats', path: '/stats', component: Stats, meta: {requiresAuth: true, group: 'stats'} },
+    { name: 'stats', path: '/bots', component: Stats, meta: {requiresAuth: true, group: 'stats'} },
     { name: 'botSettings', path: '/bots/:botName', component: BotSettings, meta: {requiresAuth: true, group: 'stats'} },
-    { name: 'statsDetails', path: '/stats/details/:id?', component: Details, meta: {requiresAuth: true, group: 'stats'} },
+    { name: 'statsDetails', path: '/bots/stat/:id?', component: Details, meta: {requiresAuth: true, group: 'stats'} },
     { name: 'adsList', path: '/ads/', component: AdsList, meta: {requiresAuth: true, group: 'adsList'} },
     { name: 'adsNew', path: '/ads/new', component: AdsEdit, meta: {requiresAuth: true, group: 'adsList'} },
     { name: 'adsEdit', path: '/ads/:id', component: AdsEdit, meta: {requiresAuth: true, group: 'adsList'} },

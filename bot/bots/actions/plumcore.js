@@ -15,12 +15,12 @@ async function getAction(ctx, item) {
     let hasAccess = plumcore.hasItemAccess(item, profile);
 
     return hasAccess
-        ? {button: {code: 'action', text: '📥 Скачать'}, route: async (item, ctx) => {
+        ? {button: {code: 'action', text: '📥'}, route: async (item, ctx) => {
                 let chatId = ctx.from.id;
                 await plumcore.sendFiles(chatId, item);
                 return ctx.scene.reenter();
             }}
-        : {button: {code: 'action', text: '💳 Оплатить'}, route: async (item, ctx) => {
+        : {button: {code: 'action', text: '💳'}, route: async (item, ctx) => {
                 return ctx.scene.enter('payment', {item});
             }};
 }
@@ -51,19 +51,20 @@ function getEmptyText() {
 }
 
 function getSettingsText() {
-    return `Выберите основные категории для поиска.
-
-Если вы ставите две и более - контент из каждой будет показываться при пролистывании курсов.`;
+    return `Выберите категорию курсов:`;
 }
 
 function getItemDescription(item) {
     return __(`<b>${item.title}</b>
 
-${item.description || ''}`, ['content', 'course', 'learn']);
+${item.description || ''}
+
+<b>Оригинальная цена</b>: ${item.originalPrice ? item.originalPrice+'р' : ''}
+<b>Цена выжимки</b>: ${item.price}р`, ['content', 'course', 'learn']);
 }
 
 function getItemImage(item) {
-    return item.image ? item.image.replace('http:', 'https:') : false;
+    return item.photos && item.photos[0] ? item.photos[0] : false;
 }
 
 function getLastVisit(ctx) {
@@ -79,11 +80,9 @@ async function setLastVisit(ctx) {
 }
 
 module.exports = {
-    disclaimer: {text: `Добро пожаловать!
+    disclaimer: {text: `Добро пожаловать в PlumCoreMarket!
 
-Здесь желающие найдут возможность сэкономить на саморазвитии. Ну а что может быть лучше, чем стать профессионалом за умеренные деньги?
-
-Приятного пользования!`, tags: ['content', 'intro', 'learn']},
+Теперь вам доступны курсы с гарантированным заработком.`, tags: ['content', 'intro', 'learn']},
     skipCategories: true,
     payment,
     plumcore,

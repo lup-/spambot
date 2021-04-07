@@ -48,7 +48,9 @@ module.exports = class Plumcore {
         }
 
         let item = items[index] || false;
-        item.description = escapeHTML(item.description, true);
+        if (item) {
+            item.description = escapeHTML(item.description, true);
+        }
 
         let totalItems = items.length;
         let hasNext = index < totalItems-1;

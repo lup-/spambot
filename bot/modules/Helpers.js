@@ -22,6 +22,10 @@ function trimHTML(html) {
         .trim();
 }
 function escapeHTML(html, decode = false) {
+    if (!html) {
+        html = '';
+    }
+
     if (decode) {
         html = he.decode(html);
     }

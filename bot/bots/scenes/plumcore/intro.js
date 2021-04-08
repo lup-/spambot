@@ -39,7 +39,7 @@ module.exports = function (params) {
             buttons.push({code: 'list', text: 'В каталог'});
 
             if (!hasSubscription) {
-                buttons.push({code: 'subscribe', text: 'Подписаться'});
+                //buttons.push({code: 'subscribe', text: 'Подписаться'});
             }
 
             if (hasOwned) {

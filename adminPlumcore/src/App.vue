@@ -6,7 +6,7 @@
                 <div v-for="route in routes" :key="route.code">
                     <v-list-item
                             link
-                            @click="$router.push({name: route.code})"
+                            @click="$router.push({name: (route.routeName ? route.routeName : route.code)})"
                             :disabled="$route.name === route.code"
                     >
                         <v-list-item-action>

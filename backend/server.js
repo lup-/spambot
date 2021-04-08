@@ -17,6 +17,7 @@ const plumcoreCourses = require('./routes/plumcore/courses');
 const plumcoreCategories = require('./routes/plumcore/categories');
 const plumcorePayments = require('./routes/plumcore/payments');
 const plumcoreSubscribers = require('./routes/plumcore/subscribers');
+const plumcoreStats = require('./routes/plumcore/stats');
 
 const PORT = 3000;
 const HOST = '0.0.0.0';
@@ -102,6 +103,10 @@ router
 router
     .post('/api/plumcore/subscriber/list', plumcoreSubscribers.list.bind(plumcoreSubscribers))
     .post('/api/plumcore/subscriber/update', plumcoreSubscribers.update.bind(plumcoreSubscribers));
+
+router
+    .post('/api/plumcore/stats/dashboard', plumcoreStats.dashboard.bind(plumcoreStats))
+    .post('/api/plumcore/stats/sales', plumcoreStats.sales.bind(plumcoreStats));
 
 router
     .post('/api/plumcore/payment/list', plumcorePayments.list)

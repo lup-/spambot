@@ -19,8 +19,7 @@ module.exports = class Plumcore {
 
     async categoriesList() {
         const db = await getDb();
-        const categories = db.collection('categories');
-        return categories.find({}).toArray();
+        return db.collection('categories').find({deleted: {$in: [null, false]}}).toArray();
     }
 
     async discoverAtIndex(categoryIds, profile, index, searchType) {
@@ -38,10 +37,10 @@ module.exports = class Plumcore {
 
         let items;
         if (searchType === 'favorite') {
-            items = await db.collection(COLLECTION_NAME).find({id: {$in: favoriteIds}}).toArray();
+            items = await db.collection(COLLECTION_NAME).find({id: {$in: favoriteIds}, deleted: {$in: [null, false]}}).toArray();
         }
         else if (searchType === 'owned') {
-            items = await db.collection(COLLECTION_NAME).find({id: {$in: ownedIds}}).toArray();
+            items = await db.collection(COLLECTION_NAME).find({id: {$in: ownedIds}, deleted: {$in: [null, false]}}).toArray();
         }
         else {
             items = await db.collection(COLLECTION_NAME).find(filter).toArray();

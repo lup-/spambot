@@ -12,6 +12,9 @@ import CategoriesList from '../components/Categories/List';
 import CategoryEdit from '../components/Categories/Edit';
 import SubscribersList from '../components/Subscribers/List';
 import SubscriberEdit from '../components/Subscribers/Edit';
+import Dashboard from "@/components/Stats/Dashboard";
+import SalesStat from  "@/components/Stats/Sales";
+import BotStat from  "@/components/Stats/Bot";
 
 import store from "../store";
 
@@ -35,6 +38,10 @@ const routes = [
 
     { name: 'subscribersList', path: '/subscribers/', component: SubscribersList, meta: {requiresAuth: true, group: 'subscribersList'} },
     { name: 'subscriberEdit', path: '/subscribers/:id', component: SubscriberEdit, meta: {requiresAuth: true, group: 'subscribersList'} },
+
+    { name: 'statDashboard', path: '/stats/', component: Dashboard, meta: {requiresAuth: true, group: 'stats'} },
+    { name: 'statSales', path: '/stats/sales/', component: SalesStat, meta: {requiresAuth: true, group: 'stats'} },
+    { name: 'statBot', path: '/stats/users/', component: BotStat, meta: {requiresAuth: true, group: 'stats'} },
 ]
 
 const router = new VueRouter({

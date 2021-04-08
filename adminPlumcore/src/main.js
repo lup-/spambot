@@ -4,6 +4,9 @@ import vuetify from './plugins/vuetify';
 import {router, store} from './router'
 
 import VueTrix from "vue-trix";
+import Chartist from "vue-chartist";
+
+import 'chartist/dist/chartist.min.css';
 
 Vue.config.productionTip = false
 
@@ -16,6 +19,10 @@ Vue.config.errorHandler = function (err) {
 };
 
 Vue.use(VueTrix);
+Vue.use(Chartist, {
+  messageNoData: "Недостаточно данных",
+  classNoData: "empty"
+})
 
 let vueInstance = new Vue({
   vuetify,

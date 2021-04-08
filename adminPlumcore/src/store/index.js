@@ -14,11 +14,12 @@ export default new Vuex.Store({
         appError: false,
         appMessage: false,
         routes: [
-            {code: 'coursesList', title: 'Курсы', icon: 'mdi-account-cash'},
-            {code: 'categoriesList', title: 'Категории', icon: 'mdi-account-cash'},
+            {code: 'coursesList', title: 'Курсы', icon: 'mdi-school'},
+            {code: 'categoriesList', title: 'Категории', icon: 'mdi-tag-multiple'},
             {code: 'paymentsList', title: 'Платежи', icon: 'mdi-cash'},
             {code: 'subscribersList', title: 'Подписчики', icon: 'mdi-account-cash'},
-            {code: 'usersList', title: 'Пользователи админки', icon: 'mdi-account', space: true},
+            {code: 'usersList', title: 'Пользователи админки', icon: 'mdi-account-hard-hat', space: true},
+            {code: 'stats', routeName: 'statDashboard', title: 'Статистика', icon: 'mdi-database', space: true},
         ]
     },
     getters: {

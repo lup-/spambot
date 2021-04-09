@@ -59,7 +59,7 @@ module.exports = function (params) {
 
         try {
             ctx.session.introShown = true;
-            return ctx.replyWithHTML(__(disclaimer.text, disclaimer.tags), menu([{code: 'accept', text: 'Понятно'}]));
+            return ctx.replyWithHTML(disclaimer.text, menu([{code: 'accept', text: 'Понятно'}]));
         }
         catch (e) {
         }
@@ -68,7 +68,20 @@ module.exports = function (params) {
     scene.action('subscribe', ctx => ctx.scene.enter('subscribe'));
     scene.action('unsubscribe', ctx => ctx.scene.enter('unsubscribe'));
 
-    scene.action('accept', ctx => ctx.scene.reenter());
+    scene.action('accept', ctx => {
+        return ctx.replyWithHTML(`Поздравляем! Теперь не нужно тратить десятки часов на обучение. Достаточно скачать выжимку и сразу приступить к заработку. Но прежде всего.
+
+<b>Как пользоваться ботом:</b>
+
+◀️ — предыдущий курс
+▶️ — следующий курс
+🎲 — случайный курс
+💳 — перейти к оплате
+⭐️ — добавить в избранное
+↩️ — вернуться в меню
+🔧 — выбрать категорию`, menu([{code: 'list', text: 'Начать'}]));
+    });
+
     scene.action('list', ctx => ctx.scene.enter('discover'));
     scene.action('owned', ctx => ctx.scene.enter('discover', {type: 'owned'}));
     scene.action('favorite', ctx => ctx.scene.enter('discover', {type: 'favorite'}));

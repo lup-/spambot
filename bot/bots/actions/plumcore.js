@@ -82,7 +82,9 @@ async function setLastVisit(ctx) {
 module.exports = {
     disclaimer: {text: `Добро пожаловать в PlumCoreMarket!
 
-Теперь вам доступны курсы с гарантированным заработком.`, tags: ['content', 'intro', 'learn']},
+Теперь вам доступны выжимки курсов с гарантированным заработком.
+
+Выбирайте, скачивайте и осваивайте новую профессию в считанные часы. Без лишней воды и скучных рассказов не по теме.`, tags: ['content', 'intro', 'learn']},
     skipCategories: true,
     payment,
     plumcore,

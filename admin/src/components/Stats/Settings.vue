@@ -6,11 +6,14 @@
                     <v-card-title>Настройки бота {{botName}}</v-card-title>
                     <v-card-text>
                         <v-form autocomplete="off">
-                            <v-text-field v-model="settings.needsSubscription"
+                            <v-combobox v-model="needsSubscription"
                                 label="Требовать подписку"
+                                multiple
+                                chips
+                                deletable-chips
                                 hint="Например: @vcblr"
                                 persistent-hint
-                            ></v-text-field>
+                            ></v-combobox>
                         </v-form>
                     </v-card-text>
                     <v-card-actions>
@@ -29,17 +32,14 @@
         data() {
             return {
                 settings: {},
+                needsSubscription: [],
                 defaultSettings: {},
             }
         },
         async created() {
             if (this.botName) {
-                if (!this.storeSettings) {
-                    await this.$store.dispatch('loadSettings', this.botName);
-                }
-                else {
-                    this.settings = this.storeSettings;
-                }
+                await this.$store.dispatch('loadSettings', this.botName);
+                this.initSettings();
             }
         },
         watch: {
@@ -47,17 +47,24 @@
                 this.$store.dispatch('loadSettings', this.botName);
             },
             storeSettings() {
+                this.initSettings();
+            },
+        },
+        methods: {
+            initSettings() {
                 if (this.storeSettings) {
                     this.settings = this.storeSettings;
+                    this.needsSubscription = this.settings.needsSubscription instanceof Array
+                        ? this.settings.needsSubscription
+                        : [ this.settings.needsSubscription ];
                 }
                 else {
                     this.settings = this.defaultSettings;
                 }
             },
-        },
-        methods: {
             async save() {
                 this.settings.botName = this.botName;
+                this.settings.needsSubscription = this.needsSubscription;
                 await this.$store.dispatch('saveSettings', this.settings);
                 this.gotoList();
             },

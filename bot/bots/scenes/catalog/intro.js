@@ -1,5 +1,6 @@
 const BaseScene = require('telegraf/scenes/base');
 const {menu} = require('../../helpers/wizard');
+const {markMessageToDelete} = require('../../../modules/deleteMessageMiddleware');
 const {__} = require('../../../modules/Messages');
 
 function routeToNextStep(ctx) {
@@ -44,7 +45,8 @@ module.exports = function (params) {
 
             buttons.push({code: 'list', text: 'В каталог'});
 
-            return ctx.reply('Куда дальше?', menu(buttons));
+            let message = await ctx.reply('Куда дальше?', menu(buttons));
+            return markMessageToDelete(ctx, message);
         }
 
         if (messageShown) {

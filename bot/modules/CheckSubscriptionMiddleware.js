@@ -7,10 +7,20 @@ const tg = new Telegram(BOT_TOKEN);
 
 const MAX_WAIT_TIMEOUT_SEC = 5 * 60;
 
-async function checkSubscribe(tg, chat, userId) {
-    let subscriber = await tg.getChatMember(chat, userId);
-    let isSubscriber = subscriber && subscriber.status && ["creator", "administrator", "member"].indexOf(subscriber.status) !== -1;
-    return isSubscriber;
+async function checkSubscribe(tg, chats, userId) {
+    let isChatsArray = chats instanceof Array;
+    if (!isChatsArray) {
+        chats = [chats];
+    }
+
+    let allChatsSubscribed = true;
+    for (let chat of chats) {
+        let subscriber = await tg.getChatMember(chat, userId);
+        let isSubscriber = subscriber && subscriber.status && ["creator", "administrator", "member"].indexOf(subscriber.status) !== -1;
+        allChatsSubscribed = allChatsSubscribed && isSubscriber;
+    }
+
+    return allChatsSubscribed;
 }
 
 async function waitForSubscription(tg, chat, userId) {
@@ -78,7 +88,11 @@ module.exports = async (ctx, next) => {
             let chatId = ctx.chat.id;
             setTimeout(async () => {
                 try {
-                    await tg.sendMessage(chatId,'Сначала необходимо подписаться на '+chatUsername);
+                    let printName = chatUsername instanceof Array
+                        ? chatUsername.join(' и ')
+                        : chatUsername;
+
+                    await tg.sendMessage(chatId,'Сначала необходимо подписаться на '+printName);
                     isSubscriber = await waitForSubscription(ctx.tg, chatUsername, userId);
                     if (isSubscriber) {
                         await tg.sendMessage(chatId,'Спасибо, что подписались!');

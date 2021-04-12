@@ -25,6 +25,7 @@ module.exports = class Payment {
         this.stopCallback = false;
         this.profileStopCallback = false;
         this.remindStopCallback = false;
+        this.sessionStore = false;
     }
     stop() {
         let waitPayments = new Promise(resolve => {
@@ -44,6 +45,27 @@ module.exports = class Payment {
         return Promise.all([waitPayments, waitStatus, waitReminds]);
     }
 
+    setSessionStore(store) {
+        this.sessionStore = store;
+    }
+
+    markMessageToDelete(userId, chatId, message) {
+        if (!this.sessionStore) {
+            return;
+        }
+
+        try {
+            let sessionKey = `${userId}:${chatId}`;
+            let {session, expires} = this.sessionStore.get(sessionKey) || {};
+            if (!session._deleteMessages) {
+                session._deleteMessages = [];
+            }
+
+            session._deleteMessages.push(message);
+            this.sessionStore.set(sessionKey, {session, expires});
+        }
+        catch (e) {}
+    }
     getReturnUrl(ctx) {
         return `https://t.me/${ctx.me}`;
     }
@@ -282,8 +304,36 @@ module.exports = class Payment {
             }
         }
         else {
-            await telegram.sendMessage(chatId, `Последний платеж не прошел`, menu([{code: 'retry', text: 'Попробовать еще раз'}]));
+            let message = await telegram.sendMessage(chatId, `Последний платеж не прошел`, menu([{code: 'retry', text: 'Попробовать еще раз'}]));
+            this.markMessageToDelete(profile.userId, chatId, message);
         }
+    }
+    async refundPayment(payment) {
+        let yooRefund = await this.callYooApi('refunds', {
+            amount: {
+                value: payment.price,
+                currency: "RUB"
+            },
+            payment_id: payment.id,
+        });
+
+        let freshPayment = await this.getPaymentInfo(payment.id);
+
+        let db = await getDb();
+        let result = await db.collection('payments').updateOne({id: payment.id}, {
+            $set: {
+                updated: moment().unix(),
+                status: freshPayment.status,
+                yooPayment: freshPayment,
+                yooRefund
+            }
+        }, {});
+
+        let isEverythingOk = yooRefund && yooRefund.status === 'succeeded' && result && result.result && result.result.ok === 1;
+
+        return isEverythingOk
+            ? await db.collection('payments').findOne({id: payment.id})
+            : false;
     }
     async addAutoPaymentAndSaveToDb(profile) {
         let lastPayment = await this.getLastPayment(profile.userId);

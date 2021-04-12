@@ -2793,11 +2793,15 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "BotSettings",
   data: function data() {
     return {
       settings: {},
+      needsSubscription: [],
       defaultSettings: {}
     };
   },
@@ -2810,26 +2814,17 @@ __webpack_require__.r(__webpack_exports__);
           switch (_context.prev = _context.next) {
             case 0:
               if (!_this.botName) {
-                _context.next = 7;
+                _context.next = 4;
                 break;
               }
 
-              if (_this.storeSettings) {
-                _context.next = 6;
-                break;
-              }
-
-              _context.next = 4;
+              _context.next = 3;
               return _this.$store.dispatch('loadSettings', _this.botName);
 
+            case 3:
+              _this.initSettings();
+
             case 4:
-              _context.next = 7;
-              break;
-
-            case 6:
-              _this.settings = _this.storeSettings;
-
-            case 7:
             case "end":
               return _context.stop();
           }
@@ -2842,14 +2837,18 @@ __webpack_require__.r(__webpack_exports__);
       this.$store.dispatch('loadSettings', this.botName);
     },
     storeSettings: function storeSettings() {
-      if (this.storeSettings) {
-        this.settings = this.storeSettings;
-      } else {
-        this.settings = this.defaultSettings;
-      }
+      this.initSettings();
     }
   },
   methods: {
+    initSettings: function initSettings() {
+      if (this.storeSettings) {
+        this.settings = this.storeSettings;
+        this.needsSubscription = this.settings.needsSubscription instanceof Array ? this.settings.needsSubscription : [this.settings.needsSubscription];
+      } else {
+        this.settings = this.defaultSettings;
+      }
+    },
     save: function save() {
       var _this2 = this;
 
@@ -2859,13 +2858,14 @@ __webpack_require__.r(__webpack_exports__);
             switch (_context2.prev = _context2.next) {
               case 0:
                 _this2.settings.botName = _this2.botName;
-                _context2.next = 3;
+                _this2.settings.needsSubscription = _this2.needsSubscription;
+                _context2.next = 4;
                 return _this2.$store.dispatch('saveSettings', _this2.settings);
 
-              case 3:
+              case 4:
                 _this2.gotoList();
 
-              case 4:
+              case 5:
               case "end":
                 return _context2.stop();
             }
@@ -6499,18 +6499,21 @@ var render = function() {
                         "v-form",
                         { attrs: { autocomplete: "off" } },
                         [
-                          _c("v-text-field", {
+                          _c("v-combobox", {
                             attrs: {
                               label: "Требовать подписку",
+                              multiple: "",
+                              chips: "",
+                              "deletable-chips": "",
                               hint: "Например: @vcblr",
                               "persistent-hint": ""
                             },
                             model: {
-                              value: _vm.settings.needsSubscription,
+                              value: _vm.needsSubscription,
                               callback: function($$v) {
-                                _vm.$set(_vm.settings, "needsSubscription", $$v)
+                                _vm.needsSubscription = $$v
                               },
-                              expression: "settings.needsSubscription"
+                              expression: "needsSubscription"
                             }
                           })
                         ],
@@ -8910,8 +8913,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vuetify_lib_components_VBtn__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! vuetify/lib/components/VBtn */ "./node_modules/vuetify/lib/components/VBtn/index.js");
 /* harmony import */ var vuetify_lib_components_VCard__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! vuetify/lib/components/VCard */ "./node_modules/vuetify/lib/components/VCard/index.js");
 /* harmony import */ var vuetify_lib_components_VGrid__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! vuetify/lib/components/VGrid */ "./node_modules/vuetify/lib/components/VGrid/index.js");
-/* harmony import */ var vuetify_lib_components_VForm__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! vuetify/lib/components/VForm */ "./node_modules/vuetify/lib/components/VForm/index.js");
-/* harmony import */ var vuetify_lib_components_VTextField__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! vuetify/lib/components/VTextField */ "./node_modules/vuetify/lib/components/VTextField/index.js");
+/* harmony import */ var vuetify_lib_components_VCombobox__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! vuetify/lib/components/VCombobox */ "./node_modules/vuetify/lib/components/VCombobox/index.js");
+/* harmony import */ var vuetify_lib_components_VForm__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! vuetify/lib/components/VForm */ "./node_modules/vuetify/lib/components/VForm/index.js");
 
 
 
@@ -8942,7 +8945,7 @@ var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_
 
 
 
-_node_modules_vuetify_loader_lib_runtime_installComponents_js__WEBPACK_IMPORTED_MODULE_3___default()(component, {VBtn: vuetify_lib_components_VBtn__WEBPACK_IMPORTED_MODULE_4__["VBtn"],VCard: vuetify_lib_components_VCard__WEBPACK_IMPORTED_MODULE_5__["VCard"],VCardActions: vuetify_lib_components_VCard__WEBPACK_IMPORTED_MODULE_5__["VCardActions"],VCardText: vuetify_lib_components_VCard__WEBPACK_IMPORTED_MODULE_5__["VCardText"],VCardTitle: vuetify_lib_components_VCard__WEBPACK_IMPORTED_MODULE_5__["VCardTitle"],VCol: vuetify_lib_components_VGrid__WEBPACK_IMPORTED_MODULE_6__["VCol"],VContainer: vuetify_lib_components_VGrid__WEBPACK_IMPORTED_MODULE_6__["VContainer"],VForm: vuetify_lib_components_VForm__WEBPACK_IMPORTED_MODULE_7__["VForm"],VRow: vuetify_lib_components_VGrid__WEBPACK_IMPORTED_MODULE_6__["VRow"],VTextField: vuetify_lib_components_VTextField__WEBPACK_IMPORTED_MODULE_8__["VTextField"]})
+_node_modules_vuetify_loader_lib_runtime_installComponents_js__WEBPACK_IMPORTED_MODULE_3___default()(component, {VBtn: vuetify_lib_components_VBtn__WEBPACK_IMPORTED_MODULE_4__["VBtn"],VCard: vuetify_lib_components_VCard__WEBPACK_IMPORTED_MODULE_5__["VCard"],VCardActions: vuetify_lib_components_VCard__WEBPACK_IMPORTED_MODULE_5__["VCardActions"],VCardText: vuetify_lib_components_VCard__WEBPACK_IMPORTED_MODULE_5__["VCardText"],VCardTitle: vuetify_lib_components_VCard__WEBPACK_IMPORTED_MODULE_5__["VCardTitle"],VCol: vuetify_lib_components_VGrid__WEBPACK_IMPORTED_MODULE_6__["VCol"],VCombobox: vuetify_lib_components_VCombobox__WEBPACK_IMPORTED_MODULE_7__["VCombobox"],VContainer: vuetify_lib_components_VGrid__WEBPACK_IMPORTED_MODULE_6__["VContainer"],VForm: vuetify_lib_components_VForm__WEBPACK_IMPORTED_MODULE_8__["VForm"],VRow: vuetify_lib_components_VGrid__WEBPACK_IMPORTED_MODULE_6__["VRow"]})
 
 
 /* hot reload */

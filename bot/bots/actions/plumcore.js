@@ -13,6 +13,7 @@ function toggleFavorite(item, ctx) {
 async function getAction(ctx, item) {
     let profile = ctx.session.profile;
     let hasAccess = plumcore.hasItemAccess(item, profile);
+    ctx.session.lastItem = item;
 
     return hasAccess
         ? {button: {code: 'action', text: '📥'}, route: async (item, ctx) => {
@@ -58,6 +59,8 @@ function getItemDescription(item) {
     return __(`<b>${item.title}</b>
 
 ${item.description || ''}
+
+Задать вопрос/приобрести: @plumcoresup или жмите на 💳
 
 <b>Оригинальная цена</b>: ${item.originalPrice ? item.originalPrice+'р' : ''}
 <b>Цена выжимки</b>: ${item.price}р`, ['content', 'course', 'learn']);

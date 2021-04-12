@@ -4,13 +4,15 @@ const path = require('path');
 const Stage = require('telegraf/stage');
 const session = require('telegraf/session');
 
-const store = new Map();
+const defaultStore = new Map();
 const {catchErrors, clone} = require('../helpers/common');
 
 const SafeReplyMiddleware = require('../../modules/SafeReplyMiddleware');
 const SaveActivityMiddleware = require('../../modules/SaveActivityMiddleware');
 const checkSubscriptionMiddleware = require('../../modules/CheckSubscriptionMiddleware');
 const toggleBlockedMiddleware = require('../../modules/toggleBlockedMiddleware');
+const {deleteMiddleware} = require('../../modules/deleteMessageMiddleware');
+
 const State = require('../../managers/State');
 const {menu} = require('../helpers/wizard');
 const {__} = require('../../modules/Messages');
@@ -23,7 +25,11 @@ class Injector {
         this.stage = false;
     }
 
-    addSession(initialState = {}, ttlSec = false) {
+    addSession(initialState = {}, ttlSec = false, store = false) {
+        if (!store) {
+            store = defaultStore;
+        }
+
         let opts = {store};
         if (ttlSec && ttlSec > 0) {
             opts.ttl = ttlSec;
@@ -194,6 +200,11 @@ class Injector {
     addPerformance() {
         let perf = init('performance');
         this.app.use(perf.getMiddleware());
+        return this;
+    }
+
+    addAutoDeleteMessages() {
+        this.app.use(deleteMiddleware);
         return this;
     }
 

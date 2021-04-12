@@ -1,5 +1,6 @@
 const BaseScene = require('telegraf/scenes/base');
 const {menuWithControls} = require('../../helpers/wizard');
+const {markMessageToDelete} = require('../../../modules/deleteMessageMiddleware');
 const {clone} = require('../../helpers/common');
 
 function isSelectedRecursive(selectedCategoryIds, category) {
@@ -22,7 +23,7 @@ function isSelectedRecursive(selectedCategoryIds, category) {
 }
 function categoryMenu(selectedCategoryIds, allCategories, pageIndex, levels) {
     const MAX_ITEMS_PER_PAGE = 8;
-    let levelCategories = allCategories;
+    let levelCategories = clone(allCategories);
     let hasSelectedLevels = levels && levels.length > 0;
 
     pageIndex = pageIndex || 0;
@@ -89,11 +90,12 @@ module.exports = function ({getSettingsText, getSelectedCategoryIds, getAllCateg
         let caterogryIds = ctx.session.category || getSelectedCategoryIds(ctx);
         let allCategories = await getAllCategories();
 
-        return ctx.safeReply(
+        let settingsMessage = await ctx.safeReply(
             ctx => ctx.editMessageText(getSettingsText(ctx), categoryMenu(caterogryIds, allCategories, page, levels)),
             ctx => ctx.reply(getSettingsText(ctx), categoryMenu(caterogryIds, allCategories, page, levels)),
             ctx
         );
+        return markMessageToDelete(ctx, settingsMessage);
     });
 
     scene.start(ctx => ctx.scene.enter('intro'));

@@ -1,6 +1,12 @@
 const BaseScene = require('telegraf/scenes/base');
 const {menu} = require('../../helpers/wizard');
+const {markMessageToDelete} = require('../../../modules/deleteMessageMiddleware');
 const EMPTY_FILE = {source: new Buffer('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64')};
+
+function markCatalogMessage(ctx, message) {
+    ctx.session.catalogMessage = message;
+    return message;
+}
 
 function itemMenu({hasPrev, hasNext, totalItems, isFavorite, item}, hasSubmenu, action, hasFavorite = true, hasRandom = true) {
     let buttons = [];
@@ -59,6 +65,7 @@ async function replyWithItem(ctx, showNewMessage, withPhoto, params) {
     let currentIndex = ctx.session.index || 0;
     let favorites = ctx.session.profile.favorite || [];
     let category = ctx.session.profile.category || [];
+    let catalogMessage = false;
 
     let results = await getItemAtIndex(currentIndex, ctx);
     let hasResults = results && results.item;
@@ -68,9 +75,10 @@ async function replyWithItem(ctx, showNewMessage, withPhoto, params) {
             let emptyExtra = noItemsMenu();
             let text = getEmptyText(ctx);
             emptyExtra.caption = text;
-            return withPhoto
+            let message = withPhoto
                 ? ctx.replyWithPhoto(EMPTY_FILE, emptyExtra)
                 : ctx.replyWithHTML(text, noItemsMenu());
+            return markCatalogMessage(message);
         }
         else {
             return ctx.scene.reenter();
@@ -115,7 +123,7 @@ async function replyWithItem(ctx, showNewMessage, withPhoto, params) {
     }
 
     if (withPhoto) {
-        return ctx.safeReply(
+        catalogMessage = await ctx.safeReply(
             ctx => {
                 return showNewMessage
                     ? ctx.replyWithPhoto(media, photoExtra)
@@ -132,7 +140,7 @@ async function replyWithItem(ctx, showNewMessage, withPhoto, params) {
             ctx);
     }
     else {
-        return ctx.safeReply(
+        catalogMessage = await ctx.safeReply(
             ctx => {
                 return showNewMessage
                     ? ctx.replyWithHTML(itemText, messageMenu)
@@ -141,6 +149,8 @@ async function replyWithItem(ctx, showNewMessage, withPhoto, params) {
             ctx => ctx.replyWithHTML(itemText, messageMenu),
             ctx);
     }
+
+    return markCatalogMessage(ctx, catalogMessage);
 }
 
 module.exports = function (params) {
@@ -233,6 +243,11 @@ module.exports = function (params) {
     scene.action('settings', ctx => {
         ctx.session.index = 0;
         ctx.session.nav = false;
+        if (ctx.session.catalogMessage) {
+            markMessageToDelete(ctx, ctx.session.catalogMessage);
+            ctx.session.catalogMessage = false;
+        }
+
         return ctx.scene.enter('settings');
     });
 

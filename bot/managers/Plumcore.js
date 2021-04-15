@@ -62,7 +62,9 @@ module.exports = class Plumcore {
     }
 
     hasSubscription(profile) {
-        return profile.subscribed && profile.subscribedTill >= moment().unix();
+        let unlimSubscribe = profile.subscribed && profile.subscribedTill === false;
+        let subscribtionActive = profile.subscribed && profile.subscribedTill >= moment().unix();
+        return unlimSubscribe || subscribtionActive;
     }
 
     hasItemAccess(item, profile) {

@@ -350,9 +350,9 @@ services:
     working_dir: /var/backend
     environment:
       - NODE_ENV=development
-      - MONGO_HOST=spambot_mongo
-      #- MONGO_HOST=192.168.80.1
-      #- MONGO_PORT=27272
+#      - MONGO_HOST=spambot_mongo
+      - MONGO_HOST=192.168.80.1
+      - MONGO_PORT=27272
       - MONGO_DB=botofarmer
       - REDIS_HOST=spambot_redis
       - PG_HOST=${PG_HOST}

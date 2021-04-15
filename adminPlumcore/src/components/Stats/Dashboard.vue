@@ -11,7 +11,7 @@
                                 {{lastNum(users)}}
                                 <v-icon v-if="isLastStepGrowing(users) === true" color="green">mdi-arrow-up-bold</v-icon>
                                 <v-icon v-if="isLastStepGrowing(users) === false" color="red">mdi-arrow-down-bold</v-icon>
-                                <span :class="isLastStepGrowing(users) ? 'green--text subtitle-1' : 'red--text subtitle-1'">
+                                <span :class="isLastStepGrowing(users) ? 'green--text subtitle-1 ml-2' : 'red--text subtitle-1 ml-2'">
                                     {{growPercent(users)}}%
                                 </span>
                             </div>
@@ -45,7 +45,7 @@
                                 {{lastNum(sales)}}
                                 <v-icon v-if="isLastStepGrowing(sales) === true" color="green">mdi-arrow-up-bold</v-icon>
                                 <v-icon v-if="isLastStepGrowing(sales) === false" color="red">mdi-arrow-down-bold</v-icon>
-                                <span :class="isLastStepGrowing(sales) ? 'green--text subtitle-1' : 'red--text subtitle-1'">
+                                <span :class="isLastStepGrowing(sales) ? 'green--text subtitle-1 ml-2' : 'red--text subtitle-1 ml-2'">
                                     {{growPercent(sales)}}%
                                 </span>
                             </div>
@@ -73,14 +73,23 @@
 </template>
 
 <script>
+    import axios from "axios";
+
     export default {
         data() {
             return {
-                users: [6, 2, 5, 9, 5, 10, 11, 10],
-                sales: [50000, 0, 15000, 25550, 1000, 3500, 8000, 30000],
+                data: {sales: [], users: []},
             }
         },
+        created() {
+            this.loadStats();
+        },
         methods: {
+            async loadStats() {
+                let {data} = await axios.get('/api/plumcore/stats/dashboard');
+                this.data.sales = data.sales || [];
+                this.data.users = data.users || [];
+            },
             isPositive(data) {
                 if (data.length <= 1) {
                     return false;
@@ -93,7 +102,9 @@
                     return null;
                 }
 
-                return data[data.length-1] > data[data.length-2];
+                return data[data.length-1] !== data[data.length-2]
+                    ? data[data.length-1] > data[data.length-2]
+                    : null;
             },
             growPercent(data) {
                 if (data.length < 2) {
@@ -102,7 +113,7 @@
 
                 let last = data[data.length-1];
                 let preLast = data[data.length-2];
-                let percent = (last-preLast)/preLast * 100;
+                let percent = preLast > 0 ? (last-preLast)/preLast * 100 : 0;
                 let strPercent = Math.round(percent).toString();
                 return percent > 0 ? strPercent : strPercent.replace('-', '');
             },
@@ -111,6 +122,14 @@
             },
             lastNum(data) {
                 return this.formatNum(data[data.length-1]);
+            }
+        },
+        computed: {
+            users() {
+                return this.data.users.map(data => data.users);
+            },
+            sales() {
+                return this.data.sales.map(data => data.sum);
             }
         }
     }

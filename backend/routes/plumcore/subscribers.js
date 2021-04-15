@@ -25,17 +25,22 @@ module.exports = {
                     foreignField: 'userId',
                     as: 'profile'
                 } },
+            { $set: {profile: {$cond: {
+                if: {$gt: [{$size: '$profile'}, 0]},
+                then: '$profile',
+                else: {userId: '$user.id', chatId: '$chat.id'}}}}
+            },
             { $unwind: '$profile' },
             { $addFields: {
-                    firstName: '$user.first_name',
-                    lastName: '$user.last_name',
-                    userName: '$user.username',
-                    lastPayment: '$profile.lastPayment',
-                    ownedCount: {$cond: [{$ne: [{$type : "$profile.owned"}, 'missing']}, {$size: '$profile.owned'}, 0]},
-                    subscribed: '$profile.subscribed',
-                    subscribedTill: '$profile.subscribedTill',
-                    blocked: '$blocked'
-                } }
+                firstName: '$user.first_name',
+                lastName: '$user.last_name',
+                userName: '$user.username',
+                lastPayment: '$profile.lastPayment',
+                ownedCount: {$cond: [{$ne: [{$type : "$profile.owned"}, 'missing']}, {$size: '$profile.owned'}, 0]},
+                subscribed: '$profile.subscribed',
+                subscribedTill: '$profile.subscribedTill',
+                blocked: '$blocked'
+            } }
         ]).toArray();
         let response = {};
         response[ITEMS_NAME] = items;
@@ -57,7 +62,7 @@ module.exports = {
             delete subscriberData._id;
         }
 
-        await db.collection(COLLECTION_NAME).findOneAndUpdate({userId}, {$set: subscriberData}, {returnOriginal: false});
+        await db.collection(COLLECTION_NAME).findOneAndUpdate({userId}, {$set: subscriberData, $setOnInsert: {id: userId}}, {returnOriginal: false, upsert: true});
         let subscriber = await db.collection(COLLECTION_NAME).findOne({userId});
 
         ctx.body = { subscriber };

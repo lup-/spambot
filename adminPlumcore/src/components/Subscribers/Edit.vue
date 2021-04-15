@@ -96,11 +96,12 @@
                         id: this.storeSubscriber.id,
                         subscribed: this.storeSubscriber.subscribed,
                         blocked: this.storeSubscriber.blocked
-                    },
-                    this.subscribedTillDate = this.subscriber.subscribedTill
-                        ? moment.unix(this.subscriber.subscribedTill).format('YYYY-MM-DD')
+                    };
+
+                    this.subscribedTillDate = this.storeSubscriber.subscribedTill
+                        ? moment.unix(this.storeSubscriber.subscribedTill).format('YYYY-MM-DD')
                         : false;
-                    this.noDateLimit = typeof(this.subscriber.subscribedTill) === 'boolean' && this.subscriber.subscribedTill === false;
+                    this.noDateLimit = typeof(this.storeSubscriber.subscribedTill) === 'boolean' && this.storeSubscriber.subscribedTill === false;
                 }
             },
             subscribedTillDate() {

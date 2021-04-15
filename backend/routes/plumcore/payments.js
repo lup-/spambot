@@ -11,7 +11,8 @@ module.exports = {
             : {};
 
         let defaultFilter = {
-            'deleted': {$in: [null, false]}
+            'deleted': {$in: [null, false]},
+            'status': {$ne: 'canceled'},
         };
 
         filter = Object.assign(defaultFilter, filter);

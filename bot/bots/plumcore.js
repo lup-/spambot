@@ -31,6 +31,17 @@ app = setupBot(app)
                 return ctx.scene.enter('discover');
             }
         })
+        .addRoute('action', /cancel_(.*)/ , async ctx => {
+            let paymentId = ctx.match[1];
+            try {
+                await payment.cancelPayment(paymentId, true);
+            }
+            catch (e) {
+                console.log(e);
+            }
+
+            return ctx.scene.enter('discover');
+        })
         .addDefaultRoute(ctx => ctx.scene.enter('intro'))
         .get();
 

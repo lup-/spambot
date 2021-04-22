@@ -154,14 +154,54 @@ module.exports = class Payment {
             price = payment.price || payment.yooPayment.amount.value;
         }
 
-        return this.callYooApi(`payments/${payment.id}/capture`, {
-            amount: {
-                value: price,
-                currency: "RUB"
-            }
-        });
+        return this.callYooApi(`payments/${payment.id}/capture`, {});
     }
-    async addPaymentAndGetPaymentUrl(ctx, item) {
+
+    async loadPaymentFromDb(paymentId) {
+        let db = await getDb();
+        let result = await db.collection('payments').findOne({id: paymentId});
+        return result ? result : false;
+    }
+
+    async cancelPayment(paymentId, userCanceled = false) {
+        let payment = await this.loadPaymentFromDb(paymentId);
+        let yooPayment = await this.getPaymentInfo(paymentId);
+        let yooCancel = null;
+
+        if (yooPayment.refundable) {
+            return this.refundPayment();
+        }
+        else {
+            try {
+                yooCancel = await this.callYooApi(`payments/${paymentId}/cancel`, {});
+            }
+            catch (e) {
+                yooCancel = false;
+            }
+        }
+
+        let freshPayment = await this.getPaymentInfo(paymentId);
+
+        let db = await getDb();
+        let result = await db.collection('payments').updateOne({id: payment.id}, {
+            $set: {
+                updated: moment().unix(),
+                finished: moment().unix(),
+                userCanceled: userCanceled ? moment().unix() : false,
+                status: freshPayment.status,
+                yooPayment: freshPayment,
+                yooCancel
+            }
+        }, {});
+
+        let isEverythingOk = result && result.result && result.result.ok === 1;
+
+        return isEverythingOk
+            ? this.loadPaymentFromDb(paymentId)
+            : false;
+    }
+
+    async addPaymentAndSaveToDb(ctx, item) {
         let profile = ctx.session.profile;
         let price = item.price;
         let returnUrl = this.getReturnUrl(ctx);
@@ -185,13 +225,22 @@ module.exports = class Payment {
                 paymentUrl
             });
 
-            return result.ops && result.ops[0] ? paymentUrl : false;
+            return result.ops && result.ops[0] ? result.ops[0] : false;
         }
         else {
             return false;
         }
     }
+    async addPaymentAndGetPaymentUrl(ctx, item) {
+        let payment = await this.addPaymentAndSaveToDb(ctx, item);
 
+        if (payment && payment.paymentUrl) {
+            return payment.paymentUrl;
+        }
+        else {
+            return false;
+        }
+    }
     async addSubscriptionPaymentAndGetPaymentUrl(ctx, price = false, days = false) {
         if (!price) {
             price = await this.getPrice(days);
@@ -250,7 +299,10 @@ module.exports = class Payment {
     }
     async getProcessingPayments() {
         let db = await getDb();
-        return db.collection('payments').find({finished: {$in: [null, false]}}).toArray();
+        return db.collection('payments').find({
+            finished: {$in: [null, false]},
+            userCanceled: {$in: [null, false]}
+        }).toArray();
     }
     async checkAndFinishPayment(payment, onSuccessfulPayment = false) {
         try {
@@ -304,7 +356,10 @@ module.exports = class Payment {
             }
         }
         else {
-            let message = await telegram.sendMessage(chatId, `Последний платеж не прошел`, menu([{code: 'retry', text: 'Попробовать еще раз'}]));
+            let message = await telegram.sendMessage(chatId, `Последний платеж не прошел`, menu([
+                {text: 'Попробовать еще раз', code: 'retry'},
+                {text: 'Отмена', code: `cancel_${payment.id}`}
+            ]));
             this.markMessageToDelete(profile.userId, chatId, message);
         }
     }

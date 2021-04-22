@@ -1,5 +1,6 @@
 const {init} = require('../../managers');
 const {__} = require('../../modules/Messages');
+const {markMessageToDelete} = require('../../modules/deleteMessageMiddleware');
 const moment = require('moment');
 
 let profileManager = init('profile');
@@ -22,6 +23,11 @@ async function getAction(ctx, item) {
                 return ctx.scene.reenter();
             }}
         : {button: {code: 'action', text: '💳'}, route: async (item, ctx) => {
+                if (ctx.session.catalogMessage) {
+                    markMessageToDelete(ctx, ctx.session.catalogMessage);
+                    ctx.session.catalogMessage = false;
+                }
+
                 return ctx.scene.enter('payment', {item});
             }};
 }
@@ -52,7 +58,7 @@ function getEmptyText() {
 }
 
 function getSettingsText() {
-    return `Выберите категорию курсов:`;
+    return `Выберите категорию курсов. Можно выбирать несколько`;
 }
 
 function getItemDescription(item) {

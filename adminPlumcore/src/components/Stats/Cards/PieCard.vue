@@ -1,47 +1,40 @@
 <template>
-    <v-card :max-height="this.maxHeight+'px'">
+    <v-card v-if="card">
         <v-card-title v-if="title">{{title}}</v-card-title>
         <v-card-text>
-            <chartist
-                    ratio="ct-octave"
-                    type="Pie"
-                    :data="items"
-                    :options="options"
-                    :style="'max-height: '+(this.maxHeight-80)+'px'"
-            >
-            </chartist>
+            <plotly ref="plot" :data="items" :layout="layout"/>
         </v-card-text>
     </v-card>
+    <plotly ref="plot" :data="items" :layout="layout" v-else/>
 </template>
 
 <script>
-    import LegendPlugin from "chartist-plugin-legend";
+    import { Plotly } from 'vue-plotly';
 
     export default {
         props: {
             maxHeight: {type: Number, default: 250},
             data: {type: Array},
-            title: {type: String}
+            title: {type: String},
+            card: {type: Boolean, default: false}
         },
+        components: {Plotly},
         data() {
             return {
             }
         },
         computed: {
             items() {
-                return {
-                    series: this.data,
-                }
+                return [{
+                    values: this.data.map(item => item.value),
+                    labels: this.data.map(item => item.name),
+                    type: 'pie'
+                }]
             },
-            options() {
-                let sum = (a, b) => { return a + b.value };
+            layout() {
                 return {
-                    height: (this.maxHeight-80)+'px',
-                    plugins: [LegendPlugin({
-                        legendNames: this.data.map(item => {
-                            return `${item.name}, ${Math.round(item.value / this.data.reduce(sum, 0) * 100)}%`
-                        }),
-                    })]
+                    autosize: true,
+                    margin: 20
                 }
             }
         }

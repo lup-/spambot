@@ -1,4 +1,3 @@
-const he = require('he');
 const {getDb} = require('../../modules/Database');
 const {getManagerSync} = require('../../managers');
 const {escapeHTML} = require('../../modules/Helpers');

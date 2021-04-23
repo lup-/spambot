@@ -1,13 +1,15 @@
 <template>
-    <v-container class="fill-height align-start">
-        <v-row align="start" justify="start" dense>
-            <v-col cols="12" md="8">
-                <v-card>
+    <v-container class="align-start">
+        <v-row>
+            <v-col cols="12">
+                <v-card class="mb-2">
                     <v-card-title>
                         <v-btn icon class="align-self-start mr-4 mt-2" size="28" @click="$router.push({name: 'statDashboard'})">
                             <v-icon>mdi-arrow-left-thick</v-icon>
                         </v-btn>
-                        Продажи
+
+                        Статистика продаж
+
                         <v-spacer></v-spacer>
                         <v-btn-toggle v-model="days" tile group color="primary" background-color="white" v-ripple="false">
                             <v-btn :value="0">Сегодня</v-btn>
@@ -17,56 +19,68 @@
                             <v-btn :value="365">1г</v-btn>
                         </v-btn-toggle>
                     </v-card-title>
-                    <v-card-text>
-                        <chartist
-                                :ratio="isSmallDisplay ? 'ct-octave' : 'ct-major-sixth'"
-                                type="Line"
-                                :data="sales"
-                                :options="salesOptions"
-                        >
-                        </chartist>
-                    </v-card-text>
                 </v-card>
             </v-col>
-            <v-col cols="12" md="4">
-                <v-row dense>
-                    <v-col>
-                        <pie-card :max-height="248" :data="categories" title="Категории"></pie-card>
-                    </v-col>
-                </v-row>
-                <v-row dense>
-                    <v-col>
-                        <pie-card :max-height="248" :data="courses" title="Курсы"></pie-card>
-                    </v-col>
-                </v-row>
+        </v-row>
+
+        <v-row>
+            <v-col cols="12">
+                <v-expansion-panels :value="[0]" multiple class="align-self-start justify-start mb-4">
+            <v-expansion-panel>
+                <v-expansion-panel-header>Продажи</v-expansion-panel-header>
+                <v-expansion-panel-content>
+                    <plotly :data="salesData" :layout="salesLayout"/>
+                </v-expansion-panel-content>
+            </v-expansion-panel>
+            <v-expansion-panel>
+                <v-expansion-panel-header>Категории</v-expansion-panel-header>
+                <v-expansion-panel-content>
+                    <pie-card :max-height="248" :data="categories" title="Категории"></pie-card>
+                </v-expansion-panel-content>
+            </v-expansion-panel>
+            <v-expansion-panel>
+                <v-expansion-panel-header>Курсы</v-expansion-panel-header>
+                <v-expansion-panel-content>
+                    <pie-card :max-height="248" :data="courses" title="Курсы"></pie-card>
+                </v-expansion-panel-content>
+            </v-expansion-panel>
+        </v-expansion-panels>
             </v-col>
+        </v-row>
+
+        <v-row>
             <v-col cols="12">
                 <v-card>
                     <v-data-table
-                        dense
-                        :headers="tableHeaders"
-                        :items="tableData"
-                        :items-per-page="50"
+                            dense
+                            :headers="tableHeaders"
+                            :items="tableData"
+                            :items-per-page="50"
                     ></v-data-table>
                 </v-card>
             </v-col>
         </v-row>
+
     </v-container>
 </template>
 
 <script>
     import PieCard from "@/components/Stats/Cards/PieCard";
+    import { Plotly } from 'vue-plotly';
     import axios from "axios";
 
     export default {
-        components: {PieCard},
+        components: {PieCard, Plotly},
         data() {
             return {
-                days: 0,
+                days: 15,
                 topCourses: [],
                 sales: {
                     labels: [],
                     series:[]
+                },
+                salesLayout: {
+                    margin: 20,
                 },
                 categories: [],
                 courses: [],
@@ -110,6 +124,13 @@
                     lineSmooth: false,
                     height: (this.isSmallDisplay ? 168 : 440) + 'px'
                 }
+            },
+            salesData() {
+                return [{
+                    x: this.tableData.map(item => item.date),
+                    y: this.tableData.map(item => item.totalSum),
+                    type: 'scatter'
+                }];
             }
         }
     }

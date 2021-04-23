@@ -1,0 +1,6 @@
+POST http://localhost:8292/api/plumcore/stats/users
+Content-Type: application/json
+
+{"days": 30}
+
+###

@@ -106,7 +106,8 @@ router
 
 router
     .get('/api/plumcore/stats/dashboard', plumcoreStats.dashboard.bind(plumcoreStats))
-    .post('/api/plumcore/stats/sales', plumcoreStats.sales.bind(plumcoreStats));
+    .post('/api/plumcore/stats/sales', plumcoreStats.sales.bind(plumcoreStats))
+    .post('/api/plumcore/stats/users', plumcoreStats.users.bind(plumcoreStats));
 
 router
     .post('/api/plumcore/payment/list', plumcorePayments.list)

@@ -17,7 +17,7 @@
                             </div>
                         </v-row>
                         <v-spacer></v-spacer>
-                        <v-btn icon class="align-self-start" size="28" @click="$router.push({name: 'statBot'})">
+                        <v-btn icon class="align-self-start" size="28" @click="$router.push({name: 'statUsers'})">
                             <v-icon>mdi-arrow-right-thick</v-icon>
                         </v-btn>
                     </v-card-title>

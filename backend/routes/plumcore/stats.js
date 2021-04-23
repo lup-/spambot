@@ -1,9 +1,101 @@
 const {getDb} = require('../../../bot/modules/Database');
+const {clone} = require('../../../bot/bots/helpers/common');
 const moment = require('moment');
 
 const DB_NAME = 'plumcore_bot';
 
 module.exports = {
+    getDates(start, end) {
+        let datesCount = moment.unix(end).diff(moment.unix(start), 'd');
+        let dates = Array(datesCount).fill(0).map((_, index) => moment.unix(start).add(index, 'd').format('DD.MM.YYYY'));
+        return dates;
+    },
+
+    addMissingDates(start, end, data, emptyItem) {
+        let dates = this.getDates(start, end);
+
+        let allDatesData = [];
+        for (const date of dates) {
+            let dateItem = data.find(item => item.date === date);
+            if (!dateItem) {
+                dateItem = clone(emptyItem);
+                dateItem.date = date;
+            }
+
+            allDatesData.push(dateItem);
+        }
+
+        return allDatesData;
+    },
+
+    async getUserStats(start, end) {
+        let db = await getDb(DB_NAME);
+        let newUsers = await db.collection('users').aggregate([
+            { $match: {$and: [
+                        {registered: {$gte: start}},
+                        {registered: {$lte: end}},
+                    ]} },
+            { $addFields: {
+                    createdDate: { $dateToString: {
+                            format: "%d.%m.%Y",
+                            date: {$toDate: {$multiply: ["$registered", 1000]}},
+                        }
+                    }
+                }},
+            { $group: {
+                    _id: "$createdDate",
+                    date: {$first: "$createdDate"},
+                    count: {$sum: 1},
+                }},
+        ]).toArray();
+
+        let blockedUsers = await db.collection('users').aggregate([
+            { $match: {$and: [
+                        {blocked: {$gte: start}},
+                        {blocked: {$lte: end}},
+                    ]} },
+            { $addFields: {
+                    blockedDate: { $dateToString: {
+                            format: "%d.%m.%Y",
+                            date: {$toDate: {$multiply: ["$blocked", 1000]}},
+                        }
+                    }
+                }},
+            { $group: {
+                    _id: "$blockedDate",
+                    date: {$first: "$blockedDate"},
+                    count: {$sum: 1},
+                }},
+        ]).toArray();
+
+        let baseCount = await db.collection('users').count({
+            $and: [
+                {registered: {$lt: start}},
+                {$or: [
+                    {blocked: {$in: [null, false]}},
+                    {blocked: {$gte: start}}
+                ]}
+            ],
+        });
+
+        let dateUsers = [];
+        let users = baseCount;
+        let dates = this.getDates(start, end);
+
+        for (const date of dates) {
+            let newUsersData = newUsers.find(item => item.date === date);
+            let blockedUsersData = blockedUsers.find(item => item.date === date);
+
+            let newUsersCount = newUsersData ? newUsersData.count : 0;
+            let blockedUsersCount = blockedUsersData ? blockedUsersData.count : 0;
+            dateUsers.push({date, users, new: newUsersCount, blocked: blockedUsersCount});
+
+            users = users + newUsersCount - blockedUsersCount;
+        }
+
+        return dateUsers;
+    },
+
     async dashboard(ctx) {
         let start = moment().subtract(7, 'day').startOf('d').unix();
         let end = moment().endOf('d').unix();
@@ -30,67 +122,8 @@ module.exports = {
                 }},
         ]).toArray();
 
-        let newUsers = await db.collection('users').aggregate([
-            { $match: {$and: [
-                {created: {$gte: start}},
-                {created: {$lte: end}},
-            ]} },
-            { $addFields: {
-                    createdDate: { $dateToString: {
-                            format: "%d.%m.%Y",
-                            date: {$toDate: {$multiply: ["$created", 1000]}},
-                        }
-                    }
-                }},
-            { $group: {
-                    _id: "$createdDate",
-                    date: {$first: "$createdDate"},
-                    count: {$sum: 1},
-                }},
-        ]).toArray();
-
-        let blockedUsers = await db.collection('users').aggregate([
-            { $match: {$and: [
-                        {blocked: {$gte: start}},
-                        {blocked: {$lte: end}},
-                    ]} },
-            { $addFields: {
-                    createdDate: { $dateToString: {
-                            format: "%d.%m.%Y",
-                            date: {$toDate: {$multiply: ["$created", 1000]}},
-                        }
-                    }
-                }},
-            { $group: {
-                    _id: "$createdDate",
-                    date: {$first: "$createdDate"},
-                    count: {$sum: 1},
-                }},
-        ]).toArray();
-
-        let baseCount = await db.collection('users').count({
-            created: {$lt: start},
-            $or: [
-                {blocked: {$in: [null, false]}},
-                {blocked: {$gte: start}}
-            ]
-        });
-
-        let datesCount = moment.unix(end).diff(moment.unix(start), 'd');
-        let dates = Array(datesCount).fill(0).map((_, index) => moment.unix(start).add(index, 'd').format('DD.MM.YYYY'));
-
-        let dateUsers = [];
-        let users = baseCount;
-        for (const date of dates) {
-            let newUsersData = newUsers.find(item => item.date === date);
-            let blockedUsersData = blockedUsers.find(item => item.date === date);
-
-            let newUsersCount = newUsersData ? newUsersData.count : 0;
-            let blockedUsersCount = blockedUsersData ? blockedUsersData.count : 0;
-            dateUsers.push({date, users});
-
-            users = users + newUsersCount - blockedUsersCount;
-        }
+        let dateUsers = await this.getUserStats(start, end);
+        let dates = this.getDates(start, end);
 
         let dateSales = dates.map(date => {
             let salesData = sales.find(item => item.date === date);
@@ -102,7 +135,7 @@ module.exports = {
     },
 
     async sales(ctx) {
-        let days = ctx.request.body && ctx.request.body.days
+        let days = ctx.request.body && typeof (ctx.request.body.days) === 'number'
             ? parseInt(ctx.request.body.days)
             : 7;
 
@@ -133,6 +166,13 @@ module.exports = {
             }},
             { $addFields: {courseCount: {$size: '$courses'}} }
         ]).toArray();
+
+        sales = this.addMissingDates(start, end, sales, {
+            totalSum: 0,
+            ordersCount: 0,
+            courses: [],
+            courseCount: 0,
+        });
 
         let categories = await db.collection('payments').aggregate([
             { $match: dateFilter },
@@ -170,5 +210,17 @@ module.exports = {
         ]).toArray();
 
         ctx.body = {sales, categories, courses};
+    },
+
+    async users(ctx) {
+        let days = ctx.request.body &&  typeof (ctx.request.body.days) === 'number'
+            ? parseInt(ctx.request.body.days)
+            : 7;
+
+        let start = moment().subtract(days, 'day').startOf('d').unix();
+        let end = moment().endOf('d').unix();
+
+        let users = await this.getUserStats(start, end);
+        ctx.body = {users}
     }
 }

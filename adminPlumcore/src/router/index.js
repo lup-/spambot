@@ -14,7 +14,7 @@ import SubscribersList from '../components/Subscribers/List';
 import SubscriberEdit from '../components/Subscribers/Edit';
 import Dashboard from "@/components/Stats/Dashboard";
 import SalesStat from  "@/components/Stats/Sales";
-import BotStat from  "@/components/Stats/Bot";
+import UsersStat from  "@/components/Stats/Users";
 
 import store from "../store";
 
@@ -41,7 +41,7 @@ const routes = [
 
     { name: 'statDashboard', path: '/stats/', component: Dashboard, meta: {requiresAuth: true, group: 'stats'} },
     { name: 'statSales', path: '/stats/sales/', component: SalesStat, meta: {requiresAuth: true, group: 'stats'} },
-    { name: 'statBot', path: '/stats/users/', component: BotStat, meta: {requiresAuth: true, group: 'stats'} },
+    { name: 'statUsers', path: '/stats/users/', component: UsersStat, meta: {requiresAuth: true, group: 'stats'} },
 ]
 
 const router = new VueRouter({

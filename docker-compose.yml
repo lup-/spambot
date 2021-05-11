@@ -282,6 +282,27 @@ services:
       - API_HASH=${API_HASH}
     command: npm run tglib
 
+  userbot:
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_tdlib"
+    ports:
+      - ${USERBOT_DEBUG_PORT}:9229
+      - ${USERBOT_HTTP_PORT}:3000
+    depends_on:
+      - mongo
+    volumes:
+      - ./userbot:/var/bot
+    working_dir: /var/bot
+    environment:
+      - MONGO_HOST=mongo
+      - MONGO_DB=userbot
+      - API_ID=${USERBOT_API_ID}
+      - API_HASH=${USERBOT_API_HASH}
+      - AUTH_PHONE=${USERBOT_AUTH_PHONE}
+      - TDJSONLIB_PATH=${USERBOT_TDJSONLIB_PATH}
+    command: npm run start
+
   tgapi_proxy:
     image: outrigger/https-proxy:1.0
     container_name: 'tgapi_proxy'

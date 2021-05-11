@@ -39,7 +39,7 @@ module.exports = function (params) {
             buttons.push({code: 'list', text: 'В каталог'});
 
             if (!hasSubscription) {
-                //buttons.push({code: 'subscribe', text: 'Подписаться'});
+                buttons.push({code: 'subscribe', text: 'Премиум'});
             }
 
             if (hasOwned) {
@@ -51,7 +51,7 @@ module.exports = function (params) {
             }
 
             if (hasSubscription) {
-                buttons.push({code: 'unsubscribe', text: 'Отписаться'});
+                buttons.push({code: 'unsubscribe', text: 'Отключить премиум'});
             }
 
             return ctx.reply('Куда дальше?', menu(buttons, 1));

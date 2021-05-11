@@ -14,7 +14,7 @@ module.exports = async (ctx, next) => {
     let type = ctx.updateType;
     let subTypes = ctx.updateSubTypes;
     let date = moment().unix();
-    let data = ctx.update[type].data || false;
+    let data = ctx.update[type] ? ctx.update[type].data || false : false;
     await activities.insertOne({userId, date, type, subTypes, data});
     return next();
 }

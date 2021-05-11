@@ -455,7 +455,9 @@ module.exports = class Payment {
         let chatId = profile.chatId;
         await telegram.sendMessage(
             chatId,
-            `До окончания подписки осталось 3 дня`,
+            `Здравствуйте. Ваш Премиум доступ к материалам бота истекает через 3 дня.
+
+Чтобы продлить доступ, воспользуйтесь этой ссылкой:`,
             menu([{code: 'renew_subscription', text: 'Продлить подписку'}])
         );
 

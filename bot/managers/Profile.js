@@ -41,7 +41,6 @@ module.exports = function () {
 
             return this.saveProfile(profile);
         },
-
         async addToOwnedItems(profile, item) {
             if (!profile.owned) {
                 profile.owned = [];
@@ -56,15 +55,14 @@ module.exports = function () {
                 return profile;
             }
         },
-
         initSessionProfileMiddleware() {
             return async (ctx, next) => {
-                const fromInfo = ctx.update.callback_query
-                    ? ctx.update.callback_query.from
-                    : ctx.update.message.from;
-                const chatInfo = ctx.update.callback_query
-                    ? ctx.update.callback_query.message.chat
-                    : ctx.update.message.chat;
+                const fromInfo = ctx.from;
+                const chatInfo = ctx.chat;
+                if (!fromInfo || !chatInfo) {
+                    return next();
+                }
+
                 const userId = fromInfo.id;
 
                 let hasProfile = Boolean(ctx.session.profile);
@@ -92,7 +90,6 @@ module.exports = function () {
                 ctx.session.profile = await this.loadProfileByUserId(userId) || defaultProfile;
                 return next();
             }
-        },
-
+        }
     }
 }

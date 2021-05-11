@@ -174,6 +174,11 @@ class Injector {
         return this;
     }
 
+    addMiddleware(middleware) {
+        this.app.use(middleware);
+        return this;
+    }
+
     addRoute(type, subType, handler) {
         if (typeof(subType) === 'function') {
             handler = subType;

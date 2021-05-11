@@ -47,7 +47,7 @@ function ChatManager() {
         },
         blockNonPrivate() {
             return async (ctx, next) => {
-                let skipThisUpdate = ctx.chat.type !== 'private';
+                let skipThisUpdate = (ctx.chat && ctx.chat.type !== 'private') || (!ctx.chat);
                 if (skipThisUpdate) {
                     return;
                 }

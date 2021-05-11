@@ -705,6 +705,26 @@ services:
       - FILES_DIR=/var/www/files
     command: node bots/plumcore.js
 
+  linker_bot:
+    image: node
+    container_name: 'linker_bot'
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+    volumes:
+      - ./bot:/var/www
+    working_dir: /var/www
+    environment:
+      - NODE_ENV=development
+      - MONGO_HOST=aquarium_mongo
+      - REDIS_HOST=aquarium_redis
+      - MONGO_DB=linker_bot
+      - BOT_TOKEN=${LINKER_BOT_TOKEN}
+      - BOT_NAME=linker_bot
+      - USERBOT_URL=http://userbot:3000
+    command: node bots/linker.js
+
   mailer_bot:
     image: node
     container_name: 'mailer_bot'
@@ -826,6 +846,27 @@ services:
       - UPLOAD_DIR=/var/backend/uploads
       - BASE_DOWNLOAD_URL=${BASE_DOWNLOAD_URL}
     command: npm run debug
+
+  userbot:
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_tdlib"
+    ports:
+      - ${USERBOT_DEBUG_PORT}:9229
+      - ${USERBOT_HTTP_PORT}:3000
+    depends_on:
+      - mongo
+    volumes:
+      - ./userbot:/var/bot
+    working_dir: /var/bot
+    environment:
+      - MONGO_HOST=aquarium_mongo
+      - MONGO_DB=userbot
+      - API_ID=${USERBOT_API_ID}
+      - API_HASH=${USERBOT_API_HASH}
+      - AUTH_PHONE=${USERBOT_AUTH_PHONE}
+      - TDJSONLIB_PATH=${USERBOT_TDJSONLIB_PATH}
+    command: npm run start
 
   tgapi_proxy:
     image: outrigger/https-proxy:1.0

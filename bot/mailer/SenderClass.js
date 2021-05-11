@@ -142,6 +142,20 @@ class Sender {
             return false;
         }
 
+        if (error && error.on && error.on.payload) {
+            if (error.on.payload.photo) {
+                delete error.on.payload.photo;
+            }
+
+            if (error.on.payload.video) {
+                delete error.on.payload.video;
+            }
+
+            if (error.on.payload.document) {
+                delete error.on.payload.document;
+            }
+        }
+
         let db = await getDb(MAILING_DB_NAME);
         await db.collection('mailingQueue').updateOne({_id: chat._id}, {$set: {status: STATUS_FAILED, error}});
         return this.updateCounters('errors');

@@ -4,6 +4,11 @@ const {escapeHTML} = require('../../modules/Helpers');
 const moment = require('moment');
 
 async function catchErrors(err, ctx) {
+    let isPrivate = ctx.chat && ctx.chat.type === 'private';
+    if (!isPrivate) {
+        return;
+    }
+
     let sendError = false;
     let blockUser = false;
 

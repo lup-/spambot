@@ -10,7 +10,7 @@ const USERS_TEXT = 'Какое ограничение по пользовате�
 const USERBOT_URL = process.env.USERBOT_URL;
 
 function getMessagesCountButtons(ctx) {
-    let messagesCount = [2, 5, 10, 20, 50];
+    let messagesCount = [2, 5, 10, 20, 50, 100];
     let selectedCount = ctx.scene.state.selectedMessages || messagesCount[0];
 
     let messagesButtons = messagesCount.map(count => {
@@ -25,7 +25,7 @@ function getMessagesCountButtons(ctx) {
     return menu(messagesButtons);
 }
 function getUsersCountButtons(ctx) {
-    let usersCount = [0, 10, 100, 500, 1000];
+    let usersCount = [0, 1, 10, 100, 500, 1000];
     let selectedCount = ctx.scene.state.selectedUsers || usersCount[0];
 
     let usersButtons = usersCount.map(count => {
@@ -121,6 +121,15 @@ module.exports = function () {
                 try {
                     let {data} = await axios.post(USERBOT_URL + '/invite', {link: url});
                     let info = data.info;
+                    if (info && info.chatId === 0 && info.title && info.title.length > 0) {
+                        let db = await getDb();
+                        let chat = await db.collection('chats').findOne({title: info.title});
+                        if (chat && chat.id) {
+                            foundChatIds[url] = chat.id;
+                            foundChatTitles[url] = chat.title;
+                        }
+                    }
+
                     if (info && info.chatId && info.chatId !== 0) {
                         chatId = info.chatId;
                         foundChatIds[url] = chatId;

@@ -1,6 +1,8 @@
 import { Airgram, Auth } from 'airgram';
 import HttpInterface from "./httpInterface.mjs";
 
+const DEBUG = process.env.DEBUG === '1' || false;
+
 const airgram = new Airgram({
     apiId: process.env.API_ID,
     apiHash: process.env.API_HASH,
@@ -27,3 +29,10 @@ airgram.use((ctx, next) => {
 });
 
 httpIO.launch();
+
+if (DEBUG) {
+    (async () => {
+        await airgram.api.setLogVerbosityLevel({newVerbosityLevel: 10});
+        await airgram.api.setLogStream({logStream: {path: "/var/bot/log.txt", redirectStderr: true}});
+    })();
+}

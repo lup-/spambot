@@ -30,7 +30,6 @@ export default class HttpInterface {
     }
 
     triggerCallbacks(updateType, ctx) {
-        console.log(updateType);
         if (this.callbacks[updateType]) {
             for (let callback of this.callbacks[updateType]) {
                 callback.call(this, ctx);

@@ -4,6 +4,7 @@ const {menu} = require('../../helpers/wizard');
 const {clone} = require('../../helpers/common');
 const axios = require('axios');
 
+const TYPE_TEXT = 'Что делать?';
 const COUNT_TEXT = 'Сколько нужно сообщений с разными ссылками?';
 const USERS_TEXT = 'Какое ограничение по пользователям?';
 const USERBOT_URL = process.env.USERBOT_URL;
@@ -37,6 +38,19 @@ function getUsersCountButtons(ctx) {
     });
 
     return menu(usersButtons);
+}
+
+function getTypeButtons(ctx) {
+    let types = [{code: 'posts', text: 'Посты'}, {code: 'links', text: 'Ссылки'}];
+    let selectedType = ctx.scene.state.selectedType || 'posts';
+    let buttons = types.map(type => {
+        return {
+            code: `type_${type.code}`,
+            text: type.code === selectedType ? `☑ ${type.text}` : type.text
+        }
+    });
+
+    return menu(buttons);
 }
 
 module.exports = function () {
@@ -79,24 +93,29 @@ module.exports = function () {
         }
 
         let foundChatIds = {};
+        let foundChatTitles = {};
         let notFoundLinks = [];
         for (let linkEntity of tgLinks) {
             let url = linkEntity.url;
             let isInviteLink = url.indexOf('/joinchat/') !== -1;
 
             let chatId = null;
+            let chatTitle = null;
             if (isInviteLink) {
                 let chat = inviteChats[url];
                 if (chat) {
                     chatId = chat.id;
+                    chatTitle = chat.title;
                 }
             }
             else {
                 chatId = '@'+url.replace('https://t.me/', '');
+                chatTitle = chatId;
             }
 
             if (chatId) {
                 foundChatIds[url] = chatId;
+                foundChatTitles[url] = chatTitle;
             }
             else {
                 try {
@@ -105,6 +124,7 @@ module.exports = function () {
                     if (info && info.chatId && info.chatId !== 0) {
                         chatId = info.chatId;
                         foundChatIds[url] = chatId;
+                        foundChatTitles[url] = info.title || '-';
                     }
                 }
                 catch (e) {
@@ -118,6 +138,7 @@ module.exports = function () {
         }
 
         ctx.scene.state.foundChatIds = foundChatIds;
+        ctx.scene.state.foundChatTitles = foundChatTitles;
         let foundChatsCount = Object.keys(foundChatIds).length;
         let replyMessage = `Обнаружено ссылок на известные чаты: ${foundChatsCount}`;
         if (notFoundLinks.length > 0) {
@@ -126,6 +147,7 @@ module.exports = function () {
 
         await ctx.replyWithHTML(replyMessage);
         if (foundChatsCount > 0) {
+            ctx.scene.state.typeMessage = await ctx.reply(TYPE_TEXT, getTypeButtons(ctx));
             ctx.scene.state.countMessage = await ctx.reply(COUNT_TEXT, getMessagesCountButtons(ctx));
             ctx.scene.state.usersMessage = await ctx.reply(USERS_TEXT, getUsersCountButtons(ctx));
             ctx.scene.state.readyMessage = await ctx.reply('Когда все настройки сделаны, нажмите эту кнопку', menu([{
@@ -166,10 +188,26 @@ module.exports = function () {
         }
     });
 
+    scene.action(/type_(.*)/, async ctx => {
+        let newType = ctx.match[1];
+        if (ctx.scene.state.selectedType !== newType) {
+            ctx.scene.state.selectedType = newType;
+            await ctx.tg.editMessageText(
+                ctx.chat.id,
+                ctx.scene.state.typeMessage.message_id,
+                undefined,
+                TYPE_TEXT,
+                getTypeButtons(ctx)
+            );
+        }
+    });
+
     scene.action('generate', async ctx => {
         let newLinksCount = ctx.scene.state.selectedMessages || 2;
         let usersLimit = ctx.scene.state.selectedUsers || 0;
+        let type = ctx.scene.state.selectedType || 'posts';
         let foundChatIds = ctx.scene.state.foundChatIds;
+        let foundChatTitles = ctx.scene.state.foundChatTitles;
         let newChatLinks = {};
 
         for (let chatLink of Object.keys(foundChatIds)) {
@@ -192,32 +230,47 @@ module.exports = function () {
             }
         }
 
-        let oldMessage = ctx.scene.state.message;
-        let messageText = oldMessage.text || oldMessage.caption;
-
-        for (let i=0; i<newLinksCount; i++) {
-            let newMessage = clone(oldMessage);
-            let entityType = newMessage.entities ? 'entities' : 'caption_entities';
-
-            newMessage[entityType] = newMessage[entityType].map(entity => {
-                if (entity.type === 'url') {
-                    entity.type = 'text_link';
-                    entity.url = messageText.substring(entity.offset, entity.offset + entity.length);
+        if (type === 'links') {
+            let linksMessage = '';
+            for (let chatLink of Object.keys(newChatLinks)) {
+                let newLinks = newChatLinks[chatLink];
+                let chatTitle = foundChatTitles[chatLink] || '-';
+                if (linksMessage !== '') {
+                    linksMessage += "\n\n";
                 }
+                linksMessage += `<b>Ссылки для чата ${chatTitle}:</b>\n${newLinks.join('\n')}`;
+            }
 
-                if (entity.type === 'text_link') {
-                    let isReplaceableLink = typeof(foundChatIds[entity.url]) !== 'undefined';
-                    if (isReplaceableLink) {
-                        entity.url = newChatLinks[entity.url][i];
-                        return entity;
+            return ctx.replyWithHTML(linksMessage);
+        }
+        else {
+            let oldMessage = ctx.scene.state.message;
+            let messageText = oldMessage.text || oldMessage.caption;
+
+            for (let i = 0; i < newLinksCount; i++) {
+                let newMessage = clone(oldMessage);
+                let entityType = newMessage.entities ? 'entities' : 'caption_entities';
+
+                newMessage[entityType] = newMessage[entityType].map(entity => {
+                    if (entity.type === 'url') {
+                        entity.type = 'text_link';
+                        entity.url = messageText.substring(entity.offset, entity.offset + entity.length);
                     }
-                }
 
-                return entity;
-            });
-            newMessage.chat_id = ctx.chat.id;
+                    if (entity.type === 'text_link') {
+                        let isReplaceableLink = typeof (foundChatIds[entity.url]) !== 'undefined';
+                        if (isReplaceableLink) {
+                            entity.url = newChatLinks[entity.url][i];
+                            return entity;
+                        }
+                    }
 
-            await ctx.tg.callApi('sendMessage', newMessage);
+                    return entity;
+                });
+                newMessage.chat_id = ctx.chat.id;
+
+                await ctx.tg.callApi('sendMessage', newMessage);
+            }
         }
     });
 

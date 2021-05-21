@@ -302,6 +302,7 @@ services:
       - AUTH_PHONE=${USERBOT_AUTH_PHONE}
       - TDJSONLIB_PATH=${USERBOT_TDJSONLIB_PATH}
       - DEBUG=1
+      - SECRET_HASH=${USERBOT_SECRET}
     command: npm run start
 
   tgapi_proxy:

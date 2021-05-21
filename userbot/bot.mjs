@@ -28,11 +28,12 @@ airgram.use((ctx, next) => {
     return next()
 });
 
-httpIO.launch();
-
-if (DEBUG) {
-    (async () => {
+(async () => {
+    if (DEBUG) {
         await airgram.api.setLogVerbosityLevel({newVerbosityLevel: 10});
         await airgram.api.setLogStream({logStream: {path: "/var/bot/log.txt", redirectStderr: true}});
-    })();
-}
+    }
+
+    await httpIO.init();
+    httpIO.launch();
+})();

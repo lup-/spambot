@@ -723,6 +723,7 @@ services:
       - BOT_TOKEN=${LINKER_BOT_TOKEN}
       - BOT_NAME=linker_bot
       - USERBOT_URL=http://userbot:3000
+      - SECRET_HASH=${USERBOT_SECRET}
     command: node bots/linker.js
 
   mailer_bot:
@@ -866,6 +867,7 @@ services:
       - API_HASH=${USERBOT_API_HASH}
       - AUTH_PHONE=${USERBOT_AUTH_PHONE}
       - TDJSONLIB_PATH=${USERBOT_TDJSONLIB_PATH}
+      - SECRET_HASH=${USERBOT_SECRET}
     command: npm run start
 
   tgapi_proxy:

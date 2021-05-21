@@ -4,6 +4,9 @@ const setupBot = require('./helpers/setup');
 const {getDb} = require('../modules/Database');
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const USERBOT_URL = process.env.USERBOT_URL;
+const SECRET_HASH = process.env.SECRET_HASH;
+
+let userbot = null;
 
 async function updateChatInfo(ctx) {
     let chatId = ctx.chat && ctx.chat.id;
@@ -19,6 +22,12 @@ async function updateChatInfo(ctx) {
     let db = await getDb();
     await db.collection('chats').replaceOne({id: chatId}, chatInfo, {upsert: true});
 }
+async function initUserbot(tg) {
+    let me = await tg.getMe();
+    let {data} = await axios.post(USERBOT_URL + '/initBot', {bot: me});
+    userbot = {bot: data.me};
+    return data;
+}
 
 let app = setupBot(new Telegraf(BOT_TOKEN))
     .addHandleBlocks()
@@ -31,6 +40,10 @@ let app = setupBot(new Telegraf(BOT_TOKEN))
     .addProfile()
     .addSaveActivity()
     .addAutoDeleteMessages()
+    .addMiddleware(async (ctx, next) => {
+        ctx.userbot = userbot;
+        return next();
+    })
     .addScenes('linker')
     .addMiddleware(async (ctx, next) => {
         try {
@@ -46,6 +59,18 @@ let app = setupBot(new Telegraf(BOT_TOKEN))
         catch (e) {}
         next();
     })
+    .addRoute('command', 'start', async ctx => {
+        let text = ctx && ctx.update && ctx.update.message && ctx.update.message.text;
+        let param = text ? text.replace('/start ', '') : null;
+
+        let isUserbotIntroducing = param && param === SECRET_HASH;
+        if (isUserbotIntroducing) {
+            userbot = { bot: userbot.bot || null, chat: ctx.chat, user: ctx.from };
+            return ctx.reply('Блип-блоп');
+        }
+
+        return ctx.scene.enter('menu');
+    })
     .addRoute('command', 'code', async ctx => {
         let text = ctx && ctx.update && ctx.update.message && ctx.update.message.text || '';
         let code = text.replace('/code ', '');
@@ -56,27 +81,63 @@ let app = setupBot(new Telegraf(BOT_TOKEN))
     })
     .addRoute('on', 'message', async (ctx, next) => {
         try {
-            let hasForwarderMesage = ctx && ctx.update && ctx.update.message && (ctx.update.message.forward_from_message_id || ctx.update.message.forward_from);
             let newChatMember = ctx && ctx.update && ctx.update.message && ctx.update.message.new_chat_member;
             let thisBotAddedToNewChat = newChatMember && ctx.update.message.new_chat_member.id == ctx.botInfo.id;
             let isPrivate = ctx.chat.type === 'private';
-            let isText = ctx && ctx.update && ctx.update.message && (ctx.update.message.text || ctx.update.message.caption);
 
             if (thisBotAddedToNewChat) {
                 await updateChatInfo(ctx);
             }
 
             if (isPrivate) {
-                if (hasForwarderMesage || isText) {
-                    return ctx.scene.enter('message', {message: ctx.update.message});
-                }
                 next();
             }
         }
         catch (e) {}
     })
-    .addDefaultRoute(ctx => ctx.reply('Перешлите сообщение со ссылками. Бот должен иметь админский доступ к группам ссылок'))
+    .addRoute('on', 'inline_query', async (ctx) => {
+        try {
+            let queryParts = ctx.inlineQuery.query.split(';');
+            let postName = queryParts[0] || false;
+            let channelName = queryParts[1] || false;
+
+            let db = await getDb();
+            let query = {title: {$regex: `.*${postName}.*`, $options: 'i'}};
+            if (channelName) {
+                query.channel = {$regex: `.*${channelName}.*`, $options: 'i'}
+            }
+
+            let foundItems = await db.collection('generated').find(query).limit(10).toArray();
+
+            let results = [];
+
+            for (const item of foundItems) {
+
+
+                let result = {
+                    type: 'article',
+                    id: item._id.toString(),
+                    title: `${item.title} для ${item.channel}`,
+                    description: item.type === 'post' ? 'пост': 'ссылка',
+                    input_message_content: item.type === 'post'
+                        ? {message_text: item.post.text, entities: item.post.entities}
+                        : {message_text: item.generatedLinks[0] || "нет ссылки"},
+                }
+
+                results.push(result);
+            }
+
+            return ctx.answerInlineQuery(results);
+        }
+        catch (e) {
+            console.log(e);
+        }
+    })
+    .addDefaultRoute(ctx => ctx.scene.enter('menu'))
     .blockNonPrivate()
     .get();
 
-app.launch();
+(async () => {
+    await initUserbot(app.telegram);
+    await app.launch();
+})();

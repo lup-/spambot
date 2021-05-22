@@ -3,8 +3,6 @@ const {getChatsInfo, generateNewLink, replaceMessageLinks, saveChatInfo, addLink
 const {getDb} = require('../../../modules/Database');
 const {menu} = require('../../helpers/wizard');
 
-
-
 function getUniqueChats(chats) {
     return Object.keys(chats)
         .map(link => chats[link])
@@ -25,9 +23,11 @@ module.exports = function () {
             : [];
         let missing = ctx.scene.state.missing;
 
-        if (post && channels && channels.length > 0) {
-            let wordEnd = post.text.indexOf(' ', 50);
-            let postBrief = post.text.slice(0, wordEnd);
+        let messageText = post ? post.text || post.caption : false;
+
+        if (messageText && channels && channels.length > 0) {
+            let wordEnd = messageText.indexOf(' ', 50);
+            let postBrief = messageText.slice(0, wordEnd);
             let infoText = `<b>Название</b>:  ${ctx.scene.state.title || 'не задано'}
             
 <b>Каналов для публикации</b>: ${channels.length}
@@ -200,13 +200,15 @@ module.exports = function () {
             ctx.scene.state.channels = oldChannels.concat(newChannels);
         }
 
+        let messageText = post.text || post.caption;
+
         if (ctx.scene.state.waiting === 'title') {
-            ctx.scene.state.title = post.text;
+            ctx.scene.state.title = messageText;
         }
 
         if (ctx.scene.state.waiting === 'usersLimit') {
             try {
-                ctx.scene.state.usersLimit = parseInt(post.text);
+                ctx.scene.state.usersLimit = parseInt(messageText);
             }
             catch (e) {
                 ctx.scene.state.usersLimit = 0

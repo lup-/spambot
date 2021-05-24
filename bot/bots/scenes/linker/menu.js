@@ -5,7 +5,7 @@ module.exports = function () {
     const scene = new BaseScene('menu');
 
     scene.enter(async ctx => {
-        return ctx.reply('Что дальше?', menu([
+        return ctx.replyWithDisposableHTML('Что дальше?', menu([
             {code: 'post', text: 'Новый пост'},
             {code: 'linksOnly', text: 'Просто ссылки'},
             {code: 'stat', text: 'Статистика'},

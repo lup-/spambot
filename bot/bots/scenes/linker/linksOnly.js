@@ -21,23 +21,22 @@ module.exports = function () {
 
 <b>Максимум вступлений по новым ссылкам</b>: ${usersLimit > 0 ? usersLimit : 'нет'}`;
 
-            return ctx.replyWithHTML(infoText, menu([
+            return ctx.replyWithDisposableHTML(infoText, menu([
+                {code: 'makeLinks', text: '🚀 Создать ссылки'},
                 {code: 'replaceTitle', text: 'Поменять название'},
                 {code: 'replaceChat', text: 'Поменять чат'},
                 {code: 'replaceChannels', text: 'Поменять каналы'},
-                {code: 'addChannels', text: 'Добавить каналы'},
                 {code: 'usersLimit', text: 'Лимит пользователей'},
-                {code: 'makeLinks', text: 'Создать ссылки'},
-                {code: 'back', text: 'В меню'},
+                {code: 'back', text: '⬅ В меню'},
             ], 1));
         }
         else if (chat) {
             ctx.scene.state.waiting = 'channels';
-            return ctx.reply('Пришлите список названий каналов разделенных новой строкой или ;');
+            return ctx.replyWithDisposableHTML('Пришлите список названий каналов разделенных новой строкой или ;');
         }
 
         ctx.scene.state.waiting = 'chat';
-        return ctx.reply('Напишите ссылку на чат, для которого нужно сгенерировать ссылки');
+        return ctx.replyWithDisposableHTML('Напишите ссылку на чат, для которого нужно сгенерировать ссылки');
     });
 
     scene.action('replaceChat', ctx => {
@@ -49,7 +48,7 @@ module.exports = function () {
 
     scene.action('replaceTitle', ctx => {
         ctx.scene.state.waiting = 'title';
-        return ctx.reply('Пришлите новое название ссылок');
+        return ctx.replyWithDisposableHTML('Пришлите новое название ссылок');
     });
 
     scene.action('replaceChannels', ctx => {
@@ -59,12 +58,12 @@ module.exports = function () {
 
     scene.action('addChannels', ctx => {
         ctx.scene.state.waiting = 'channels';
-        return ctx.reply('Пришлите список дополнительных каналов');
+        return ctx.replyWithDisposableHTML('Пришлите список дополнительных каналов');
     });
 
     scene.action('usersLimit', ctx => {
         ctx.scene.state.waiting = 'usersLimit';
-        return ctx.reply('Пришлите максимальное количество вступлений по новым ссылкам');
+        return ctx.replyWithDisposableHTML('Пришлите максимальное количество вступлений по новым ссылкам');
     });
 
     scene.action('makeLinks', async ctx => {
@@ -76,11 +75,12 @@ module.exports = function () {
         let results = {success: 0, errors: 0};
         let db = await getDb();
 
-        await ctx.reply('Обработка начата...');
+        await ctx.replyWithDisposableHTML('Обработка начата...');
 
+        let errors = {};
+        let generatedList = [];
         for (let channel of channels) {
             let link = null;
-            let errors = {};
 
             try {
                 link = await generateNewLink(chat, usersLimit, ctx.telegram);
@@ -93,10 +93,12 @@ module.exports = function () {
             }
 
             let chatNoExtraFields = clone(chat);
+            let userId = ctx.from.id;
             delete chatNoExtraFields.invite_links;
 
             let linkRecord = {
                 type: 'link',
+                userId,
                 title,
                 channel,
                 chats: [chat],
@@ -105,19 +107,47 @@ module.exports = function () {
 
             try {
                 await db.collection('generated').insertOne(linkRecord);
+                generatedList.push({title: channel, link});
+
                 results.success++;
             }
             catch (e) {
                 results.errors++;
             }
-
         }
 
-        await ctx.reply(`Обработка закончена\n\nУспешно: ${results.success}\nОшибок: ${results.errors}`);
-        return ctx.scene.enter('menu');
+        await ctx.replyWithDisposableHTML(`Обработка закончена\n\nУспешно: ${results.success}\nОшибок: ${results.errors}`);
+
+        if (results.errors > 0) {
+            let uniqueErrors = Object.values(errors).map(e => e.message).filter( (msg, index, all) => all.indexOf(msg) === index );
+            return await ctx.replyWithDisposableHTML(`Обнаруженные ошибки:\n\n${uniqueErrors.join('\n')}`, menu([
+                {code: 'back', text: 'В меню'},
+                {code: 'retry', text: 'Попробовать снова'}
+            ], 1));
+        }
+
+        if (results.success > 0) {
+            let linksList = generatedList.map(generated => `${generated.title}: ${generated.link}`).join('\n');
+            let extra = menu([
+                {code: 'back', text: 'В меню'},
+                {code: 'reset', text: 'Сгенерировать еще'}
+            ], 1);
+            extra.disable_web_page_preview = true;
+
+            return await ctx.reply(`Новые ссылки:\n\n${linksList}`, extra);
+        }
     });
 
     scene.action('back', ctx => ctx.scene.enter('menu'));
+    scene.action('retry', ctx => ctx.scene.reenter());
+    scene.action('reset', ctx => {
+        ctx.scene.state.channels = null;
+        ctx.scene.state.chat = null;
+        ctx.scene.state.usersLimit = null;
+        ctx.scene.state.title = null;
+        ctx.scene.state.waiting = null;
+        ctx.scene.reenter();
+    });
 
     scene.on('message', async (ctx, next) => {
         let post = ctx && ctx.update && ctx.update.message
@@ -134,7 +164,7 @@ module.exports = function () {
                 ctx.scene.state.title = chat.title;
             }
             else {
-                return ctx.reply('Чат не найден');
+                return ctx.replyWithDisposableHTML('Чат не найден, попробуйте скинуть другую приватную ссылку', menu([{code: 'back', text: '⬅ Назад'}]));
             }
         }
 
@@ -156,6 +186,10 @@ module.exports = function () {
             catch (e) {
                 ctx.scene.state.usersLimit = 0
             }
+        }
+
+        if (ctx.scene.state.waiting) {
+            ctx.markMessageToDelete(ctx, ctx.update.message);
         }
 
         ctx.scene.state.waiting = false;

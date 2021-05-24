@@ -136,6 +136,19 @@ export default class HttpInterface {
             ctx.body = {info};
         }
         catch (e) {
+            if (e.message === "USER_ALREADY_PARTICIPANT" && !ctx.retry) {
+                try {
+                    let info = toObject(await this.airgram.api.checkChatInviteLink({inviteLink: link}));
+                    let chatId = info.chatId;
+                    await this.airgram.api.leaveChat({chatId});
+                    сtx.retry = true;
+                    return this.chatByInvite(ctx);
+                }
+                catch (e) {
+                    ctx.body = {error: e.toString()};
+                }
+            }
+
             ctx.body = {error: e.toString()};
         }
     }

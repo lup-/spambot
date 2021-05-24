@@ -1,6 +1,7 @@
 const axios = require('axios');
 const {getDb} = require('../../modules/Database');
 const {clone} = require('../helpers/common');
+const {wait} = require('../../modules/Helpers');
 const USERBOT_URL = process.env.USERBOT_URL;
 
 function getLinks(message) {
@@ -124,11 +125,13 @@ async function getSingleChatInfo(url, ctx) {
 }
 
 async function generateNewLink(chat, usersLimit, tg) {
+    const API_FLOOD_THRESHOLD_MSEC = 150;
     let requestData = {chat_id: chat.id};
     if (usersLimit > 0) {
         requestData['member_limit'] = usersLimit;
     }
 
+    await wait(API_FLOOD_THRESHOLD_MSEC);
     let newLinkInfo = await tg.callApi('createChatInviteLink', requestData);
     return newLinkInfo.invite_link;
 }

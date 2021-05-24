@@ -24,6 +24,13 @@ async function deleteMiddleware(ctx, next) {
         }
     }
 
+    ctx.markMessageToDelete = markMessageToDelete;
+    ctx.replyWithDisposableHTML = async (html, extra) => {
+        await deleteMiddleware(ctx, () => {});
+        let message = await ctx.replyWithHTML(html, extra);
+        markMessageToDelete(ctx, message);
+    }
+
     return next();
 }
 

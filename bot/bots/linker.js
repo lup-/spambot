@@ -59,7 +59,7 @@ let app = setupBot(new Telegraf(BOT_TOKEN))
         catch (e) {}
         next();
     })
-    .addRoute('command', 'start', async ctx => {
+    .addRoute('command', 'start', async (ctx, next) => {
         let text = ctx && ctx.update && ctx.update.message && ctx.update.message.text;
         let param = text ? text.replace('/start ', '') : null;
 
@@ -69,7 +69,14 @@ let app = setupBot(new Telegraf(BOT_TOKEN))
             return ctx.reply('Блип-блоп');
         }
 
-        return ctx.scene.enter('menu');
+        let isPrivate = ctx.chat && ctx.chat.type === 'private';
+
+        if (isPrivate) {
+            return ctx.scene.enter('menu');
+        }
+        else {
+            return next();
+        }
     })
     .addRoute('command', 'code', async ctx => {
         let text = ctx && ctx.update && ctx.update.message && ctx.update.message.text || '';
@@ -98,22 +105,28 @@ let app = setupBot(new Telegraf(BOT_TOKEN))
     .addRoute('on', 'inline_query', async (ctx) => {
         try {
             let queryParts = ctx.inlineQuery.query.split(';');
-            let postName = queryParts[0] || false;
-            let channelName = queryParts[1] || false;
+            let postName = queryParts[0] ? queryParts[0].trim() : false;
+            let channelName = queryParts[1] ? queryParts[1].trim(): false;
+            let userId = ctx.from.id;
+            if (postName && !channelName) {
+                channelName = postName;
+            }
 
             let db = await getDb();
-            let query = {title: {$regex: `.*${postName}.*`, $options: 'i'}};
-            if (channelName) {
-                query.channel = {$regex: `.*${channelName}.*`, $options: 'i'}
-            }
+            let query = {
+                userId,
+                type: 'post',
+                $or: [
+                    {title: {$regex: `.*${postName}.*`, $options: 'i'}},
+                    {channel: {$regex: `.*${channelName}.*`, $options: 'i'}}
+                ]
+            };
 
             let foundItems = await db.collection('generated').find(query).limit(10).toArray();
 
             let results = [];
 
             for (const item of foundItems) {
-
-
                 let result = {
                     type: 'article',
                     id: item._id.toString(),
@@ -133,8 +146,8 @@ let app = setupBot(new Telegraf(BOT_TOKEN))
             console.log(e);
         }
     })
-    .addDefaultRoute(ctx => ctx.scene.enter('menu'))
     .blockNonPrivate()
+    .addDefaultRoute(ctx => ctx.scene.enter('menu'))
     .get();
 
 (async () => {

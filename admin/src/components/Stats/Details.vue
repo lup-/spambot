@@ -166,8 +166,15 @@
         methods: {
             async loadDetails() {
                 this.isLoading = true;
+                let botIds = this.botIds;
+                let noBotIdsSelected = !botIds || (botIds && botIds.length === 0);
+
+                if (noBotIdsSelected && this.$store.getters.userHasBotsRestriction) {
+                    botIds = this.$store.getters.allowedBotNames;
+                }
+
                 await this.$store.dispatch('loadDetails', {
-                    botIds: this.botIds,
+                    botIds,
                     scale: this.scale,
                     range: this.range
                 });
@@ -220,7 +227,7 @@
         },
         computed: {
             bots() {
-                return this.$store.state.bots.list.map( bot => ({text: bot.tg.username ? '@'+bot.tg.username : bot.id, value: bot.id}) );
+                return this.$store.getters.allowedBotListForSelect;
             },
             data() {
                 return this.graphs.reduce( (lines, graph) => {

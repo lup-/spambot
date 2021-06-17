@@ -124,9 +124,7 @@
                 return this.$store.state.ads.list;
             },
             bots() {
-                return this.$store.state.bots.list.map(bot => {
-                    return {text: bot.botName, value: bot.botName};
-                });
+                return this.$store.getters.allowedBotListForSelect;
             },
             tags() {
                 return this.$store.getters.tags;

@@ -9,6 +9,7 @@ import mailing from "@/store/modules/mailing";
 import vacancy from "./modules/vacancy";
 import user from "./modules/user";
 import dashboard from "@/store/modules/dashboard";
+import system from "@/store/modules/system";
 
 Vue.use(Vuex);
 
@@ -21,7 +22,8 @@ export default new Vuex.Store({
         messages,
         vacancy,
         user,
-        dashboard
+        dashboard,
+        system
     },
     state: {
         appError: false,
@@ -37,7 +39,15 @@ export default new Vuex.Store({
     },
     getters: {
         allowedRoutes(state, getters) {
-            return state.routes.filter(route => getters.userHasRights(route.code));
+            return (allRoutes) => {
+                return state.routes.filter(button => {
+                    let requiresAdmin = allRoutes
+                        .filter(route => route.meta && route.meta.group === button.code)
+                        .some(route => route.meta && route.meta.requiresAdmin === true);
+
+                    return getters.userHasRights(button.code, requiresAdmin);
+                });
+            }
         }
     },
     actions: {

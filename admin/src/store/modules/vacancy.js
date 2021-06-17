@@ -26,15 +26,15 @@ export default {
         async newVacancy({dispatch, state}, vacancy) {
             let result = await axios.post(`/api/vacancy/add`, {vacancy});
             dispatch('setCurrentVacancy', result.data.vacancy);
-            return dispatch('loadVacancies', state.filter);
+            return dispatch('loadVacancies', state.currentFilter);
         },
         async editVacancy({dispatch, state}, vacancy) {
             await axios.post(`/api/vacancy/update`, {vacancy});
-            return dispatch('loadVacancies', state.filter);
+            return dispatch('loadVacancies', state.currentFilter);
         },
         async deleteVacancy({dispatch, state}, vacancy) {
             await axios.post(`/api/vacancy/delete`, {vacancy});
-            return dispatch('loadVacancies', state.filter);
+            return dispatch('loadVacancies', state.currentFilter);
         },
     },
     mutations: {

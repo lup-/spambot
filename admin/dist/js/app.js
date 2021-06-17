@@ -218,13 +218,26 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'App',
   data: function data() {
     return {
       drawer: null,
       showError: false,
-      showMessage: false
+      showMessage: false,
+      initDone: false
     };
   },
   watch: {
@@ -243,25 +256,31 @@ __webpack_require__.r(__webpack_exports__);
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
-              _context.next = 2;
+              _this.initDone = false;
+              _context.next = 3;
               return _this.$store.dispatch('loginLocalUser');
 
-            case 2:
-              _context.next = 4;
-              return _this.$store.dispatch('loadAds');
-
-            case 4:
-              _context.next = 6;
+            case 3:
+              _context.next = 5;
               return _this.$store.dispatch('loadBots');
 
-            case 6:
-              _context.next = 8;
+            case 5:
+              _context.next = 7;
+              return _this.$store.dispatch('loadSystemStatus');
+
+            case 7:
+              _this.initDone = true;
+              _context.next = 10;
+              return _this.$store.dispatch('loadAds');
+
+            case 10:
+              _context.next = 12;
               return _this.$store.dispatch('loadMessages');
 
-            case 8:
+            case 12:
               return _context.abrupt("return", true);
 
-            case 9:
+            case 13:
             case "end":
               return _context.stop();
           }
@@ -293,6 +312,38 @@ __webpack_require__.r(__webpack_exports__);
           }
         }, _callee2);
       }))();
+    },
+    restart: function restart() {
+      var _this3 = this;
+
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                if (!_this3.systemIsOk) {
+                  _context3.next = 3;
+                  break;
+                }
+
+                _this3.$store.commit('setSuccessMessage', 'Система в порядке, перезагрузка не требуется');
+
+                return _context3.abrupt("return");
+
+              case 3:
+                _context3.next = 5;
+                return _this3.$store.dispatch('restartSystem');
+
+              case 5:
+                return _context3.abrupt("return", _this3.$store.commit('setInfoMessage', 'Перезагрузка системы запущена'));
+
+              case 6:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3);
+      }))();
     }
   },
   computed: {
@@ -303,10 +354,19 @@ __webpack_require__.r(__webpack_exports__);
       return this.$store.state.appMessage;
     },
     routes: function routes() {
-      return this.$store.getters.allowedRoutes;
+      return this.$store.getters.allowedRoutes(this.$router.options.routes);
     },
     isLoggedIn: function isLoggedIn() {
       return this.$store.getters.isLoggedIn;
+    },
+    canRestart: function canRestart() {
+      return this.$store.state.user.current.isAdmin;
+    },
+    systemIsOk: function systemIsOk() {
+      return this.$store.state.system.systemOk;
+    },
+    isLoading: function isLoading() {
+      return this.$store.state.system.restartInProgress;
     }
   }
 });
@@ -493,12 +553,7 @@ __webpack_require__.r(__webpack_exports__);
       return this.$store.state.ads.list;
     },
     bots: function bots() {
-      return this.$store.state.bots.list.map(function (bot) {
-        return {
-          text: bot.botName,
-          value: bot.botName
-        };
-      });
+      return this.$store.getters.allowedBotListForSelect;
     },
     tags: function tags() {
       return this.$store.getters.tags;
@@ -622,18 +677,20 @@ __webpack_require__.r(__webpack_exports__);
       var _this2 = this;
 
       return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+        var filter;
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
                 _this2.isLoading = true;
-                _context2.next = 3;
-                return _this2.$store.dispatch('loadAds', {});
-
-              case 3:
-                _this2.isLoading = false;
+                filter = _this2.$store.getters.allowedBotFilter('bots');
+                _context2.next = 4;
+                return _this2.$store.dispatch('loadAds', filter);
 
               case 4:
+                _this2.isLoading = false;
+
+              case 5:
               case "end":
                 return _context2.stop();
             }
@@ -720,82 +777,85 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var core_js_modules_es_symbol_description__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_symbol_description__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var core_js_modules_es_array_concat__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core-js/modules/es.array.concat */ "./node_modules/core-js/modules/es.array.concat.js");
 /* harmony import */ var core_js_modules_es_array_concat__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_concat__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var core_js_modules_es_array_join__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core-js/modules/es.array.join */ "./node_modules/core-js/modules/es.array.join.js");
-/* harmony import */ var core_js_modules_es_array_join__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_join__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var core_js_modules_es_array_map__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core-js/modules/es.array.map */ "./node_modules/core-js/modules/es.array.map.js");
-/* harmony import */ var core_js_modules_es_array_map__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_map__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var core_js_modules_es_array_splice__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core-js/modules/es.array.splice */ "./node_modules/core-js/modules/es.array.splice.js");
-/* harmony import */ var core_js_modules_es_array_splice__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_splice__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var core_js_modules_es_function_name__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core-js/modules/es.function.name */ "./node_modules/core-js/modules/es.function.name.js");
-/* harmony import */ var core_js_modules_es_function_name__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_function_name__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var core_js_modules_es_object_to_string__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core-js/modules/es.object.to-string */ "./node_modules/core-js/modules/es.object.to-string.js");
-/* harmony import */ var core_js_modules_es_object_to_string__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_object_to_string__WEBPACK_IMPORTED_MODULE_7__);
-/* harmony import */ var core_js_modules_es_regexp_exec__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! core-js/modules/es.regexp.exec */ "./node_modules/core-js/modules/es.regexp.exec.js");
-/* harmony import */ var core_js_modules_es_regexp_exec__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_regexp_exec__WEBPACK_IMPORTED_MODULE_8__);
-/* harmony import */ var core_js_modules_es_regexp_to_string__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! core-js/modules/es.regexp.to-string */ "./node_modules/core-js/modules/es.regexp.to-string.js");
-/* harmony import */ var core_js_modules_es_regexp_to_string__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_regexp_to_string__WEBPACK_IMPORTED_MODULE_9__);
-/* harmony import */ var core_js_modules_es_string_pad_start__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! core-js/modules/es.string.pad-start */ "./node_modules/core-js/modules/es.string.pad-start.js");
-/* harmony import */ var core_js_modules_es_string_pad_start__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_pad_start__WEBPACK_IMPORTED_MODULE_10__);
-/* harmony import */ var core_js_modules_es_string_split__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! core-js/modules/es.string.split */ "./node_modules/core-js/modules/es.string.split.js");
-/* harmony import */ var core_js_modules_es_string_split__WEBPACK_IMPORTED_MODULE_11___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_split__WEBPACK_IMPORTED_MODULE_11__);
-/* harmony import */ var core_js_modules_es_string_link__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! core-js/modules/es.string.link */ "./node_modules/core-js/modules/es.string.link.js");
-/* harmony import */ var core_js_modules_es_string_link__WEBPACK_IMPORTED_MODULE_12___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_link__WEBPACK_IMPORTED_MODULE_12__);
-/* harmony import */ var core_js_modules_es_typed_array_uint8_array__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! core-js/modules/es.typed-array.uint8-array */ "./node_modules/core-js/modules/es.typed-array.uint8-array.js");
-/* harmony import */ var core_js_modules_es_typed_array_uint8_array__WEBPACK_IMPORTED_MODULE_13___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_uint8_array__WEBPACK_IMPORTED_MODULE_13__);
-/* harmony import */ var core_js_modules_es_typed_array_copy_within__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! core-js/modules/es.typed-array.copy-within */ "./node_modules/core-js/modules/es.typed-array.copy-within.js");
-/* harmony import */ var core_js_modules_es_typed_array_copy_within__WEBPACK_IMPORTED_MODULE_14___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_copy_within__WEBPACK_IMPORTED_MODULE_14__);
-/* harmony import */ var core_js_modules_es_typed_array_every__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! core-js/modules/es.typed-array.every */ "./node_modules/core-js/modules/es.typed-array.every.js");
-/* harmony import */ var core_js_modules_es_typed_array_every__WEBPACK_IMPORTED_MODULE_15___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_every__WEBPACK_IMPORTED_MODULE_15__);
-/* harmony import */ var core_js_modules_es_typed_array_fill__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! core-js/modules/es.typed-array.fill */ "./node_modules/core-js/modules/es.typed-array.fill.js");
-/* harmony import */ var core_js_modules_es_typed_array_fill__WEBPACK_IMPORTED_MODULE_16___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_fill__WEBPACK_IMPORTED_MODULE_16__);
-/* harmony import */ var core_js_modules_es_typed_array_filter__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! core-js/modules/es.typed-array.filter */ "./node_modules/core-js/modules/es.typed-array.filter.js");
-/* harmony import */ var core_js_modules_es_typed_array_filter__WEBPACK_IMPORTED_MODULE_17___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_filter__WEBPACK_IMPORTED_MODULE_17__);
-/* harmony import */ var core_js_modules_es_typed_array_find__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! core-js/modules/es.typed-array.find */ "./node_modules/core-js/modules/es.typed-array.find.js");
-/* harmony import */ var core_js_modules_es_typed_array_find__WEBPACK_IMPORTED_MODULE_18___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_find__WEBPACK_IMPORTED_MODULE_18__);
-/* harmony import */ var core_js_modules_es_typed_array_find_index__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! core-js/modules/es.typed-array.find-index */ "./node_modules/core-js/modules/es.typed-array.find-index.js");
-/* harmony import */ var core_js_modules_es_typed_array_find_index__WEBPACK_IMPORTED_MODULE_19___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_find_index__WEBPACK_IMPORTED_MODULE_19__);
-/* harmony import */ var core_js_modules_es_typed_array_for_each__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! core-js/modules/es.typed-array.for-each */ "./node_modules/core-js/modules/es.typed-array.for-each.js");
-/* harmony import */ var core_js_modules_es_typed_array_for_each__WEBPACK_IMPORTED_MODULE_20___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_for_each__WEBPACK_IMPORTED_MODULE_20__);
-/* harmony import */ var core_js_modules_es_typed_array_includes__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! core-js/modules/es.typed-array.includes */ "./node_modules/core-js/modules/es.typed-array.includes.js");
-/* harmony import */ var core_js_modules_es_typed_array_includes__WEBPACK_IMPORTED_MODULE_21___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_includes__WEBPACK_IMPORTED_MODULE_21__);
-/* harmony import */ var core_js_modules_es_typed_array_index_of__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! core-js/modules/es.typed-array.index-of */ "./node_modules/core-js/modules/es.typed-array.index-of.js");
-/* harmony import */ var core_js_modules_es_typed_array_index_of__WEBPACK_IMPORTED_MODULE_22___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_index_of__WEBPACK_IMPORTED_MODULE_22__);
-/* harmony import */ var core_js_modules_es_typed_array_iterator__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! core-js/modules/es.typed-array.iterator */ "./node_modules/core-js/modules/es.typed-array.iterator.js");
-/* harmony import */ var core_js_modules_es_typed_array_iterator__WEBPACK_IMPORTED_MODULE_23___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_iterator__WEBPACK_IMPORTED_MODULE_23__);
-/* harmony import */ var core_js_modules_es_typed_array_join__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! core-js/modules/es.typed-array.join */ "./node_modules/core-js/modules/es.typed-array.join.js");
-/* harmony import */ var core_js_modules_es_typed_array_join__WEBPACK_IMPORTED_MODULE_24___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_join__WEBPACK_IMPORTED_MODULE_24__);
-/* harmony import */ var core_js_modules_es_typed_array_last_index_of__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! core-js/modules/es.typed-array.last-index-of */ "./node_modules/core-js/modules/es.typed-array.last-index-of.js");
-/* harmony import */ var core_js_modules_es_typed_array_last_index_of__WEBPACK_IMPORTED_MODULE_25___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_last_index_of__WEBPACK_IMPORTED_MODULE_25__);
-/* harmony import */ var core_js_modules_es_typed_array_map__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! core-js/modules/es.typed-array.map */ "./node_modules/core-js/modules/es.typed-array.map.js");
-/* harmony import */ var core_js_modules_es_typed_array_map__WEBPACK_IMPORTED_MODULE_26___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_map__WEBPACK_IMPORTED_MODULE_26__);
-/* harmony import */ var core_js_modules_es_typed_array_reduce__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! core-js/modules/es.typed-array.reduce */ "./node_modules/core-js/modules/es.typed-array.reduce.js");
-/* harmony import */ var core_js_modules_es_typed_array_reduce__WEBPACK_IMPORTED_MODULE_27___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_reduce__WEBPACK_IMPORTED_MODULE_27__);
-/* harmony import */ var core_js_modules_es_typed_array_reduce_right__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! core-js/modules/es.typed-array.reduce-right */ "./node_modules/core-js/modules/es.typed-array.reduce-right.js");
-/* harmony import */ var core_js_modules_es_typed_array_reduce_right__WEBPACK_IMPORTED_MODULE_28___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_reduce_right__WEBPACK_IMPORTED_MODULE_28__);
-/* harmony import */ var core_js_modules_es_typed_array_reverse__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! core-js/modules/es.typed-array.reverse */ "./node_modules/core-js/modules/es.typed-array.reverse.js");
-/* harmony import */ var core_js_modules_es_typed_array_reverse__WEBPACK_IMPORTED_MODULE_29___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_reverse__WEBPACK_IMPORTED_MODULE_29__);
-/* harmony import */ var core_js_modules_es_typed_array_set__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! core-js/modules/es.typed-array.set */ "./node_modules/core-js/modules/es.typed-array.set.js");
-/* harmony import */ var core_js_modules_es_typed_array_set__WEBPACK_IMPORTED_MODULE_30___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_set__WEBPACK_IMPORTED_MODULE_30__);
-/* harmony import */ var core_js_modules_es_typed_array_slice__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(/*! core-js/modules/es.typed-array.slice */ "./node_modules/core-js/modules/es.typed-array.slice.js");
-/* harmony import */ var core_js_modules_es_typed_array_slice__WEBPACK_IMPORTED_MODULE_31___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_slice__WEBPACK_IMPORTED_MODULE_31__);
-/* harmony import */ var core_js_modules_es_typed_array_some__WEBPACK_IMPORTED_MODULE_32__ = __webpack_require__(/*! core-js/modules/es.typed-array.some */ "./node_modules/core-js/modules/es.typed-array.some.js");
-/* harmony import */ var core_js_modules_es_typed_array_some__WEBPACK_IMPORTED_MODULE_32___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_some__WEBPACK_IMPORTED_MODULE_32__);
-/* harmony import */ var core_js_modules_es_typed_array_sort__WEBPACK_IMPORTED_MODULE_33__ = __webpack_require__(/*! core-js/modules/es.typed-array.sort */ "./node_modules/core-js/modules/es.typed-array.sort.js");
-/* harmony import */ var core_js_modules_es_typed_array_sort__WEBPACK_IMPORTED_MODULE_33___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_sort__WEBPACK_IMPORTED_MODULE_33__);
-/* harmony import */ var core_js_modules_es_typed_array_subarray__WEBPACK_IMPORTED_MODULE_34__ = __webpack_require__(/*! core-js/modules/es.typed-array.subarray */ "./node_modules/core-js/modules/es.typed-array.subarray.js");
-/* harmony import */ var core_js_modules_es_typed_array_subarray__WEBPACK_IMPORTED_MODULE_34___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_subarray__WEBPACK_IMPORTED_MODULE_34__);
-/* harmony import */ var core_js_modules_es_typed_array_to_locale_string__WEBPACK_IMPORTED_MODULE_35__ = __webpack_require__(/*! core-js/modules/es.typed-array.to-locale-string */ "./node_modules/core-js/modules/es.typed-array.to-locale-string.js");
-/* harmony import */ var core_js_modules_es_typed_array_to_locale_string__WEBPACK_IMPORTED_MODULE_35___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_to_locale_string__WEBPACK_IMPORTED_MODULE_35__);
-/* harmony import */ var core_js_modules_es_typed_array_to_string__WEBPACK_IMPORTED_MODULE_36__ = __webpack_require__(/*! core-js/modules/es.typed-array.to-string */ "./node_modules/core-js/modules/es.typed-array.to-string.js");
-/* harmony import */ var core_js_modules_es_typed_array_to_string__WEBPACK_IMPORTED_MODULE_36___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_to_string__WEBPACK_IMPORTED_MODULE_36__);
-/* harmony import */ var _var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_slicedToArray__WEBPACK_IMPORTED_MODULE_37__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/slicedToArray */ "./node_modules/@babel/runtime/helpers/esm/slicedToArray.js");
-/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_38__ = __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
-/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_38___default = /*#__PURE__*/__webpack_require__.n(regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_38__);
-/* harmony import */ var _var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_39__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
-/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_40__ = __webpack_require__(/*! moment */ "./node_modules/moment/moment.js");
-/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_40___default = /*#__PURE__*/__webpack_require__.n(moment__WEBPACK_IMPORTED_MODULE_40__);
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_41__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_41___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_41__);
+/* harmony import */ var core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core-js/modules/es.array.find */ "./node_modules/core-js/modules/es.array.find.js");
+/* harmony import */ var core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var core_js_modules_es_array_join__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core-js/modules/es.array.join */ "./node_modules/core-js/modules/es.array.join.js");
+/* harmony import */ var core_js_modules_es_array_join__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_join__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var core_js_modules_es_array_map__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core-js/modules/es.array.map */ "./node_modules/core-js/modules/es.array.map.js");
+/* harmony import */ var core_js_modules_es_array_map__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_map__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var core_js_modules_es_array_splice__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core-js/modules/es.array.splice */ "./node_modules/core-js/modules/es.array.splice.js");
+/* harmony import */ var core_js_modules_es_array_splice__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_splice__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var core_js_modules_es_function_name__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core-js/modules/es.function.name */ "./node_modules/core-js/modules/es.function.name.js");
+/* harmony import */ var core_js_modules_es_function_name__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_function_name__WEBPACK_IMPORTED_MODULE_7__);
+/* harmony import */ var core_js_modules_es_object_to_string__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! core-js/modules/es.object.to-string */ "./node_modules/core-js/modules/es.object.to-string.js");
+/* harmony import */ var core_js_modules_es_object_to_string__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_object_to_string__WEBPACK_IMPORTED_MODULE_8__);
+/* harmony import */ var core_js_modules_es_regexp_exec__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! core-js/modules/es.regexp.exec */ "./node_modules/core-js/modules/es.regexp.exec.js");
+/* harmony import */ var core_js_modules_es_regexp_exec__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_regexp_exec__WEBPACK_IMPORTED_MODULE_9__);
+/* harmony import */ var core_js_modules_es_regexp_to_string__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! core-js/modules/es.regexp.to-string */ "./node_modules/core-js/modules/es.regexp.to-string.js");
+/* harmony import */ var core_js_modules_es_regexp_to_string__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_regexp_to_string__WEBPACK_IMPORTED_MODULE_10__);
+/* harmony import */ var core_js_modules_es_string_pad_start__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! core-js/modules/es.string.pad-start */ "./node_modules/core-js/modules/es.string.pad-start.js");
+/* harmony import */ var core_js_modules_es_string_pad_start__WEBPACK_IMPORTED_MODULE_11___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_pad_start__WEBPACK_IMPORTED_MODULE_11__);
+/* harmony import */ var core_js_modules_es_string_split__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! core-js/modules/es.string.split */ "./node_modules/core-js/modules/es.string.split.js");
+/* harmony import */ var core_js_modules_es_string_split__WEBPACK_IMPORTED_MODULE_12___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_split__WEBPACK_IMPORTED_MODULE_12__);
+/* harmony import */ var core_js_modules_es_string_link__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! core-js/modules/es.string.link */ "./node_modules/core-js/modules/es.string.link.js");
+/* harmony import */ var core_js_modules_es_string_link__WEBPACK_IMPORTED_MODULE_13___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_link__WEBPACK_IMPORTED_MODULE_13__);
+/* harmony import */ var core_js_modules_es_typed_array_uint8_array__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! core-js/modules/es.typed-array.uint8-array */ "./node_modules/core-js/modules/es.typed-array.uint8-array.js");
+/* harmony import */ var core_js_modules_es_typed_array_uint8_array__WEBPACK_IMPORTED_MODULE_14___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_uint8_array__WEBPACK_IMPORTED_MODULE_14__);
+/* harmony import */ var core_js_modules_es_typed_array_copy_within__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! core-js/modules/es.typed-array.copy-within */ "./node_modules/core-js/modules/es.typed-array.copy-within.js");
+/* harmony import */ var core_js_modules_es_typed_array_copy_within__WEBPACK_IMPORTED_MODULE_15___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_copy_within__WEBPACK_IMPORTED_MODULE_15__);
+/* harmony import */ var core_js_modules_es_typed_array_every__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! core-js/modules/es.typed-array.every */ "./node_modules/core-js/modules/es.typed-array.every.js");
+/* harmony import */ var core_js_modules_es_typed_array_every__WEBPACK_IMPORTED_MODULE_16___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_every__WEBPACK_IMPORTED_MODULE_16__);
+/* harmony import */ var core_js_modules_es_typed_array_fill__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! core-js/modules/es.typed-array.fill */ "./node_modules/core-js/modules/es.typed-array.fill.js");
+/* harmony import */ var core_js_modules_es_typed_array_fill__WEBPACK_IMPORTED_MODULE_17___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_fill__WEBPACK_IMPORTED_MODULE_17__);
+/* harmony import */ var core_js_modules_es_typed_array_filter__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! core-js/modules/es.typed-array.filter */ "./node_modules/core-js/modules/es.typed-array.filter.js");
+/* harmony import */ var core_js_modules_es_typed_array_filter__WEBPACK_IMPORTED_MODULE_18___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_filter__WEBPACK_IMPORTED_MODULE_18__);
+/* harmony import */ var core_js_modules_es_typed_array_find__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! core-js/modules/es.typed-array.find */ "./node_modules/core-js/modules/es.typed-array.find.js");
+/* harmony import */ var core_js_modules_es_typed_array_find__WEBPACK_IMPORTED_MODULE_19___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_find__WEBPACK_IMPORTED_MODULE_19__);
+/* harmony import */ var core_js_modules_es_typed_array_find_index__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! core-js/modules/es.typed-array.find-index */ "./node_modules/core-js/modules/es.typed-array.find-index.js");
+/* harmony import */ var core_js_modules_es_typed_array_find_index__WEBPACK_IMPORTED_MODULE_20___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_find_index__WEBPACK_IMPORTED_MODULE_20__);
+/* harmony import */ var core_js_modules_es_typed_array_for_each__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! core-js/modules/es.typed-array.for-each */ "./node_modules/core-js/modules/es.typed-array.for-each.js");
+/* harmony import */ var core_js_modules_es_typed_array_for_each__WEBPACK_IMPORTED_MODULE_21___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_for_each__WEBPACK_IMPORTED_MODULE_21__);
+/* harmony import */ var core_js_modules_es_typed_array_includes__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! core-js/modules/es.typed-array.includes */ "./node_modules/core-js/modules/es.typed-array.includes.js");
+/* harmony import */ var core_js_modules_es_typed_array_includes__WEBPACK_IMPORTED_MODULE_22___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_includes__WEBPACK_IMPORTED_MODULE_22__);
+/* harmony import */ var core_js_modules_es_typed_array_index_of__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! core-js/modules/es.typed-array.index-of */ "./node_modules/core-js/modules/es.typed-array.index-of.js");
+/* harmony import */ var core_js_modules_es_typed_array_index_of__WEBPACK_IMPORTED_MODULE_23___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_index_of__WEBPACK_IMPORTED_MODULE_23__);
+/* harmony import */ var core_js_modules_es_typed_array_iterator__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! core-js/modules/es.typed-array.iterator */ "./node_modules/core-js/modules/es.typed-array.iterator.js");
+/* harmony import */ var core_js_modules_es_typed_array_iterator__WEBPACK_IMPORTED_MODULE_24___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_iterator__WEBPACK_IMPORTED_MODULE_24__);
+/* harmony import */ var core_js_modules_es_typed_array_join__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! core-js/modules/es.typed-array.join */ "./node_modules/core-js/modules/es.typed-array.join.js");
+/* harmony import */ var core_js_modules_es_typed_array_join__WEBPACK_IMPORTED_MODULE_25___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_join__WEBPACK_IMPORTED_MODULE_25__);
+/* harmony import */ var core_js_modules_es_typed_array_last_index_of__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! core-js/modules/es.typed-array.last-index-of */ "./node_modules/core-js/modules/es.typed-array.last-index-of.js");
+/* harmony import */ var core_js_modules_es_typed_array_last_index_of__WEBPACK_IMPORTED_MODULE_26___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_last_index_of__WEBPACK_IMPORTED_MODULE_26__);
+/* harmony import */ var core_js_modules_es_typed_array_map__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! core-js/modules/es.typed-array.map */ "./node_modules/core-js/modules/es.typed-array.map.js");
+/* harmony import */ var core_js_modules_es_typed_array_map__WEBPACK_IMPORTED_MODULE_27___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_map__WEBPACK_IMPORTED_MODULE_27__);
+/* harmony import */ var core_js_modules_es_typed_array_reduce__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! core-js/modules/es.typed-array.reduce */ "./node_modules/core-js/modules/es.typed-array.reduce.js");
+/* harmony import */ var core_js_modules_es_typed_array_reduce__WEBPACK_IMPORTED_MODULE_28___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_reduce__WEBPACK_IMPORTED_MODULE_28__);
+/* harmony import */ var core_js_modules_es_typed_array_reduce_right__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! core-js/modules/es.typed-array.reduce-right */ "./node_modules/core-js/modules/es.typed-array.reduce-right.js");
+/* harmony import */ var core_js_modules_es_typed_array_reduce_right__WEBPACK_IMPORTED_MODULE_29___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_reduce_right__WEBPACK_IMPORTED_MODULE_29__);
+/* harmony import */ var core_js_modules_es_typed_array_reverse__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! core-js/modules/es.typed-array.reverse */ "./node_modules/core-js/modules/es.typed-array.reverse.js");
+/* harmony import */ var core_js_modules_es_typed_array_reverse__WEBPACK_IMPORTED_MODULE_30___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_reverse__WEBPACK_IMPORTED_MODULE_30__);
+/* harmony import */ var core_js_modules_es_typed_array_set__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(/*! core-js/modules/es.typed-array.set */ "./node_modules/core-js/modules/es.typed-array.set.js");
+/* harmony import */ var core_js_modules_es_typed_array_set__WEBPACK_IMPORTED_MODULE_31___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_set__WEBPACK_IMPORTED_MODULE_31__);
+/* harmony import */ var core_js_modules_es_typed_array_slice__WEBPACK_IMPORTED_MODULE_32__ = __webpack_require__(/*! core-js/modules/es.typed-array.slice */ "./node_modules/core-js/modules/es.typed-array.slice.js");
+/* harmony import */ var core_js_modules_es_typed_array_slice__WEBPACK_IMPORTED_MODULE_32___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_slice__WEBPACK_IMPORTED_MODULE_32__);
+/* harmony import */ var core_js_modules_es_typed_array_some__WEBPACK_IMPORTED_MODULE_33__ = __webpack_require__(/*! core-js/modules/es.typed-array.some */ "./node_modules/core-js/modules/es.typed-array.some.js");
+/* harmony import */ var core_js_modules_es_typed_array_some__WEBPACK_IMPORTED_MODULE_33___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_some__WEBPACK_IMPORTED_MODULE_33__);
+/* harmony import */ var core_js_modules_es_typed_array_sort__WEBPACK_IMPORTED_MODULE_34__ = __webpack_require__(/*! core-js/modules/es.typed-array.sort */ "./node_modules/core-js/modules/es.typed-array.sort.js");
+/* harmony import */ var core_js_modules_es_typed_array_sort__WEBPACK_IMPORTED_MODULE_34___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_sort__WEBPACK_IMPORTED_MODULE_34__);
+/* harmony import */ var core_js_modules_es_typed_array_subarray__WEBPACK_IMPORTED_MODULE_35__ = __webpack_require__(/*! core-js/modules/es.typed-array.subarray */ "./node_modules/core-js/modules/es.typed-array.subarray.js");
+/* harmony import */ var core_js_modules_es_typed_array_subarray__WEBPACK_IMPORTED_MODULE_35___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_subarray__WEBPACK_IMPORTED_MODULE_35__);
+/* harmony import */ var core_js_modules_es_typed_array_to_locale_string__WEBPACK_IMPORTED_MODULE_36__ = __webpack_require__(/*! core-js/modules/es.typed-array.to-locale-string */ "./node_modules/core-js/modules/es.typed-array.to-locale-string.js");
+/* harmony import */ var core_js_modules_es_typed_array_to_locale_string__WEBPACK_IMPORTED_MODULE_36___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_to_locale_string__WEBPACK_IMPORTED_MODULE_36__);
+/* harmony import */ var core_js_modules_es_typed_array_to_string__WEBPACK_IMPORTED_MODULE_37__ = __webpack_require__(/*! core-js/modules/es.typed-array.to-string */ "./node_modules/core-js/modules/es.typed-array.to-string.js");
+/* harmony import */ var core_js_modules_es_typed_array_to_string__WEBPACK_IMPORTED_MODULE_37___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_typed_array_to_string__WEBPACK_IMPORTED_MODULE_37__);
+/* harmony import */ var _var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_slicedToArray__WEBPACK_IMPORTED_MODULE_38__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/slicedToArray */ "./node_modules/@babel/runtime/helpers/esm/slicedToArray.js");
+/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_39__ = __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
+/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_39___default = /*#__PURE__*/__webpack_require__.n(regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_39__);
+/* harmony import */ var _var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_40__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_41__ = __webpack_require__(/*! moment */ "./node_modules/moment/moment.js");
+/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_41___default = /*#__PURE__*/__webpack_require__.n(moment__WEBPACK_IMPORTED_MODULE_41__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_42__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_42___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_42__);
+
 
 
 
@@ -1141,15 +1201,15 @@ __webpack_require__.r(__webpack_exports__);
       targetType: false,
       targetCmp: false,
       menuTargetDate: false,
-      targetDate: moment__WEBPACK_IMPORTED_MODULE_40___default()().format('YYYY-MM-DD'),
-      targetDateFormatted: moment__WEBPACK_IMPORTED_MODULE_40___default()().format('DD.MM.YYYY'),
+      targetDate: moment__WEBPACK_IMPORTED_MODULE_41___default()().format('YYYY-MM-DD'),
+      targetDateFormatted: moment__WEBPACK_IMPORTED_MODULE_41___default()().format('DD.MM.YYYY'),
       targetValue: [],
       menuDate: false,
       menuTime: false,
       showNewTarget: false,
-      startTime: moment__WEBPACK_IMPORTED_MODULE_40___default()().startOf('h').add(1, 'h').format('HH:mm'),
-      startDate: moment__WEBPACK_IMPORTED_MODULE_40___default()().format('YYYY-MM-DD'),
-      startDateFormatted: moment__WEBPACK_IMPORTED_MODULE_40___default()().format('DD.MM.YYYY'),
+      startTime: moment__WEBPACK_IMPORTED_MODULE_41___default()().startOf('h').add(1, 'h').format('HH:mm'),
+      startDate: moment__WEBPACK_IMPORTED_MODULE_41___default()().format('YYYY-MM-DD'),
+      startDateFormatted: moment__WEBPACK_IMPORTED_MODULE_41___default()().format('DD.MM.YYYY'),
       testUsers: [],
       testUser: false
     };
@@ -1157,7 +1217,7 @@ __webpack_require__.r(__webpack_exports__);
   created: function created() {
     var _this = this;
 
-    return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_39__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+    return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_40__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
       return regeneratorRuntime.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
@@ -1198,7 +1258,7 @@ __webpack_require__.r(__webpack_exports__);
       handler: function handler() {
         var _this2 = this;
 
-        return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_39__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+        return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_40__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
           return regeneratorRuntime.wrap(function _callee2$(_context2) {
             while (1) {
               switch (_context2.prev = _context2.next) {
@@ -1231,7 +1291,7 @@ __webpack_require__.r(__webpack_exports__);
         this.mailing = this.storeMailing;
 
         if (this.mailing.startAt) {
-          var mailingDate = moment__WEBPACK_IMPORTED_MODULE_40___default.a.unix(this.mailing.startAt);
+          var mailingDate = moment__WEBPACK_IMPORTED_MODULE_41___default.a.unix(this.mailing.startAt);
           this.startTime = mailingDate.format('HH:mm');
           this.startDate = mailingDate.format('YYYY-MM-DD');
           this.startDateFormatted = mailingDate.format('DD.MM.YYYY');
@@ -1263,12 +1323,26 @@ __webpack_require__.r(__webpack_exports__);
       mailing.photos = this.photos;
       mailing.videos = this.videos;
       mailing.buttons = this.buttons;
+      var userHasBotRestriction = this.$store.getters.userHasBotsRestriction;
+      var botTarget = mailing.target.find(function (target) {
+        return target.type === 'bots';
+      });
+      var noBotTargetSpecified = !botTarget;
+
+      if (userHasBotRestriction && noBotTargetSpecified) {
+        mailing.target.push({
+          type: 'bots',
+          cmp: false,
+          value: this.$store.getters.allowedBotNames
+        });
+      }
+
       return mailing;
     },
     save: function save() {
       var _this3 = this;
 
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_39__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_40__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
         var mailing;
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
@@ -1307,7 +1381,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     loadToBrowser: function loadToBrowser(file) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_39__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_40__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
@@ -1345,7 +1419,7 @@ __webpack_require__.r(__webpack_exports__);
       return btoa(binary);
     },
     uploadToServer: function uploadToServer(file) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_39__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee5() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_40__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee5() {
         var requestData, _yield$axios$post, data;
 
         return regeneratorRuntime.wrap(function _callee5$(_context5) {
@@ -1355,7 +1429,7 @@ __webpack_require__.r(__webpack_exports__);
                 requestData = new FormData();
                 requestData.append('file', file);
                 _context5.next = 4;
-                return axios__WEBPACK_IMPORTED_MODULE_41___default.a.post('/api/file/link', requestData, {
+                return axios__WEBPACK_IMPORTED_MODULE_42___default.a.post('/api/file/link', requestData, {
                   headers: {
                     'Content-Type': 'multipart/form-data'
                   }
@@ -1377,7 +1451,7 @@ __webpack_require__.r(__webpack_exports__);
     addFile: function addFile(event) {
       var _this4 = this;
 
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_39__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee6() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_40__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee6() {
         var file, _file$type$split, _file$type$split2, fileType, uploadData, buffer, base64Src, dataUrl;
 
         return regeneratorRuntime.wrap(function _callee6$(_context6) {
@@ -1387,7 +1461,7 @@ __webpack_require__.r(__webpack_exports__);
                 event.preventDefault();
                 _context6.prev = 1;
                 file = event.file;
-                _file$type$split = file.type.split('/'), _file$type$split2 = Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_slicedToArray__WEBPACK_IMPORTED_MODULE_37__["default"])(_file$type$split, 1), fileType = _file$type$split2[0];
+                _file$type$split = file.type.split('/'), _file$type$split2 = Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_slicedToArray__WEBPACK_IMPORTED_MODULE_38__["default"])(_file$type$split, 1), fileType = _file$type$split2[0];
                 _context6.t0 = fileType;
                 _context6.next = _context6.t0 === 'image' ? 7 : _context6.t0 === 'video' ? 15 : 21;
                 break;
@@ -1460,7 +1534,7 @@ __webpack_require__.r(__webpack_exports__);
     deleteVideo: function deleteVideo(index) {
       var _this5 = this;
 
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_39__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee7() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_40__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee7() {
         var video, _yield$axios$post2, data;
 
         return regeneratorRuntime.wrap(function _callee7$(_context7) {
@@ -1469,7 +1543,7 @@ __webpack_require__.r(__webpack_exports__);
               case 0:
                 video = _this5.videos[index];
                 _context7.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_41___default.a.post('/api/file/delete', {
+                return axios__WEBPACK_IMPORTED_MODULE_42___default.a.post('/api/file/delete', {
                   file: video.serverFile
                 });
 
@@ -1495,7 +1569,7 @@ __webpack_require__.r(__webpack_exports__);
       if (!date) return null;
 
       var _date$split = date.split('.'),
-          _date$split2 = Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_slicedToArray__WEBPACK_IMPORTED_MODULE_37__["default"])(_date$split, 3),
+          _date$split2 = Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_slicedToArray__WEBPACK_IMPORTED_MODULE_38__["default"])(_date$split, 3),
           day = _date$split2[0],
           month = _date$split2[1],
           year = _date$split2[2];
@@ -1506,7 +1580,7 @@ __webpack_require__.r(__webpack_exports__);
       if (!date) return null;
 
       var _date$split3 = date.split('-'),
-          _date$split4 = Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_slicedToArray__WEBPACK_IMPORTED_MODULE_37__["default"])(_date$split3, 3),
+          _date$split4 = Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_slicedToArray__WEBPACK_IMPORTED_MODULE_38__["default"])(_date$split3, 3),
           year = _date$split4[0],
           month = _date$split4[1],
           day = _date$split4[2];
@@ -1514,11 +1588,11 @@ __webpack_require__.r(__webpack_exports__);
       return "".concat(day, ".").concat(month, ".").concat(year);
     },
     updateMailingDate: function updateMailingDate() {
-      var date = this.startDate ? moment__WEBPACK_IMPORTED_MODULE_40___default()(this.startDate).startOf('d') : moment__WEBPACK_IMPORTED_MODULE_40___default()().startOf('d');
+      var date = this.startDate ? moment__WEBPACK_IMPORTED_MODULE_41___default()(this.startDate).startOf('d') : moment__WEBPACK_IMPORTED_MODULE_41___default()().startOf('d');
 
       if (this.startTime) {
         var _this$startTime$split = this.startTime.split(':'),
-            _this$startTime$split2 = Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_slicedToArray__WEBPACK_IMPORTED_MODULE_37__["default"])(_this$startTime$split, 2),
+            _this$startTime$split2 = Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_slicedToArray__WEBPACK_IMPORTED_MODULE_38__["default"])(_this$startTime$split, 2),
             hh = _this$startTime$split2[0],
             mm = _this$startTime$split2[1];
 
@@ -1552,8 +1626,8 @@ __webpack_require__.r(__webpack_exports__);
       this.targetType = false;
       this.targetCmp = false;
       this.menuTargetDate = false;
-      this.targetDate = moment__WEBPACK_IMPORTED_MODULE_40___default()().format('YYYY-MM-DD');
-      this.targetDateFormatted = moment__WEBPACK_IMPORTED_MODULE_40___default()().format('DD.MM.YYYY');
+      this.targetDate = moment__WEBPACK_IMPORTED_MODULE_41___default()().format('YYYY-MM-DD');
+      this.targetDateFormatted = moment__WEBPACK_IMPORTED_MODULE_41___default()().format('DD.MM.YYYY');
       this.targetValue = [];
       this.showNewTarget = false;
     },
@@ -1584,7 +1658,7 @@ __webpack_require__.r(__webpack_exports__);
     loadPredictedUsers: function loadPredictedUsers() {
       var _this6 = this;
 
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_39__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee8() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_40__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee8() {
         var mailing, response;
         return regeneratorRuntime.wrap(function _callee8$(_context8) {
           while (1) {
@@ -1592,7 +1666,7 @@ __webpack_require__.r(__webpack_exports__);
               case 0:
                 mailing = _this6.getMailingToSend();
                 _context8.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_41___default.a.post("/api/mailing/predictUsers", {
+                return axios__WEBPACK_IMPORTED_MODULE_42___default.a.post("/api/mailing/predictUsers", {
                   mailing: mailing
                 });
 
@@ -1611,14 +1685,14 @@ __webpack_require__.r(__webpack_exports__);
     loadTestUsers: function loadTestUsers() {
       var _this7 = this;
 
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_39__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee9() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_40__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee9() {
         var response;
         return regeneratorRuntime.wrap(function _callee9$(_context9) {
           while (1) {
             switch (_context9.prev = _context9.next) {
               case 0:
                 _context9.next = 2;
-                return axios__WEBPACK_IMPORTED_MODULE_41___default.a.post("/api/mailing/testUsers");
+                return axios__WEBPACK_IMPORTED_MODULE_42___default.a.post("/api/mailing/testUsers");
 
               case 2:
                 response = _context9.sent;
@@ -1640,7 +1714,7 @@ __webpack_require__.r(__webpack_exports__);
     sendPreview: function sendPreview() {
       var _this8 = this;
 
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_39__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee10() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_40__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee10() {
         var mailing, chatId, response;
         return regeneratorRuntime.wrap(function _callee10$(_context10) {
           while (1) {
@@ -1649,7 +1723,7 @@ __webpack_require__.r(__webpack_exports__);
                 mailing = _this8.getMailingToSend();
                 chatId = _this8.testUser;
                 _context10.next = 4;
-                return axios__WEBPACK_IMPORTED_MODULE_41___default.a.post("/api/mailing/preview", {
+                return axios__WEBPACK_IMPORTED_MODULE_42___default.a.post("/api/mailing/preview", {
                   mailing: mailing,
                   chatId: chatId
                 });
@@ -1684,12 +1758,7 @@ __webpack_require__.r(__webpack_exports__);
       return this.$store.state.mailing.list;
     },
     bots: function bots() {
-      return this.$store.state.bots.list.map(function (bot) {
-        return {
-          text: bot.botName,
-          value: bot.botName
-        };
-      });
+      return this.$store.getters.allowedBotListForSelect;
     },
     targetIsDate: function targetIsDate() {
       return this.targetType !== 'bots';
@@ -1910,18 +1979,20 @@ function clone(obj) {
       var _this3 = this;
 
       return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_9__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
+        var filter;
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
                 _this3.isLoading = true;
-                _context3.next = 3;
-                return _this3.$store.dispatch('loadMailings', {});
-
-              case 3:
-                _this3.isLoading = false;
+                filter = _this3.$store.getters.allowedBotFilter('target.value');
+                _context3.next = 4;
+                return _this3.$store.dispatch('loadMailings', filter);
 
               case 4:
+                _this3.isLoading = false;
+
+              case 5:
               case "end":
                 return _context3.stop();
             }
@@ -1933,14 +2004,16 @@ function clone(obj) {
       var _this4 = this;
 
       return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_9__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
+        var filter;
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
               case 0:
-                _context4.next = 2;
-                return _this4.$store.dispatch('loadMailings', {});
+                filter = _this4.$store.getters.allowedBotFilter('target.value');
+                _context4.next = 3;
+                return _this4.$store.dispatch('loadMailings', filter);
 
-              case 2:
+              case 3:
               case "end":
                 return _context4.stop();
             }
@@ -2594,22 +2667,30 @@ __webpack_require__.r(__webpack_exports__);
       var _this2 = this;
 
       return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_11__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+        var botIds, noBotIdsSelected;
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
                 _this2.isLoading = true;
-                _context2.next = 3;
+                botIds = _this2.botIds;
+                noBotIdsSelected = !botIds || botIds && botIds.length === 0;
+
+                if (noBotIdsSelected && _this2.$store.getters.userHasBotsRestriction) {
+                  botIds = _this2.$store.getters.allowedBotNames;
+                }
+
+                _context2.next = 6;
                 return _this2.$store.dispatch('loadDetails', {
-                  botIds: _this2.botIds,
+                  botIds: botIds,
                   scale: _this2.scale,
                   range: _this2.range
                 });
 
-              case 3:
+              case 6:
                 _this2.isLoading = false;
 
-              case 4:
+              case 7:
               case "end":
                 return _context2.stop();
             }
@@ -2677,12 +2758,7 @@ __webpack_require__.r(__webpack_exports__);
   },
   computed: {
     bots: function bots() {
-      return this.$store.state.bots.list.map(function (bot) {
-        return {
-          text: bot.tg.username ? '@' + bot.tg.username : bot.id,
-          value: bot.id
-        };
-      });
+      return this.$store.getters.allowedBotListForSelect;
     },
     data: function data() {
       var _this3 = this;
@@ -2998,18 +3074,20 @@ __webpack_require__.r(__webpack_exports__);
       var _this2 = this;
 
       return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+        var filter;
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
                 _this2.isLoading = true;
-                _context2.next = 3;
-                return _this2.$store.dispatch('loadStats', {});
-
-              case 3:
-                _this2.isLoading = false;
+                filter = _this2.$store.getters.allowedBotFilter('botId');
+                _context2.next = 4;
+                return _this2.$store.dispatch('loadStats', filter);
 
               case 4:
+                _this2.isLoading = false;
+
+              case 5:
               case "end":
                 return _context2.stop();
             }
@@ -3105,6 +3183,14 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -3276,6 +3362,9 @@ __webpack_require__.r(__webpack_exports__);
     },
     currentUser: function currentUser() {
       return this.$store.state.user.current;
+    },
+    bots: function bots() {
+      return this.$store.getters.allowedBotListForSelect;
     }
   }
 });
@@ -3612,6 +3701,17 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "VacancyEdit",
@@ -3812,33 +3912,40 @@ __webpack_require__.r(__webpack_exports__);
       var _this4 = this;
 
       return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
+        var noBotsSpecified;
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
               case 0:
+                noBotsSpecified = !_this4.vacancy.bots;
+
+                if (_this4.$store.getters.userHasBotsRestriction && noBotsSpecified) {
+                  _this4.vacancy.bots = _this4.$store.getters.allowedBotNames;
+                }
+
                 if (!_this4.isNew) {
-                  _context4.next = 5;
+                  _context4.next = 7;
                   break;
                 }
 
-                _context4.next = 3;
+                _context4.next = 5;
                 return _this4.$store.dispatch('newVacancy', _this4.vacancy);
 
-              case 3:
-                _context4.next = 7;
-                break;
-
               case 5:
-                _context4.next = 7;
-                return _this4.$store.dispatch('editVacancy', _this4.vacancy);
+                _context4.next = 9;
+                break;
 
               case 7:
                 _context4.next = 9;
+                return _this4.$store.dispatch('editVacancy', _this4.vacancy);
+
+              case 9:
+                _context4.next = 11;
                 return _this4.$router.push({
                   name: 'vacanciesList'
                 });
 
-              case 9:
+              case 11:
               case "end":
                 return _context4.stop();
             }
@@ -3879,6 +3986,9 @@ __webpack_require__.r(__webpack_exports__);
     },
     linkTemplate: function linkTemplate() {
       return "https://t.me/".concat(this.botId, "?start=<ref>=").concat(this.vacancyId);
+    },
+    bots: function bots() {
+      return this.$store.getters.allowedBotListForSelect;
     }
   }
 });
@@ -3983,18 +4093,20 @@ __webpack_require__.r(__webpack_exports__);
       var _this2 = this;
 
       return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+        var filter;
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
                 _this2.isLoading = true;
-                _context2.next = 3;
-                return _this2.$store.dispatch('loadVacancies', {});
-
-              case 3:
-                _this2.isLoading = false;
+                filter = _this2.$store.getters.allowedBotFilter('bots');
+                _context2.next = 4;
+                return _this2.$store.dispatch('loadVacancies', filter);
 
               case 4:
+                _this2.isLoading = false;
+
+              case 5:
               case "end":
                 return _context2.stop();
             }
@@ -4151,11 +4263,53 @@ var render = function() {
               }
             }
           }),
-          _c("v-toolbar-title", [_vm._v("Ботовод")])
+          _c("v-toolbar-title", [_vm._v("Ботовод")]),
+          _c("v-spacer"),
+          _vm.canRestart && _vm.systemIsOk !== null
+            ? _c(
+                "v-btn",
+                {
+                  attrs: {
+                    color: _vm.systemIsOk ? "success" : "warning",
+                    "x-small": _vm.systemIsOk
+                  },
+                  on: { click: _vm.restart }
+                },
+                [
+                  _c("v-icon", {
+                    staticClass: "mr-2",
+                    attrs: { "x-small": _vm.systemIsOk },
+                    domProps: {
+                      textContent: _vm._s(
+                        _vm.systemIsOk ? "mdi-check-circle" : "mdi-alert"
+                      )
+                    }
+                  }),
+                  _vm._v(
+                    " " +
+                      _vm._s(
+                        _vm.systemIsOk
+                          ? "Система в порядке"
+                          : "Перегрузить систему"
+                      ) +
+                      " "
+                  )
+                ],
+                1
+              )
+            : _vm._e(),
+          _c("v-progress-linear", {
+            attrs: {
+              active: _vm.isLoading,
+              indeterminate: _vm.isLoading,
+              absolute: "",
+              bottom: ""
+            }
+          })
         ],
         1
       ),
-      _c("v-main", [_c("router-view")], 1),
+      _vm.initDone ? _c("v-main", [_c("router-view")], 1) : _vm._e(),
       _c("v-footer", { attrs: { app: "" } }),
       _c(
         "v-snackbar",
@@ -4406,16 +4560,13 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c(
     "v-container",
-    {
-      staticClass: "fill-height",
-      class: { "align-start": !_vm.isEmpty && !_vm.isLoading }
-    },
+    { staticClass: "fill-height align-start" },
     [
       _c(
         "v-row",
         {
           attrs: {
-            align: _vm.isEmpty || _vm.isLoading ? "center" : "start",
+            align: "start",
             justify: _vm.isEmpty || _vm.isLoading ? "center" : "start"
           }
         },
@@ -4636,18 +4787,23 @@ var render = function() {
             ],
             1
           ),
-          _c(
-            "v-col",
-            { attrs: { cols: "12" } },
-            [
-              _c(
-                "v-btn",
-                { attrs: { color: "danger" }, on: { click: _vm.reloadBotAds } },
-                [_vm._v("Перегрузить сообщения в ботах")]
+          _vm.$store.state.user.current.isAdmin
+            ? _c(
+                "v-col",
+                { attrs: { cols: "12" } },
+                [
+                  _c(
+                    "v-btn",
+                    {
+                      attrs: { color: "danger" },
+                      on: { click: _vm.reloadBotAds }
+                    },
+                    [_vm._v("Перегрузить сообщения в ботах")]
+                  )
+                ],
+                1
               )
-            ],
-            1
-          )
+            : _vm._e()
         ],
         1
       )
@@ -6890,7 +7046,23 @@ var render = function() {
                                   expression: "user.rights"
                                 }
                               })
-                            : _vm._e()
+                            : _vm._e(),
+                          _c("v-autocomplete", {
+                            attrs: {
+                              items: _vm.bots,
+                              chips: "",
+                              "deletable-chips": "",
+                              multiple: "",
+                              label: "Ограничить доступ к ботам"
+                            },
+                            model: {
+                              value: _vm.user.botRights,
+                              callback: function($$v) {
+                                _vm.$set(_vm.user, "botRights", $$v)
+                              },
+                              expression: "user.botRights"
+                            }
+                          })
                         ],
                         1
                       )
@@ -7208,6 +7380,25 @@ var render = function() {
                         "v-form",
                         { attrs: { autocomplete: "off" } },
                         [
+                          _c("v-autocomplete", {
+                            attrs: {
+                              items: _vm.bots,
+                              chips: "",
+                              "deletable-chips": "",
+                              multiple: "",
+                              label: "Боты",
+                              hint:
+                                "Если не указано, публикуется во всех доступных",
+                              "persistent-hint": ""
+                            },
+                            model: {
+                              value: _vm.vacancy.bots,
+                              callback: function($$v) {
+                                _vm.$set(_vm.vacancy, "bots", $$v)
+                              },
+                              expression: "vacancy.bots"
+                            }
+                          }),
                           _c("v-switch", {
                             attrs: { label: "Удаленка" },
                             model: {
@@ -8050,8 +8241,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vuetify_lib_components_VList__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! vuetify/lib/components/VList */ "./node_modules/vuetify/lib/components/VList/index.js");
 /* harmony import */ var vuetify_lib_components_VMain__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! vuetify/lib/components/VMain */ "./node_modules/vuetify/lib/components/VMain/index.js");
 /* harmony import */ var vuetify_lib_components_VNavigationDrawer__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! vuetify/lib/components/VNavigationDrawer */ "./node_modules/vuetify/lib/components/VNavigationDrawer/index.js");
-/* harmony import */ var vuetify_lib_components_VSnackbar__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! vuetify/lib/components/VSnackbar */ "./node_modules/vuetify/lib/components/VSnackbar/index.js");
-/* harmony import */ var vuetify_lib_components_VToolbar__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! vuetify/lib/components/VToolbar */ "./node_modules/vuetify/lib/components/VToolbar/index.js");
+/* harmony import */ var vuetify_lib_components_VProgressLinear__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! vuetify/lib/components/VProgressLinear */ "./node_modules/vuetify/lib/components/VProgressLinear/index.js");
+/* harmony import */ var vuetify_lib_components_VSnackbar__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! vuetify/lib/components/VSnackbar */ "./node_modules/vuetify/lib/components/VSnackbar/index.js");
+/* harmony import */ var vuetify_lib_components_VGrid__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! vuetify/lib/components/VGrid */ "./node_modules/vuetify/lib/components/VGrid/index.js");
+/* harmony import */ var vuetify_lib_components_VToolbar__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! vuetify/lib/components/VToolbar */ "./node_modules/vuetify/lib/components/VToolbar/index.js");
 
 
 
@@ -8089,7 +8282,9 @@ var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_
 
 
 
-_node_modules_vuetify_loader_lib_runtime_installComponents_js__WEBPACK_IMPORTED_MODULE_4___default()(component, {VAlert: vuetify_lib_components_VAlert__WEBPACK_IMPORTED_MODULE_5__["VAlert"],VApp: vuetify_lib_components_VApp__WEBPACK_IMPORTED_MODULE_6__["VApp"],VAppBar: vuetify_lib_components_VAppBar__WEBPACK_IMPORTED_MODULE_7__["VAppBar"],VAppBarNavIcon: vuetify_lib_components_VAppBar__WEBPACK_IMPORTED_MODULE_7__["VAppBarNavIcon"],VBtn: vuetify_lib_components_VBtn__WEBPACK_IMPORTED_MODULE_8__["VBtn"],VFooter: vuetify_lib_components_VFooter__WEBPACK_IMPORTED_MODULE_9__["VFooter"],VIcon: vuetify_lib_components_VIcon__WEBPACK_IMPORTED_MODULE_10__["VIcon"],VList: vuetify_lib_components_VList__WEBPACK_IMPORTED_MODULE_11__["VList"],VListItem: vuetify_lib_components_VList__WEBPACK_IMPORTED_MODULE_11__["VListItem"],VListItemAction: vuetify_lib_components_VList__WEBPACK_IMPORTED_MODULE_11__["VListItemAction"],VListItemContent: vuetify_lib_components_VList__WEBPACK_IMPORTED_MODULE_11__["VListItemContent"],VListItemTitle: vuetify_lib_components_VList__WEBPACK_IMPORTED_MODULE_11__["VListItemTitle"],VMain: vuetify_lib_components_VMain__WEBPACK_IMPORTED_MODULE_12__["VMain"],VNavigationDrawer: vuetify_lib_components_VNavigationDrawer__WEBPACK_IMPORTED_MODULE_13__["VNavigationDrawer"],VSnackbar: vuetify_lib_components_VSnackbar__WEBPACK_IMPORTED_MODULE_14__["VSnackbar"],VToolbarTitle: vuetify_lib_components_VToolbar__WEBPACK_IMPORTED_MODULE_15__["VToolbarTitle"]})
+
+
+_node_modules_vuetify_loader_lib_runtime_installComponents_js__WEBPACK_IMPORTED_MODULE_4___default()(component, {VAlert: vuetify_lib_components_VAlert__WEBPACK_IMPORTED_MODULE_5__["VAlert"],VApp: vuetify_lib_components_VApp__WEBPACK_IMPORTED_MODULE_6__["VApp"],VAppBar: vuetify_lib_components_VAppBar__WEBPACK_IMPORTED_MODULE_7__["VAppBar"],VAppBarNavIcon: vuetify_lib_components_VAppBar__WEBPACK_IMPORTED_MODULE_7__["VAppBarNavIcon"],VBtn: vuetify_lib_components_VBtn__WEBPACK_IMPORTED_MODULE_8__["VBtn"],VFooter: vuetify_lib_components_VFooter__WEBPACK_IMPORTED_MODULE_9__["VFooter"],VIcon: vuetify_lib_components_VIcon__WEBPACK_IMPORTED_MODULE_10__["VIcon"],VList: vuetify_lib_components_VList__WEBPACK_IMPORTED_MODULE_11__["VList"],VListItem: vuetify_lib_components_VList__WEBPACK_IMPORTED_MODULE_11__["VListItem"],VListItemAction: vuetify_lib_components_VList__WEBPACK_IMPORTED_MODULE_11__["VListItemAction"],VListItemContent: vuetify_lib_components_VList__WEBPACK_IMPORTED_MODULE_11__["VListItemContent"],VListItemTitle: vuetify_lib_components_VList__WEBPACK_IMPORTED_MODULE_11__["VListItemTitle"],VMain: vuetify_lib_components_VMain__WEBPACK_IMPORTED_MODULE_12__["VMain"],VNavigationDrawer: vuetify_lib_components_VNavigationDrawer__WEBPACK_IMPORTED_MODULE_13__["VNavigationDrawer"],VProgressLinear: vuetify_lib_components_VProgressLinear__WEBPACK_IMPORTED_MODULE_14__["VProgressLinear"],VSnackbar: vuetify_lib_components_VSnackbar__WEBPACK_IMPORTED_MODULE_15__["VSnackbar"],VSpacer: vuetify_lib_components_VGrid__WEBPACK_IMPORTED_MODULE_16__["VSpacer"],VToolbarTitle: vuetify_lib_components_VToolbar__WEBPACK_IMPORTED_MODULE_17__["VToolbarTitle"]})
 
 
 /* hot reload */
@@ -9675,13 +9870,13 @@ var router = new vue_router__WEBPACK_IMPORTED_MODULE_4__["default"]({
 });
 router.beforeEach( /*#__PURE__*/function () {
   var _ref = Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee(to, from, next) {
-    var isNotLoggedIn, loginTo, routeGroup;
+    var isNotLoggedIn, loginTo, routeGroup, requiresAdmin, userHasRights;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
             if (!to.matched.some(function (record) {
-              return record.meta.requiresAuth;
+              return record.meta.requiresAuth || record.meta.requiresAdmin;
             })) {
               _context.next = 8;
               break;
@@ -9703,8 +9898,10 @@ router.beforeEach( /*#__PURE__*/function () {
               next(loginTo);
             } else {
               routeGroup = to.matched && to.matched[0] ? to.matched[0].meta.group : false;
+              requiresAdmin = to.matched && to.matched[0] ? to.matched[0].meta.requiresAdmin : false;
+              userHasRights = routeGroup && _store__WEBPACK_IMPORTED_MODULE_6__["default"].getters.userHasRights(routeGroup, requiresAdmin);
 
-              if (routeGroup && _store__WEBPACK_IMPORTED_MODULE_6__["default"].getters.userHasRights(routeGroup)) {
+              if (userHasRights) {
                 next();
               } else {
                 _store__WEBPACK_IMPORTED_MODULE_6__["default"].commit('setErrorMessage', 'Не достаточно прав!');
@@ -9864,6 +10061,7 @@ __webpack_require__.r(__webpack_exports__);
   component: _components_RefUsers_List__WEBPACK_IMPORTED_MODULE_8__["default"],
   meta: {
     requiresAuth: true,
+    requiresAdmin: true,
     group: 'refUsersList'
   }
 }, {
@@ -9872,6 +10070,7 @@ __webpack_require__.r(__webpack_exports__);
   component: _components_RefUsers_Edit__WEBPACK_IMPORTED_MODULE_7__["default"],
   meta: {
     requiresAuth: true,
+    requiresAdmin: true,
     group: 'refUsersList'
   }
 }, {
@@ -9904,6 +10103,7 @@ __webpack_require__.r(__webpack_exports__);
   component: _components_Users_List__WEBPACK_IMPORTED_MODULE_13__["default"],
   meta: {
     requiresAuth: true,
+    requiresAdmin: true,
     group: 'usersList'
   }
 }, {
@@ -9912,6 +10112,7 @@ __webpack_require__.r(__webpack_exports__);
   component: _components_Users_Edit__WEBPACK_IMPORTED_MODULE_12__["default"],
   meta: {
     requiresAuth: true,
+    requiresAdmin: true,
     group: 'usersList'
   }
 }, {
@@ -9920,6 +10121,7 @@ __webpack_require__.r(__webpack_exports__);
   component: _components_Users_Edit__WEBPACK_IMPORTED_MODULE_12__["default"],
   meta: {
     requiresAuth: true,
+    requiresAdmin: true,
     group: 'usersList'
   }
 }]);
@@ -9937,16 +10139,19 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var core_js_modules_es_array_filter__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.array.filter */ "./node_modules/core-js/modules/es.array.filter.js");
 /* harmony import */ var core_js_modules_es_array_filter__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_filter__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.runtime.esm.js");
-/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
-/* harmony import */ var _modules_stats__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./modules/stats */ "./src/store/modules/stats.js");
-/* harmony import */ var _modules_ads__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./modules/ads */ "./src/store/modules/ads.js");
-/* harmony import */ var _modules_bots__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./modules/bots */ "./src/store/modules/bots.js");
-/* harmony import */ var _store_modules_messages__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @/store/modules/messages */ "./src/store/modules/messages.js");
-/* harmony import */ var _store_modules_mailing__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @/store/modules/mailing */ "./src/store/modules/mailing.js");
-/* harmony import */ var _modules_vacancy__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./modules/vacancy */ "./src/store/modules/vacancy.js");
-/* harmony import */ var _modules_user__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./modules/user */ "./src/store/modules/user.js");
-/* harmony import */ var _store_modules_dashboard__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @/store/modules/dashboard */ "./src/store/modules/dashboard.js");
+/* harmony import */ var core_js_modules_es_array_some__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.array.some */ "./node_modules/core-js/modules/es.array.some.js");
+/* harmony import */ var core_js_modules_es_array_some__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_some__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.runtime.esm.js");
+/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+/* harmony import */ var _modules_stats__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./modules/stats */ "./src/store/modules/stats.js");
+/* harmony import */ var _modules_ads__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./modules/ads */ "./src/store/modules/ads.js");
+/* harmony import */ var _modules_bots__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./modules/bots */ "./src/store/modules/bots.js");
+/* harmony import */ var _store_modules_messages__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @/store/modules/messages */ "./src/store/modules/messages.js");
+/* harmony import */ var _store_modules_mailing__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @/store/modules/mailing */ "./src/store/modules/mailing.js");
+/* harmony import */ var _modules_vacancy__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./modules/vacancy */ "./src/store/modules/vacancy.js");
+/* harmony import */ var _modules_user__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./modules/user */ "./src/store/modules/user.js");
+/* harmony import */ var _store_modules_dashboard__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @/store/modules/dashboard */ "./src/store/modules/dashboard.js");
+/* harmony import */ var _store_modules_system__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @/store/modules/system */ "./src/store/modules/system.js");
 
 
 
@@ -9958,17 +10163,20 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-vue__WEBPACK_IMPORTED_MODULE_1__["default"].use(vuex__WEBPACK_IMPORTED_MODULE_2__["default"]);
-/* harmony default export */ __webpack_exports__["default"] = (new vuex__WEBPACK_IMPORTED_MODULE_2__["default"].Store({
+
+
+vue__WEBPACK_IMPORTED_MODULE_2__["default"].use(vuex__WEBPACK_IMPORTED_MODULE_3__["default"]);
+/* harmony default export */ __webpack_exports__["default"] = (new vuex__WEBPACK_IMPORTED_MODULE_3__["default"].Store({
   modules: {
-    stats: _modules_stats__WEBPACK_IMPORTED_MODULE_3__["default"],
-    ads: _modules_ads__WEBPACK_IMPORTED_MODULE_4__["default"],
-    mailing: _store_modules_mailing__WEBPACK_IMPORTED_MODULE_7__["default"],
-    bots: _modules_bots__WEBPACK_IMPORTED_MODULE_5__["default"],
-    messages: _store_modules_messages__WEBPACK_IMPORTED_MODULE_6__["default"],
-    vacancy: _modules_vacancy__WEBPACK_IMPORTED_MODULE_8__["default"],
-    user: _modules_user__WEBPACK_IMPORTED_MODULE_9__["default"],
-    dashboard: _store_modules_dashboard__WEBPACK_IMPORTED_MODULE_10__["default"]
+    stats: _modules_stats__WEBPACK_IMPORTED_MODULE_4__["default"],
+    ads: _modules_ads__WEBPACK_IMPORTED_MODULE_5__["default"],
+    mailing: _store_modules_mailing__WEBPACK_IMPORTED_MODULE_8__["default"],
+    bots: _modules_bots__WEBPACK_IMPORTED_MODULE_6__["default"],
+    messages: _store_modules_messages__WEBPACK_IMPORTED_MODULE_7__["default"],
+    vacancy: _modules_vacancy__WEBPACK_IMPORTED_MODULE_9__["default"],
+    user: _modules_user__WEBPACK_IMPORTED_MODULE_10__["default"],
+    dashboard: _store_modules_dashboard__WEBPACK_IMPORTED_MODULE_11__["default"],
+    system: _store_modules_system__WEBPACK_IMPORTED_MODULE_12__["default"]
   },
   state: {
     appError: false,
@@ -10001,9 +10209,16 @@ vue__WEBPACK_IMPORTED_MODULE_1__["default"].use(vuex__WEBPACK_IMPORTED_MODULE_2_
   },
   getters: {
     allowedRoutes: function allowedRoutes(state, getters) {
-      return state.routes.filter(function (route) {
-        return getters.userHasRights(route.code);
-      });
+      return function (allRoutes) {
+        return state.routes.filter(function (button) {
+          var requiresAdmin = allRoutes.filter(function (route) {
+            return route.meta && route.meta.group === button.code;
+          }).some(function (route) {
+            return route.meta && route.meta.requiresAdmin === true;
+          });
+          return getters.userHasRights(button.code, requiresAdmin);
+        });
+      };
     }
   },
   actions: {},
@@ -10043,16 +10258,13 @@ vue__WEBPACK_IMPORTED_MODULE_1__["default"].use(vuex__WEBPACK_IMPORTED_MODULE_2_
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var core_js_modules_es_array_filter__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.array.filter */ "./node_modules/core-js/modules/es.array.filter.js");
-/* harmony import */ var core_js_modules_es_array_filter__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_filter__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.array.find */ "./node_modules/core-js/modules/es.array.find.js");
-/* harmony import */ var core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
-/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_4__);
-
+/* harmony import */ var core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.array.find */ "./node_modules/core-js/modules/es.array.find.js");
+/* harmony import */ var core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
+/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_3__);
 
 
 
@@ -10066,7 +10278,7 @@ __webpack_require__.r(__webpack_exports__);
   actions: {
     loadAds: function loadAds(_ref) {
       var _arguments = arguments;
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
         var commit, filter, response;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
@@ -10075,7 +10287,7 @@ __webpack_require__.r(__webpack_exports__);
                 commit = _ref.commit;
                 filter = _arguments.length > 1 && _arguments[1] !== undefined ? _arguments[1] : {};
                 _context.next = 4;
-                return axios__WEBPACK_IMPORTED_MODULE_4___default.a.post("/api/amsg/list", {
+                return axios__WEBPACK_IMPORTED_MODULE_3___default.a.post("/api/amsg/list", {
                   filter: filter
                 });
 
@@ -10096,7 +10308,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     setCurrentAd: function setCurrentAd(_ref2, adId) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
         var commit, state, ad;
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
@@ -10120,7 +10332,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     newAd: function newAd(_ref3, ad) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
         var dispatch, state, result;
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
@@ -10128,14 +10340,14 @@ __webpack_require__.r(__webpack_exports__);
               case 0:
                 dispatch = _ref3.dispatch, state = _ref3.state;
                 _context3.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_4___default.a.post("/api/amsg/add", {
+                return axios__WEBPACK_IMPORTED_MODULE_3___default.a.post("/api/amsg/add", {
                   ad: ad
                 });
 
               case 3:
                 result = _context3.sent;
                 dispatch('setCurrentAd', result.data.ad);
-                return _context3.abrupt("return", dispatch('loadAds', state.filter));
+                return _context3.abrupt("return", dispatch('loadAds', state.currentFilter));
 
               case 6:
               case "end":
@@ -10146,7 +10358,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     editAd: function editAd(_ref4, ad) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
         var dispatch, state;
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
@@ -10154,12 +10366,12 @@ __webpack_require__.r(__webpack_exports__);
               case 0:
                 dispatch = _ref4.dispatch, state = _ref4.state;
                 _context4.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_4___default.a.post("/api/amsg/update", {
+                return axios__WEBPACK_IMPORTED_MODULE_3___default.a.post("/api/amsg/update", {
                   ad: ad
                 });
 
               case 3:
-                return _context4.abrupt("return", dispatch('loadAds', state.filter));
+                return _context4.abrupt("return", dispatch('loadAds', state.currentFilter));
 
               case 4:
               case "end":
@@ -10170,7 +10382,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     deleteAd: function deleteAd(_ref5, ad) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee5() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee5() {
         var dispatch, state;
         return regeneratorRuntime.wrap(function _callee5$(_context5) {
           while (1) {
@@ -10178,12 +10390,12 @@ __webpack_require__.r(__webpack_exports__);
               case 0:
                 dispatch = _ref5.dispatch, state = _ref5.state;
                 _context5.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_4___default.a.post("/api/amsg/delete", {
+                return axios__WEBPACK_IMPORTED_MODULE_3___default.a.post("/api/amsg/delete", {
                   ad: ad
                 });
 
               case 3:
-                return _context5.abrupt("return", dispatch('loadAds', state.filter));
+                return _context5.abrupt("return", dispatch('loadAds', state.currentFilter));
 
               case 4:
               case "end":
@@ -10218,15 +10430,21 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.array.find */ "./node_modules/core-js/modules/es.array.find.js");
-/* harmony import */ var core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var core_js_modules_es_array_map__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.array.map */ "./node_modules/core-js/modules/es.array.map.js");
-/* harmony import */ var core_js_modules_es_array_map__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_map__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
-/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var core_js_modules_es_array_filter__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.array.filter */ "./node_modules/core-js/modules/es.array.filter.js");
+/* harmony import */ var core_js_modules_es_array_filter__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_filter__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.array.find */ "./node_modules/core-js/modules/es.array.find.js");
+/* harmony import */ var core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var core_js_modules_es_array_index_of__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core-js/modules/es.array.index-of */ "./node_modules/core-js/modules/es.array.index-of.js");
+/* harmony import */ var core_js_modules_es_array_index_of__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_index_of__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var core_js_modules_es_array_map__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core-js/modules/es.array.map */ "./node_modules/core-js/modules/es.array.map.js");
+/* harmony import */ var core_js_modules_es_array_map__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_map__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
+/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_6__);
+
+
 
 
 
@@ -10250,11 +10468,46 @@ __webpack_require__.r(__webpack_exports__);
         });
         return bot && bot.tg ? bot.tg[field] || false : false;
       };
+    },
+    allowedBotList: function allowedBotList(state, getters, rootState) {
+      var currentUser = rootState.user.current;
+      var allowedBots = currentUser.botRights || [];
+      var anyBotAllowed = allowedBots.length === 0;
+      return state.list.filter(function (bot) {
+        return anyBotAllowed || allowedBots.indexOf(bot.botName) !== -1;
+      });
+    },
+    allowedBotListForSelect: function allowedBotListForSelect(state, getters) {
+      return getters.allowedBotList.map(function (bot) {
+        return {
+          text: bot.botName,
+          value: bot.botName
+        };
+      });
+    },
+    allowedBotNames: function allowedBotNames(state, getters) {
+      return getters.allowedBotList.map(function (bot) {
+        return bot.botName;
+      });
+    },
+    allowedBotFilter: function allowedBotFilter(state, getters) {
+      return function (botPropName) {
+        var filter = {};
+        var allowedBots = getters.allowedBotNames;
+
+        if (allowedBots.length > 0) {
+          filter[botPropName] = {
+            $in: allowedBots
+          };
+        }
+
+        return filter;
+      };
     }
   },
   actions: {
     loadBots: function loadBots(_ref, filter) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
         var commit, response;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
@@ -10262,7 +10515,7 @@ __webpack_require__.r(__webpack_exports__);
               case 0:
                 commit = _ref.commit;
                 _context.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_4___default.a.post("/api/bots/list", {
+                return axios__WEBPACK_IMPORTED_MODULE_6___default.a.post("/api/bots/list", {
                   filter: filter
                 });
 
@@ -10279,7 +10532,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     loadSettings: function loadSettings(_ref2, botName) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
         var commit, response;
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
@@ -10287,7 +10540,7 @@ __webpack_require__.r(__webpack_exports__);
               case 0:
                 commit = _ref2.commit;
                 _context2.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_4___default.a.post("/api/bots/getSettings", {
+                return axios__WEBPACK_IMPORTED_MODULE_6___default.a.post("/api/bots/getSettings", {
                   botName: botName
                 });
 
@@ -10304,7 +10557,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     saveSettings: function saveSettings(_ref3, settings) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
         var commit, response;
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
@@ -10312,7 +10565,7 @@ __webpack_require__.r(__webpack_exports__);
               case 0:
                 commit = _ref3.commit;
                 _context3.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_4___default.a.post("/api/bots/saveSettings", {
+                return axios__WEBPACK_IMPORTED_MODULE_6___default.a.post("/api/bots/saveSettings", {
                   settings: settings
                 });
 
@@ -10329,7 +10582,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     restartBots: function restartBots(_ref4, botNames) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
         var getters;
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
@@ -10341,7 +10594,7 @@ __webpack_require__.r(__webpack_exports__);
                   botNames = getters.botNames;
                 }
 
-                return _context4.abrupt("return", axios__WEBPACK_IMPORTED_MODULE_4___default.a.post("/api/bots/restart", {
+                return _context4.abrupt("return", axios__WEBPACK_IMPORTED_MODULE_6___default.a.post("/api/bots/restart", {
                   botNames: botNames
                 }));
 
@@ -10354,7 +10607,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     reloadBotAds: function reloadBotAds(_ref5, botNames) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee5() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee5() {
         var getters;
         return regeneratorRuntime.wrap(function _callee5$(_context5) {
           while (1) {
@@ -10366,7 +10619,7 @@ __webpack_require__.r(__webpack_exports__);
                   botNames = getters.botNames;
                 }
 
-                return _context5.abrupt("return", axios__WEBPACK_IMPORTED_MODULE_4___default.a.post("/api/bots/reloadAds", {
+                return _context5.abrupt("return", axios__WEBPACK_IMPORTED_MODULE_6___default.a.post("/api/bots/reloadAds", {
                   botNames: botNames
                 }));
 
@@ -10379,7 +10632,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     reloadBotMessages: function reloadBotMessages(_ref6, botNames) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee6() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee6() {
         var getters;
         return regeneratorRuntime.wrap(function _callee6$(_context6) {
           while (1) {
@@ -10391,7 +10644,7 @@ __webpack_require__.r(__webpack_exports__);
                   botNames = getters.botNames;
                 }
 
-                return _context6.abrupt("return", axios__WEBPACK_IMPORTED_MODULE_4___default.a.post("/api/bots/reloadMessages", {
+                return _context6.abrupt("return", axios__WEBPACK_IMPORTED_MODULE_6___default.a.post("/api/bots/reloadMessages", {
                   botNames: botNames
                 }));
 
@@ -10481,20 +10734,17 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var core_js_modules_es_array_filter__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.array.filter */ "./node_modules/core-js/modules/es.array.filter.js");
-/* harmony import */ var core_js_modules_es_array_filter__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_filter__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.array.find */ "./node_modules/core-js/modules/es.array.find.js");
-/* harmony import */ var core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var core_js_modules_es_object_to_string__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core-js/modules/es.object.to-string */ "./node_modules/core-js/modules/es.object.to-string.js");
-/* harmony import */ var core_js_modules_es_object_to_string__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_object_to_string__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var core_js_modules_es_regexp_to_string__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core-js/modules/es.regexp.to-string */ "./node_modules/core-js/modules/es.regexp.to-string.js");
-/* harmony import */ var core_js_modules_es_regexp_to_string__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_regexp_to_string__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
-/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var _var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_6__);
-
+/* harmony import */ var core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.array.find */ "./node_modules/core-js/modules/es.array.find.js");
+/* harmony import */ var core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_js_modules_es_object_to_string__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.object.to-string */ "./node_modules/core-js/modules/es.object.to-string.js");
+/* harmony import */ var core_js_modules_es_object_to_string__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_object_to_string__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var core_js_modules_es_regexp_to_string__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core-js/modules/es.regexp.to-string */ "./node_modules/core-js/modules/es.regexp.to-string.js");
+/* harmony import */ var core_js_modules_es_regexp_to_string__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_regexp_to_string__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
+/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_5__);
 
 
 
@@ -10510,7 +10760,7 @@ __webpack_require__.r(__webpack_exports__);
   actions: {
     loadMailings: function loadMailings(_ref) {
       var _arguments = arguments;
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_4__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
         var commit, filter, response;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
@@ -10519,7 +10769,7 @@ __webpack_require__.r(__webpack_exports__);
                 commit = _ref.commit;
                 filter = _arguments.length > 1 && _arguments[1] !== undefined ? _arguments[1] : {};
                 _context.next = 4;
-                return axios__WEBPACK_IMPORTED_MODULE_6___default.a.post("/api/mailing/list", {
+                return axios__WEBPACK_IMPORTED_MODULE_5___default.a.post("/api/mailing/list", {
                   filter: filter
                 });
 
@@ -10540,7 +10790,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     setCurrentMailing: function setCurrentMailing(_ref2, mailingId) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_4__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
         var commit, state, mailing;
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
@@ -10564,7 +10814,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     newMailing: function newMailing(_ref3, mailing) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_4__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
         var dispatch, state, result;
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
@@ -10572,14 +10822,14 @@ __webpack_require__.r(__webpack_exports__);
               case 0:
                 dispatch = _ref3.dispatch, state = _ref3.state;
                 _context3.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_6___default.a.post("/api/mailing/add", {
+                return axios__WEBPACK_IMPORTED_MODULE_5___default.a.post("/api/mailing/add", {
                   mailing: mailing
                 });
 
               case 3:
                 result = _context3.sent;
                 dispatch('setCurrentAd', result.data.mailing);
-                return _context3.abrupt("return", dispatch('loadMailings', state.filter));
+                return _context3.abrupt("return", dispatch('loadMailings', state.currentFilter));
 
               case 6:
               case "end":
@@ -10590,7 +10840,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     editMailing: function editMailing(_ref4, mailing) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_4__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
         var dispatch, state;
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
@@ -10598,12 +10848,12 @@ __webpack_require__.r(__webpack_exports__);
               case 0:
                 dispatch = _ref4.dispatch, state = _ref4.state;
                 _context4.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_6___default.a.post("/api/mailing/update", {
+                return axios__WEBPACK_IMPORTED_MODULE_5___default.a.post("/api/mailing/update", {
                   mailing: mailing
                 });
 
               case 3:
-                return _context4.abrupt("return", dispatch('loadMailings', state.filter));
+                return _context4.abrupt("return", dispatch('loadMailings', state.currentFilter));
 
               case 4:
               case "end":
@@ -10614,7 +10864,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     deleteMailing: function deleteMailing(_ref5, mailing) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee5() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_4__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee5() {
         var dispatch, commit, state;
         return regeneratorRuntime.wrap(function _callee5$(_context5) {
           while (1) {
@@ -10622,13 +10872,13 @@ __webpack_require__.r(__webpack_exports__);
               case 0:
                 dispatch = _ref5.dispatch, commit = _ref5.commit, state = _ref5.state;
                 _context5.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_6___default.a.post("/api/mailing/delete", {
+                return axios__WEBPACK_IMPORTED_MODULE_5___default.a.post("/api/mailing/delete", {
                   mailing: mailing
                 });
 
               case 3:
                 commit('setSuccessMessage', 'Рассылка удалена!');
-                return _context5.abrupt("return", dispatch('loadMailings', state.filter));
+                return _context5.abrupt("return", dispatch('loadMailings', state.currentFilter));
 
               case 5:
               case "end":
@@ -10639,7 +10889,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     archiveMailing: function archiveMailing(_ref6, mailing) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee6() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_4__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee6() {
         var dispatch, commit, state;
         return regeneratorRuntime.wrap(function _callee6$(_context6) {
           while (1) {
@@ -10647,13 +10897,13 @@ __webpack_require__.r(__webpack_exports__);
               case 0:
                 dispatch = _ref6.dispatch, commit = _ref6.commit, state = _ref6.state;
                 _context6.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_6___default.a.post("/api/mailing/archive", {
+                return axios__WEBPACK_IMPORTED_MODULE_5___default.a.post("/api/mailing/archive", {
                   mailing: mailing
                 });
 
               case 3:
                 commit('setSuccessMessage', 'Рассылка архивирована!');
-                return _context6.abrupt("return", dispatch('loadMailings', state.filter));
+                return _context6.abrupt("return", dispatch('loadMailings', state.currentFilter));
 
               case 5:
               case "end":
@@ -10664,7 +10914,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     startMailing: function startMailing(_ref7, mailing) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee7() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_4__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee7() {
         var dispatch, commit, response;
         return regeneratorRuntime.wrap(function _callee7$(_context7) {
           while (1) {
@@ -10673,7 +10923,7 @@ __webpack_require__.r(__webpack_exports__);
                 dispatch = _ref7.dispatch, commit = _ref7.commit;
                 _context7.prev = 1;
                 _context7.next = 4;
-                return axios__WEBPACK_IMPORTED_MODULE_6___default.a.post("/api/mailing/play", {
+                return axios__WEBPACK_IMPORTED_MODULE_5___default.a.post("/api/mailing/play", {
                   mailing: mailing
                 });
 
@@ -10707,7 +10957,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     stopMailing: function stopMailing(_ref8, mailing) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee8() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_4__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee8() {
         var dispatch, commit, response;
         return regeneratorRuntime.wrap(function _callee8$(_context8) {
           while (1) {
@@ -10716,7 +10966,7 @@ __webpack_require__.r(__webpack_exports__);
                 dispatch = _ref8.dispatch, commit = _ref8.commit;
                 _context8.prev = 1;
                 _context8.next = 4;
-                return axios__WEBPACK_IMPORTED_MODULE_6___default.a.post("/api/mailing/pause", {
+                return axios__WEBPACK_IMPORTED_MODULE_5___default.a.post("/api/mailing/pause", {
                   mailing: mailing
                 });
 
@@ -11278,6 +11528,193 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./src/store/modules/system.js":
+/*!*************************************!*\
+  !*** ./src/store/modules/system.js ***!
+  \*************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var core_js_modules_es_object_to_string__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.object.to-string */ "./node_modules/core-js/modules/es.object.to-string.js");
+/* harmony import */ var core_js_modules_es_object_to_string__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_object_to_string__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
+/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_3__);
+
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  state: {
+    serviceStatues: [],
+    systemOk: null,
+    lastError: null,
+    restartInProgress: false
+  },
+  actions: {
+    loadSystemStatus: function loadSystemStatus(_ref) {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+        var commit, response;
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                commit = _ref.commit;
+                _context.next = 3;
+                return axios__WEBPACK_IMPORTED_MODULE_3___default.a.get("/api/system/status");
+
+              case 3:
+                response = _context.sent;
+                return _context.abrupt("return", commit('setStatus', response.data));
+
+              case 5:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee);
+      }))();
+    },
+    restartSystem: function restartSystem(_ref2) {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
+        var commit, dispatch, response, isWaiting, waitTimeoutSec, waitTimeSec, pollIntervalMs, intervalId;
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                commit = _ref2.commit, dispatch = _ref2.dispatch;
+                _context3.next = 3;
+                return axios__WEBPACK_IMPORTED_MODULE_3___default.a.get("/api/system/restart");
+
+              case 3:
+                response = _context3.sent;
+                isWaiting = response.data.waiting;
+                commit('setRestartProgress', isWaiting);
+                waitTimeoutSec = 600;
+                waitTimeSec = 0;
+                pollIntervalMs = 10000;
+                intervalId = null;
+                return _context3.abrupt("return", new Promise(function (resolve, reject) {
+                  intervalId = setInterval( /*#__PURE__*/Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+                    var statusResponse, hasError, errorText;
+                    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+                      while (1) {
+                        switch (_context2.prev = _context2.next) {
+                          case 0:
+                            _context2.next = 2;
+                            return axios__WEBPACK_IMPORTED_MODULE_3___default.a.get("/api/system/restartStatus");
+
+                          case 2:
+                            statusResponse = _context2.sent;
+
+                            if (!(statusResponse.data.waiting === false)) {
+                              _context2.next = 22;
+                              break;
+                            }
+
+                            hasError = statusResponse.data.error !== null;
+                            clearInterval(intervalId);
+                            commit('setRestartProgress', false);
+
+                            if (!hasError) {
+                              _context2.next = 15;
+                              break;
+                            }
+
+                            _context2.next = 10;
+                            return commit('setErrorMessage', "\u041E\u0448\u0438\u0431\u043A\u0430 \u043F\u0435\u0440\u0435\u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0438: ".concat(statusResponse.data.error), {
+                              root: true
+                            });
+
+                          case 10:
+                            _context2.next = 12;
+                            return commit('setLastError', statusResponse.data.error);
+
+                          case 12:
+                            return _context2.abrupt("return", reject(statusResponse.data.error));
+
+                          case 15:
+                            _context2.next = 17;
+                            return commit('setSuccessMessage', 'Система успешно перезагружена!', {
+                              root: true
+                            });
+
+                          case 17:
+                            _context2.next = 19;
+                            return commit('setLastError', null);
+
+                          case 19:
+                            _context2.next = 21;
+                            return dispatch('loadSystemStatus');
+
+                          case 21:
+                            return _context2.abrupt("return", resolve());
+
+                          case 22:
+                            waitTimeSec += pollIntervalMs / 1000;
+
+                            if (!(waitTimeSec >= waitTimeoutSec)) {
+                              _context2.next = 33;
+                              break;
+                            }
+
+                            errorText = 'Превышено время ожидания перезагрузки системы!';
+                            clearInterval(intervalId);
+                            _context2.next = 28;
+                            return commit('setRestartProgress', false);
+
+                          case 28:
+                            _context2.next = 30;
+                            return commit('setErrorMessage', errorText, {
+                              root: true
+                            });
+
+                          case 30:
+                            _context2.next = 32;
+                            return commit('setLastError', errorText);
+
+                          case 32:
+                            return _context2.abrupt("return", reject(errorText));
+
+                          case 33:
+                          case "end":
+                            return _context2.stop();
+                        }
+                      }
+                    }, _callee2);
+                  })), pollIntervalMs);
+                }));
+
+              case 11:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3);
+      }))();
+    }
+  },
+  mutations: {
+    setStatus: function setStatus(state, status) {
+      state.systemOk = status.everythingOk;
+      state.serviceStatues = status.serviceStatuses;
+      state.lastError = status.error;
+    },
+    setRestartProgress: function setRestartProgress(state, isInProgress) {
+      state.restartInProgress = isInProgress;
+    },
+    setLastError: function setLastError(state, error) {
+      state.lastError = error;
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "./src/store/modules/user.js":
 /*!***********************************!*\
   !*** ./src/store/modules/user.js ***!
@@ -11322,8 +11759,24 @@ var LOGIN_TTL_SECONDS = 86400;
     },
     userHasRights: function userHasRights(state) {
       return function (right) {
-        return state.current && (right === 'home' || state.current.isAdmin || state.current.rights && state.current.rights.indexOf(right) !== -1);
+        var requiresAdmin = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+        var isAuthorized = Boolean(state.current);
+        var isAdmin = isAuthorized && state.current.isAdmin;
+
+        if (requiresAdmin) {
+          return isAdmin;
+        }
+
+        var isLoginPage = right === 'home';
+        var userHasRightsDefined = isAuthorized && state.current.rights && state.current.rights.length > 0;
+        var noRestrictionsDefined = !userHasRightsDefined;
+        var accessToPageAllowed = isAuthorized && state.current.rights && state.current.rights.indexOf(right) !== -1;
+        var hasRights = isAdmin || isLoginPage || noRestrictionsDefined || accessToPageAllowed;
+        return isAuthorized && hasRights;
       };
+    },
+    userHasBotsRestriction: function userHasBotsRestriction(state) {
+      return state.current && state.current.botRights && state.current.botRights.length > 0;
     }
   },
   actions: {
@@ -11654,16 +12107,13 @@ var LOGIN_TTL_SECONDS = 86400;
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var core_js_modules_es_array_filter__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.array.filter */ "./node_modules/core-js/modules/es.array.filter.js");
-/* harmony import */ var core_js_modules_es_array_filter__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_filter__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.array.find */ "./node_modules/core-js/modules/es.array.find.js");
-/* harmony import */ var core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
-/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_4__);
-
+/* harmony import */ var core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.array.find */ "./node_modules/core-js/modules/es.array.find.js");
+/* harmony import */ var core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
+/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_3__);
 
 
 
@@ -11678,7 +12128,7 @@ __webpack_require__.r(__webpack_exports__);
   actions: {
     loadVacancies: function loadVacancies(_ref) {
       var _arguments = arguments;
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
         var commit, filter, response;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
@@ -11687,7 +12137,7 @@ __webpack_require__.r(__webpack_exports__);
                 commit = _ref.commit;
                 filter = _arguments.length > 1 && _arguments[1] !== undefined ? _arguments[1] : {};
                 _context.next = 4;
-                return axios__WEBPACK_IMPORTED_MODULE_4___default.a.post("/api/vacancy/list", {
+                return axios__WEBPACK_IMPORTED_MODULE_3___default.a.post("/api/vacancy/list", {
                   filter: filter
                 });
 
@@ -11708,7 +12158,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     loadCategories: function loadCategories(_ref2) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
         var commit, response;
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
@@ -11716,7 +12166,7 @@ __webpack_require__.r(__webpack_exports__);
               case 0:
                 commit = _ref2.commit;
                 _context2.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_4___default.a.post("/api/vacancy/categories");
+                return axios__WEBPACK_IMPORTED_MODULE_3___default.a.post("/api/vacancy/categories");
 
               case 3:
                 response = _context2.sent;
@@ -11731,7 +12181,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     setCurrentVacancy: function setCurrentVacancy(_ref3, vacancyId) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
         var commit, state, vacancy;
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
@@ -11755,7 +12205,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     newVacancy: function newVacancy(_ref4, vacancy) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
         var dispatch, state, result;
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
@@ -11763,14 +12213,14 @@ __webpack_require__.r(__webpack_exports__);
               case 0:
                 dispatch = _ref4.dispatch, state = _ref4.state;
                 _context4.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_4___default.a.post("/api/vacancy/add", {
+                return axios__WEBPACK_IMPORTED_MODULE_3___default.a.post("/api/vacancy/add", {
                   vacancy: vacancy
                 });
 
               case 3:
                 result = _context4.sent;
                 dispatch('setCurrentVacancy', result.data.vacancy);
-                return _context4.abrupt("return", dispatch('loadVacancies', state.filter));
+                return _context4.abrupt("return", dispatch('loadVacancies', state.currentFilter));
 
               case 6:
               case "end":
@@ -11781,7 +12231,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     editVacancy: function editVacancy(_ref5, vacancy) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee5() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee5() {
         var dispatch, state;
         return regeneratorRuntime.wrap(function _callee5$(_context5) {
           while (1) {
@@ -11789,12 +12239,12 @@ __webpack_require__.r(__webpack_exports__);
               case 0:
                 dispatch = _ref5.dispatch, state = _ref5.state;
                 _context5.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_4___default.a.post("/api/vacancy/update", {
+                return axios__WEBPACK_IMPORTED_MODULE_3___default.a.post("/api/vacancy/update", {
                   vacancy: vacancy
                 });
 
               case 3:
-                return _context5.abrupt("return", dispatch('loadVacancies', state.filter));
+                return _context5.abrupt("return", dispatch('loadVacancies', state.currentFilter));
 
               case 4:
               case "end":
@@ -11805,7 +12255,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     deleteVacancy: function deleteVacancy(_ref6, vacancy) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee6() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee6() {
         var dispatch, state;
         return regeneratorRuntime.wrap(function _callee6$(_context6) {
           while (1) {
@@ -11813,12 +12263,12 @@ __webpack_require__.r(__webpack_exports__);
               case 0:
                 dispatch = _ref6.dispatch, state = _ref6.state;
                 _context6.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_4___default.a.post("/api/vacancy/delete", {
+                return axios__WEBPACK_IMPORTED_MODULE_3___default.a.post("/api/vacancy/delete", {
                   vacancy: vacancy
                 });
 
               case 3:
-                return _context6.abrupt("return", dispatch('loadVacancies', state.filter));
+                return _context6.abrupt("return", dispatch('loadVacancies', state.currentFilter));
 
               case 4:
               case "end":

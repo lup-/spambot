@@ -21,15 +21,15 @@ export default {
         async newAd({dispatch, state}, ad) {
             let result = await axios.post(`/api/amsg/add`, {ad});
             dispatch('setCurrentAd', result.data.ad);
-            return dispatch('loadAds', state.filter);
+            return dispatch('loadAds', state.currentFilter);
         },
         async editAd({dispatch, state}, ad) {
             await axios.post(`/api/amsg/update`, {ad});
-            return dispatch('loadAds', state.filter);
+            return dispatch('loadAds', state.currentFilter);
         },
         async deleteAd({dispatch, state}, ad) {
             await axios.post(`/api/amsg/delete`, {ad});
-            return dispatch('loadAds', state.filter);
+            return dispatch('loadAds', state.currentFilter);
         },
     },
     mutations: {

@@ -109,7 +109,7 @@ function getSalary(item) {
 }
 function getLocalFullItemDescription(item) {
     return __(`<b>${item.name}</b>
-${item.city}
+${item.city || ''}
 
 <b>Оплата:</b>
 ${getSalary(item)}
@@ -137,7 +137,7 @@ function getFullItemDescription(item) {
         .replace(/\n+$/sg, '');
 
     return __(`<b>${item.name}</b>
-${item.employer ? item.employer.name : ''}
+${item.employer ? item.employer.name || '' : ''}
 
 <b>Оплата:</b>
 ${getSalary(item)}
@@ -149,7 +149,7 @@ ${getContacts(item)}`, ['content', 'vacancy', 'job', 'full']);
 }
 function getLocalItemDescription(item) {
     return __(`<b>${item.name}</b>
-${item.city}
+${item.city || ''}
 
 <b>Оплата:</b>
 ${getSalary(item)}

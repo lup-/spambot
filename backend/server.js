@@ -12,6 +12,7 @@ const mailings = require('./routes/mailings');
 const vacancies = require('./routes/vacancies');
 const users = require('./routes/users');
 const files = require('./routes/files');
+const system = require('./routes/system');
 
 const plumcoreCourses = require('./routes/plumcore/courses');
 const plumcoreCategories = require('./routes/plumcore/categories');
@@ -87,6 +88,10 @@ router
     .post('/api/file/link', upload.single('file'), files.getLink.bind(files))
     .post('/api/file/delete', files.deleteFile.bind(files));
 
+router
+    .get('/api/system/status', system.status.bind(system))
+    .get('/api/system/restart', system.restart.bind(system))
+    .get('/api/system/restartStatus', system.restartStatus.bind(system));
 
 router
     .post('/api/plumcore/course/list', plumcoreCourses.list)

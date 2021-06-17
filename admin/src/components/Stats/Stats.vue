@@ -71,7 +71,8 @@
         methods: {
             async loadStats() {
                 this.isLoading = true;
-                await this.$store.dispatch('loadStats', {});
+                let filter = this.$store.getters.allowedBotFilter('botId');
+                await this.$store.dispatch('loadStats', filter);
                 this.isLoading = false;
             },
             gotoBotStats(botId) {

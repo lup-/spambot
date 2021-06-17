@@ -7,6 +7,17 @@
                     <v-card-text>
                         <v-text-field readonly v-if="!isNew" :value="linkTemplate"></v-text-field>
                         <v-form autocomplete="off">
+                            <v-autocomplete
+                                    :items="bots"
+                                    v-model="vacancy.bots"
+                                    chips
+                                    deletable-chips
+                                    multiple
+                                    label="Боты"
+                                    hint="Если не указано, публикуется во всех доступных"
+                                    persistent-hint
+                            ></v-autocomplete>
+
                             <v-switch v-model="vacancy.remote" label="Удаленка"></v-switch>
                             <v-switch v-model="vacancy.internship" label="Стажировка"></v-switch>
 
@@ -184,6 +195,11 @@
         },
         methods: {
             async save() {
+                let noBotsSpecified = !this.vacancy.bots;
+                if (this.$store.getters.userHasBotsRestriction && noBotsSpecified) {
+                    this.vacancy.bots = this.$store.getters.allowedBotNames;
+                }
+
                 if (this.isNew) {
                     await this.$store.dispatch('newVacancy', this.vacancy);
                 }
@@ -225,7 +241,10 @@
             },
             linkTemplate() {
                 return `https://t.me/${this.botId}?start=<ref>=${this.vacancyId}`;
-            }
+            },
+            bots() {
+                return this.$store.getters.allowedBotListForSelect;
+            },
         }
     }
 </script>

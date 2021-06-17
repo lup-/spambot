@@ -1,0 +1,3 @@
+#!/bin/bash
+chmod 600 $RESTART_KEYFILE
+ssh $RESTART_LOCATION -o "StrictHostKeyChecking no" -i $RESTART_KEYFILE $REMOTE_RESTART_SCRIPT

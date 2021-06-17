@@ -55,7 +55,8 @@
             },
             async loadVacancies() {
                 this.isLoading = true;
-                await this.$store.dispatch('loadVacancies', {});
+                let filter = this.$store.getters.allowedBotFilter('bots');
+                await this.$store.dispatch('loadVacancies', filter);
                 this.isLoading = false;
             },
             gotoVacancyEdit(id) {

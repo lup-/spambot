@@ -21,21 +21,21 @@ export default {
         async newMailing({dispatch, state}, mailing) {
             let result = await axios.post(`/api/mailing/add`, {mailing});
             dispatch('setCurrentAd', result.data.mailing);
-            return dispatch('loadMailings', state.filter);
+            return dispatch('loadMailings', state.currentFilter);
         },
         async editMailing({dispatch, state}, mailing) {
             await axios.post(`/api/mailing/update`, {mailing});
-            return dispatch('loadMailings', state.filter);
+            return dispatch('loadMailings', state.currentFilter);
         },
         async deleteMailing({dispatch, commit, state}, mailing) {
             await axios.post(`/api/mailing/delete`, {mailing});
             commit('setSuccessMessage', 'Рассылка удалена!');
-            return dispatch('loadMailings', state.filter);
+            return dispatch('loadMailings', state.currentFilter);
         },
         async archiveMailing({dispatch, commit, state}, mailing) {
             await axios.post(`/api/mailing/archive`, {mailing});
             commit('setSuccessMessage', 'Рассылка архивирована!');
-            return dispatch('loadMailings', state.filter);
+            return dispatch('loadMailings', state.currentFilter);
         },
         async startMailing({dispatch, commit}, mailing) {
             try {

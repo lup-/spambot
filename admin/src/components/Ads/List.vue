@@ -1,6 +1,6 @@
 <template>
-    <v-container class="fill-height" :class="{'align-start': !isEmpty && !isLoading}">
-        <v-row :align="isEmpty || isLoading ? 'center' : 'start'" :justify="isEmpty || isLoading ? 'center' : 'start'">
+    <v-container class="fill-height align-start">
+        <v-row align="start" :justify="isEmpty || isLoading ? 'center' : 'start'">
             <v-btn fab bottom right fixed large color="primary"
                     @click="$router.push({name: 'adsNew'})"
             >
@@ -51,7 +51,7 @@
                     </template>
                 </v-data-iterator>
             </v-col>
-            <v-col cols="12">
+            <v-col cols="12" v-if="$store.state.user.current.isAdmin">
                 <v-btn color="danger" @click="reloadBotAds">Перегрузить сообщения в ботах</v-btn>
             </v-col>
         </v-row>
@@ -75,7 +75,8 @@
             },
             async loadAds() {
                 this.isLoading = true;
-                await this.$store.dispatch('loadAds', {});
+                let filter = this.$store.getters.allowedBotFilter('bots');
+                await this.$store.dispatch('loadAds', filter);
                 this.isLoading = false;
             },
             async reloadBotAds() {

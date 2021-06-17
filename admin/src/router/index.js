@@ -10,7 +10,7 @@ const router = new VueRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-    if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (to.matched.some(record => record.meta.requiresAuth || record.meta.requiresAdmin)) {
         await store.dispatch('loginLocalUser');
         let isNotLoggedIn = !store.getters.isLoggedIn;
         let loginTo = {
@@ -23,8 +23,11 @@ router.beforeEach(async (to, from, next) => {
         }
         else {
             let routeGroup = to.matched && to.matched[0] ? to.matched[0].meta.group : false;
+            let requiresAdmin = to.matched && to.matched[0] ? to.matched[0].meta.requiresAdmin : false;
 
-            if (routeGroup && store.getters.userHasRights(routeGroup)) {
+            let userHasRights = routeGroup && store.getters.userHasRights(routeGroup, requiresAdmin);
+
+            if (userHasRights) {
                 next();
             }
             else {

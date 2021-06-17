@@ -1,0 +1,3 @@
+#!/bin/bash
+chmod 600 $STATUS_KEYFILE
+ssh $STATUS_LOCATION -o "StrictHostKeyChecking no" -i $STATUS_KEYFILE $REMOTE_STATUS_SCRIPT

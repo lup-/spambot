@@ -4,7 +4,10 @@ const {markMessageToDelete} = require('../../../modules/deleteMessageMiddleware'
 const EMPTY_FILE = {source: new Buffer('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64')};
 
 function markCatalogMessage(ctx, message) {
-    ctx.session.catalogMessage = message;
+    if (ctx.session) {
+        ctx.session.catalogMessage = message;
+    }
+
     return message;
 }
 

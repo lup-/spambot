@@ -1,0 +1,4 @@
+GET http://localhost:8192/api/system/status
+Accept: application/json
+
+###

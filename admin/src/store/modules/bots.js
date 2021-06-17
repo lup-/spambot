@@ -14,6 +14,34 @@ export default {
                 let bot = state.list.find(bot => bot.id === botId);
                 return bot && bot.tg ? bot.tg[field] || false : false;
             }
+        },
+        allowedBotList(state, getters, rootState) {
+            let currentUser = rootState.user.current;
+            let allowedBots = currentUser.botRights || [];
+            let anyBotAllowed = allowedBots.length === 0;
+
+            return state.list.filter(bot => {
+                return anyBotAllowed || allowedBots.indexOf(bot.botName) !== -1;
+            });
+        },
+        allowedBotListForSelect(state, getters) {
+            return getters.allowedBotList.map(bot => {
+                return {text: bot.botName, value: bot.botName};
+            });
+        },
+        allowedBotNames(state, getters) {
+            return getters.allowedBotList.map(bot => bot.botName);
+        },
+        allowedBotFilter(state, getters) {
+            return botPropName => {
+                let filter = {};
+                let allowedBots = getters.allowedBotNames;
+                if (allowedBots.length > 0) {
+                    filter[botPropName] = {$in: allowedBots};
+                }
+
+                return filter;
+            }
         }
     },
     actions: {

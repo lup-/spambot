@@ -16,14 +16,27 @@ export default {
             return state.current && state.current.id;
         },
         userHasRights(state) {
-            return (right) => {
-                return state.current && (
-                    right === 'home' ||
-                    state.current.isAdmin || (
-                        state.current.rights && state.current.rights.indexOf(right) !== -1
-                    )
-                );
+            return (right, requiresAdmin = false) => {
+                let isAuthorized = Boolean(state.current);
+                let isAdmin = isAuthorized && state.current.isAdmin;
+
+                if (requiresAdmin) {
+                    return isAdmin;
+                }
+
+                let isLoginPage = right === 'home';
+
+                let userHasRightsDefined = isAuthorized && state.current.rights && state.current.rights.length > 0;
+                let noRestrictionsDefined = !userHasRightsDefined;
+                let accessToPageAllowed = isAuthorized && state.current.rights && state.current.rights.indexOf(right) !== -1;
+
+                let hasRights = isAdmin || isLoginPage || noRestrictionsDefined || accessToPageAllowed;
+
+                return isAuthorized && hasRights;
             }
+        },
+        userHasBotsRestriction(state) {
+            return state.current && state.current.botRights && state.current.botRights.length > 0;
         }
     },
     actions: {

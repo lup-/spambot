@@ -18,6 +18,10 @@ module.exports = {
             : {};
 
         let bots = await config.botList();
+        if (filter && filter.botId && filter.botId['$in'] && filter.botId['$in'].length > 0) {
+            bots = bots.filter(bot => filter.botId['$in'].indexOf(bot.id) !== -1);
+        }
+
         for (const bot of bots) {
             let db = await getDb(bot.dbName);
             let users = db.collection('users');
@@ -159,7 +163,7 @@ module.exports = {
                 let activeUserCount = activeUsersResult.find(item => item.tag === tag);
 
                 let count = userCount && userCount['count'] ? userCount['count'] : 0;
-                let total = totalUsersResult && totalUsersResult[0][`count_${index}`] || 0;
+                let total = totalUsersResult && totalUsersResult[0] && totalUsersResult[0][`count_${index}`] || 0;
                 let active = activeUserCount && activeUserCount['count'] ? activeUserCount['count'] : 0;
 
                 return {tag, count, active, total};

@@ -612,6 +612,8 @@ services:
       - MONGO_DB=workhant_bot
       - BOT_NAME=workhant_bot
       - BOT_TOKEN=${WORKHANT_BOT_TOKEN}
+      - SKIP_HH=${WORKHANT_SKIP_HH}
+      - RESTRICT_LOCAL_VACANCIES_TO_BOT=${WORKHANT_RESTRICT_LOCAL_VACANCIES_TO_BOT}
       - NODE_TLS_REJECT_UNAUTHORIZED=0
       - 'HH_FILTER={"text": "NOT МТС"}'
     command: node bots/vacancies.js
@@ -633,6 +635,8 @@ services:
       - MONGO_DB=traineeship_bot
       - BOT_NAME=traineeship_bot
       - BOT_TOKEN=${TRAINEESHIP_BOT_TOKEN}
+      - SKIP_HH=${TRAINEESHIP_SKIP_HH}
+      - RESTRICT_LOCAL_VACANCIES_TO_BOT=${TRAINEESHIP_RESTRICT_LOCAL_VACANCIES_TO_BOT}
       - NODE_TLS_REJECT_UNAUTHORIZED=0
       - 'HH_FILTER={"employment": "probation", "text": "NOT МТС"}'
     command: node bots/vacancies.js
@@ -654,6 +658,8 @@ services:
       - MONGO_DB=beembam_bot
       - BOT_NAME=beembam_bot
       - BOT_TOKEN=${BEEMBAM_BOT_TOKEN}
+      - SKIP_HH=${BEEMBAM_SKIP_HH}
+      - RESTRICT_LOCAL_VACANCIES_TO_BOT=${BEEMBAM_RESTRICT_LOCAL_VACANCIES_TO_BOT}
       - NODE_TLS_REJECT_UNAUTHORIZED=0
       - 'HH_FILTER={"schedule": "remote", "text": "NOT МТС"}'
     command: node bots/vacancies.js
@@ -833,6 +839,18 @@ services:
       - type: bind
         source: ./.env
         target: /var/.env
+      - type: bind
+        source: ${BACKEND_RESTART_KEYFILE}
+        target: /var/backend/restart.key
+      - type: bind
+        source: ./etc/scripts/restart_from_docker.sh
+        target: /var/backend/restart.sh
+      - type: bind
+        source: ${BACKEND_STATUS_KEYFILE}
+        target: /var/backend/status.key
+      - type: bind
+        source: ./etc/scripts/status_from_docker.sh
+        target: /var/backend/status.sh
     working_dir: /var/backend
     environment:
       - NODE_ENV=development
@@ -846,6 +864,14 @@ services:
       - IMGBB_TOKEN=${IMGBB_TOKEN}
       - UPLOAD_DIR=/var/backend/uploads
       - BASE_DOWNLOAD_URL=${BASE_DOWNLOAD_URL}
+      - RESTART_LOCATION=${BACKEND_RESTART_LOCATION}
+      - REMOTE_RESTART_SCRIPT=${BACKEND_RESTART_SCRIPT}
+      - RESTART_KEYFILE=/var/backend/restart.key
+      - RESTART_SCRIPT=/var/backend/restart.sh
+      - STATUS_LOCATION=${BACKEND_STATUS_LOCATION}
+      - REMOTE_STATUS_SCRIPT=${BACKEND_STATUS_SCRIPT}
+      - STATUS_KEYFILE=/var/backend/status.key
+      - STATUS_SCRIPT=/var/backend/status.sh
     command: npm run debug
 
   userbot:

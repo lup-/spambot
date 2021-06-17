@@ -370,12 +370,24 @@ services:
       - type: bind
         source: ./.env
         target: /var/.env
+      - type: bind
+        source: ${BACKEND_RESTART_KEYFILE}
+        target: /var/backend/restart.key
+      - type: bind
+        source: ./etc/scripts/restart_from_docker.sh
+        target: /var/backend/restart.sh
+      - type: bind
+        source: ${BACKEND_STATUS_KEYFILE}
+        target: /var/backend/status.key
+      - type: bind
+        source: ./etc/scripts/status_from_docker.sh
+        target: /var/backend/status.sh
     working_dir: /var/backend
     environment:
       - NODE_ENV=development
-#      - MONGO_HOST=spambot_mongo
-      - MONGO_HOST=192.168.80.1
-      - MONGO_PORT=27272
+      - MONGO_HOST=spambot_mongo
+#      - MONGO_HOST=192.168.80.1
+#      - MONGO_PORT=27272
       - MONGO_DB=botofarmer
       - REDIS_HOST=spambot_redis
       - PG_HOST=${PG_HOST}
@@ -385,4 +397,12 @@ services:
       - IMGBB_TOKEN=${IMGBB_TOKEN}
       - UPLOAD_DIR=/var/backend/uploads
       - BASE_DOWNLOAD_URL=${BASE_DOWNLOAD_URL}
+      - RESTART_LOCATION=${BACKEND_RESTART_LOCATION}
+      - REMOTE_RESTART_SCRIPT=${BACKEND_RESTART_SCRIPT}
+      - RESTART_KEYFILE=/var/backend/restart.key
+      - RESTART_SCRIPT=/var/backend/restart.sh
+      - STATUS_LOCATION=${BACKEND_STATUS_LOCATION}
+      - REMOTE_STATUS_SCRIPT=${BACKEND_STATUS_SCRIPT}
+      - STATUS_KEYFILE=/var/backend/status.key
+      - STATUS_SCRIPT=/var/backend/status.sh
     command: npm run debug

@@ -378,6 +378,18 @@
                 mailing.videos = this.videos;
                 mailing.buttons = this.buttons;
 
+                let userHasBotRestriction = this.$store.getters.userHasBotsRestriction;
+                let botTarget = mailing.target.find(target => target.type === 'bots');
+                let noBotTargetSpecified = !botTarget;
+
+                if (userHasBotRestriction && noBotTargetSpecified) {
+                    mailing.target.push({
+                        type: 'bots',
+                        cmp: false,
+                        value: this.$store.getters.allowedBotNames,
+                    });
+                }
+
                 return mailing;
             },
             async save() {
@@ -594,9 +606,7 @@
                 return this.$store.state.mailing.list;
             },
             bots() {
-                return this.$store.state.bots.list.map(bot => {
-                    return {text: bot.botName, value: bot.botName};
-                });
+                return this.$store.getters.allowedBotListForSelect;
             },
             targetIsDate() {
                 return this.targetType !== 'bots';

@@ -31,6 +31,14 @@
                                     multiple
                                     label="Права доступа"
                             ></v-autocomplete>
+                            <v-autocomplete
+                                    :items="bots"
+                                    v-model="user.botRights"
+                                    chips
+                                    deletable-chips
+                                    multiple
+                                    label="Ограничить доступ к ботам"
+                            ></v-autocomplete>
                         </v-form>
                     </v-card-text>
                     <v-card-actions>
@@ -115,7 +123,10 @@
             },
             currentUser() {
                 return this.$store.state.user.current;
-            }
+            },
+            bots() {
+                return this.$store.getters.allowedBotListForSelect;
+            },
         }
     }
 </script>

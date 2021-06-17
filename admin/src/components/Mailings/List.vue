@@ -107,11 +107,13 @@
             },
             async loadMailings() {
                 this.isLoading = true;
-                await this.$store.dispatch('loadMailings', {});
+                let filter = this.$store.getters.allowedBotFilter('target.value');
+                await this.$store.dispatch('loadMailings', filter);
                 this.isLoading = false;
             },
             async silentLoadMailings() {
-                await this.$store.dispatch('loadMailings', {});
+                let filter = this.$store.getters.allowedBotFilter('target.value');
+                await this.$store.dispatch('loadMailings', filter);
             },
             gotoMailingEdit(id) {
                 this.$router.push({name: 'mailingEdit', params: {id}});

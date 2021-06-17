@@ -5,6 +5,9 @@ const moment = require('moment');
 
 const HH_API_BASE = `https://api.hh.ru/`;
 const VACANCIES_DB = process.env.VACANCIES_DB || 'vacancies';
+const SKIP_HH = process.env.SKIP_HH === '1';
+const RESTRICT_LOCAL_VACANCIES_TO_BOT = process.env.RESTRICT_LOCAL_VACANCIES_TO_BOT === '1';
+const BOT_NAME = process.env.BOT_NAME;
 
 module.exports = function () {
     return {
@@ -46,7 +49,13 @@ module.exports = function () {
         },
         async getLocalVacancies(categoryIds, params) {
             let db = await getDb(VACANCIES_DB);
-            let query = {categories: {$in: categoryIds}};
+            let query = categoryIds && categoryIds.length > 0
+                ? {categories: {$in: categoryIds}}
+                : {};
+
+            if (RESTRICT_LOCAL_VACANCIES_TO_BOT) {
+                query['bots'] = BOT_NAME;
+            }
 
             if (params && params.schedule && params.schedule === 'remote') {
                 query['remote'] = true;
@@ -86,7 +95,7 @@ module.exports = function () {
         async getVacancies(categoryIds, index, params, skipHH = false) {
             let localVacancies = await this.getLocalVacancies(categoryIds, params);
             if (skipHH) {
-                return localVacancies;
+                return {vacancies: localVacancies, totalVacancies: localVacancies.length};
             }
 
             let joinedVacancies = [].concat(localVacancies);
@@ -177,7 +186,7 @@ module.exports = function () {
 
             let needLoadVacancies = (savedVacancies === false) || (savedVacancies && savedVacancies.length-1 < index);
             if (needLoadVacancies) {
-                let {vacancies, totalVacancies} = await this.getVacancies(categoryIds, index, params);
+                let {vacancies, totalVacancies} = await this.getVacancies(categoryIds, index, params, SKIP_HH);
                 totalItems = totalVacancies;
                 savedVacancies = savedVacancies
                     ? savedVacancies.concat(vacancies)
@@ -186,7 +195,7 @@ module.exports = function () {
                 ctx.scene.state.totalItems = totalItems;
             }
 
-            let brief = savedVacancies[index] || false;
+            let brief = savedVacancies ? savedVacancies[index] || false : false;
             let item = brief;
 
             let hasNext = index < totalItems-1;

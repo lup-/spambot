@@ -4,6 +4,7 @@ export default {
     state: {
         list: [],
         categories: [],
+        customCategories: [],
         current: false,
         currentFilter: {}
     },
@@ -16,6 +17,10 @@ export default {
         async loadCategories({commit}) {
             let response = await axios.post(`/api/vacancy/categories`);
             return commit('setCategories', response.data.categories);
+        },
+        async loadCustomCategories({commit}, botNames) {
+            let response = await axios.post(`/api/vacancy/customCategories`, {botNames});
+            return commit('setCustomCategories', response.data.categories);
         },
         async setCurrentVacancy({commit, state}, vacancyId) {
             let vacancy = state.list.find(item => item.id === vacancyId);
@@ -43,6 +48,9 @@ export default {
         },
         setCategories(state, categories) {
             state.categories = categories;
+        },
+        setCustomCategories(state, categories) {
+            state.customCategories = categories;
         },
         setCurrentVacancy(state, vacancy) {
             state.current = vacancy;

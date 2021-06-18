@@ -22,7 +22,12 @@
                                     autocomplete="new-password"
                                     @click:append="showPassword = !showPassword"
                             ></v-text-field>
+                            <v-text-field
+                                    v-model="user.telegramId"
+                                    label="ID в Telegram"
+                            ></v-text-field>
                             <v-switch v-model="user.isAdmin" label="Администратор" v-if="hasRights('usersList')"></v-switch>
+                            <v-switch v-model="user.canCreateMailingFromBot" label="Может создавать рассылки из бота" v-if="hasRights('usersList')"></v-switch>
                             <v-autocomplete v-if="hasRights('usersList')"
                                     :items="rights"
                                     v-model="user.rights"

@@ -6,7 +6,6 @@ const moment = require('moment');
 const HH_API_BASE = `https://api.hh.ru/`;
 const VACANCIES_DB = process.env.VACANCIES_DB || 'vacancies';
 const SKIP_HH = process.env.SKIP_HH === '1';
-const RESTRICT_LOCAL_VACANCIES_TO_BOT = process.env.RESTRICT_LOCAL_VACANCIES_TO_BOT === '1';
 const BOT_NAME = process.env.BOT_NAME;
 
 module.exports = function () {
@@ -21,7 +20,31 @@ module.exports = function () {
             let results = await axios.get(url, config);
             return results.data;
         },
+        async getLocalCatalogCategories() {
+            const db = await getDb(VACANCIES_DB);
+            let botCategories = await db.collection('vacancies').aggregate([
+                {$unwind: "$bots"},
+                {$match: {bots: BOT_NAME}},
+                {$unwind: "$categories"},
+                {$group: {
+                        "_id": "$bots",
+                        "bot": {$first: "$bots"},
+                        "categories": {$addToSet: "$categories"}
+                    }}
+            ]).toArray();
+
+            return botCategories && botCategories[0] && botCategories[0].categories
+                ? botCategories[0].categories.map(text => ({id: text, title: text}))
+                : [];
+        },
         async getCatalogCategories() {
+            let settingsDb = await getDb('botofarmer');
+            let settings = await settingsDb.collection('botSettings').findOne({botName: BOT_NAME});
+
+            if (settings.restrictToBot) {
+                return this.getLocalCatalogCategories();
+            }
+
             let specs = await this.getHH('specializations');
 
             return specs.map(spec => {
@@ -49,20 +72,24 @@ module.exports = function () {
         },
         async getLocalVacancies(categoryIds, params) {
             let db = await getDb(VACANCIES_DB);
+            let settingsDb = await getDb('botofarmer');
             let query = categoryIds && categoryIds.length > 0
                 ? {categories: {$in: categoryIds}}
                 : {};
 
-            if (RESTRICT_LOCAL_VACANCIES_TO_BOT) {
+            let settings = await settingsDb.collection('botSettings').findOne({botName: BOT_NAME});
+
+            if (settings.restrictToBot) {
                 query['bots'] = BOT_NAME;
             }
+            else {
+                if (params && params.schedule && params.schedule === 'remote') {
+                    query['remote'] = true;
+                }
 
-            if (params && params.schedule && params.schedule === 'remote') {
-                query['remote'] = true;
-            }
-
-            if (params && params.employment && params.employment === 'probation') {
-                query['internship'] = true;
+                if (params && params.employment && params.employment === 'probation') {
+                    query['internship'] = true;
+                }
             }
 
             let vacancies = await db.collection('vacancies').aggregate([

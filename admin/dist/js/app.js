@@ -740,22 +740,35 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Stats_Stats__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Stats/Stats */ "./src/components/Stats/Stats.vue");
-/* harmony import */ var _Vacancies_List__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Vacancies/List */ "./src/components/Vacancies/List.vue");
+/* harmony import */ var _components_Ads_List__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../components/Ads/List */ "./src/components/Ads/List.vue");
+/* harmony import */ var _components_Mailings_List__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../components/Mailings/List */ "./src/components/Mailings/List.vue");
+/* harmony import */ var _components_RefUsers_List__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../components/RefUsers/List */ "./src/components/RefUsers/List.vue");
+/* harmony import */ var _components_Vacancies_List__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../components/Vacancies/List */ "./src/components/Vacancies/List.vue");
+/* harmony import */ var _components_Users_List__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../components/Users/List */ "./src/components/Users/List.vue");
 //
 //
 //
 //
+
+
+
+
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   components: {
     Stats: _Stats_Stats__WEBPACK_IMPORTED_MODULE_0__["default"],
-    VacanciesList: _Vacancies_List__WEBPACK_IMPORTED_MODULE_1__["default"]
+    AdsList: _components_Ads_List__WEBPACK_IMPORTED_MODULE_1__["default"],
+    MailingsList: _components_Mailings_List__WEBPACK_IMPORTED_MODULE_2__["default"],
+    RefUsersList: _components_RefUsers_List__WEBPACK_IMPORTED_MODULE_3__["default"],
+    VacanciesList: _components_Vacancies_List__WEBPACK_IMPORTED_MODULE_4__["default"],
+    UsersList: _components_Users_List__WEBPACK_IMPORTED_MODULE_5__["default"]
   },
   computed: {
     defaultComponent: function defaultComponent() {
-      var hasStatsRights = this.$store.getters.userHasRights('stats');
-      return hasStatsRights ? 'Stats' : 'VacanciesList';
+      var allRoutes = this.$store.state.routes;
+      var defaultRoute = this.$store.getters.allowedRoutes(allRoutes)[0];
+      return defaultRoute.componentName || 'Stats';
     }
   }
 });
@@ -1975,24 +1988,28 @@ function clone(obj) {
     archiveMailing: function archiveMailing(mailing) {
       this.$store.dispatch('archiveMailing', mailing);
     },
+    getFilter: function getFilter() {
+      var hasBotRestrictions = this.$store.state.user.current && this.$store.state.user.current.botRights && this.$store.state.user.current.botRights.length > 0;
+      var showAllBotsMailings = !hasBotRestrictions;
+      var filterSingleBot = hasBotRestrictions && this.$store.state.user.current.botRights.length === 1;
+      return this.$store.getters.allowedBotFilter('target.value', filterSingleBot, showAllBotsMailings);
+    },
     loadMailings: function loadMailings() {
       var _this3 = this;
 
       return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_9__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
-        var filter;
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
                 _this3.isLoading = true;
-                filter = _this3.$store.getters.allowedBotFilter('target.value');
-                _context3.next = 4;
-                return _this3.$store.dispatch('loadMailings', filter);
+                _context3.next = 3;
+                return _this3.$store.dispatch('loadMailings', _this3.getFilter());
 
-              case 4:
+              case 3:
                 _this3.isLoading = false;
 
-              case 5:
+              case 4:
               case "end":
                 return _context3.stop();
             }
@@ -2004,16 +2021,14 @@ function clone(obj) {
       var _this4 = this;
 
       return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_9__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
-        var filter;
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
               case 0:
-                filter = _this4.$store.getters.allowedBotFilter('target.value');
-                _context4.next = 3;
-                return _this4.$store.dispatch('loadMailings', filter);
+                _context4.next = 2;
+                return _this4.$store.dispatch('loadMailings', _this4.getFilter());
 
-              case 3:
+              case 2:
               case "end":
                 return _context4.stop();
             }
@@ -2872,13 +2887,85 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "BotSettings",
   data: function data() {
     return {
       settings: {},
       needsSubscription: [],
-      defaultSettings: {}
+      defaultSettings: {},
+      botTypes: [{
+        text: 'Поиск книг',
+        value: 'books'
+      }, {
+        text: 'Стартапы и бизнес-идеи',
+        value: 'business'
+      }, {
+        text: 'Купоны и скидки',
+        value: 'coupons'
+      }, {
+        text: 'Знакомства',
+        value: 'dating'
+      }, {
+        text: 'Энциклопедия болезней',
+        value: 'disease'
+      }, {
+        text: 'Энциклопедия фамилий',
+        value: 'familyname'
+      }, {
+        text: 'Фильмы и сериалы',
+        value: 'film'
+      }, {
+        text: 'Финансовые советы (подписка)',
+        value: 'finance'
+      }, {
+        text: 'Финансовые советы (каталог)',
+        value: 'fincat'
+      }, {
+        text: 'Гороскопы',
+        value: 'horoscope'
+      }, {
+        text: 'Генератор ссылок',
+        value: 'linker'
+      }, {
+        text: 'Проверка текста',
+        value: 'orfo'
+      }, {
+        text: 'ПДД',
+        value: 'pdd'
+      }, {
+        text: 'Подкасты',
+        value: 'podcasts'
+      }, {
+        text: 'Подарки',
+        value: 'present'
+      }, {
+        text: 'Болезнь по симптомам',
+        value: 'symptoms'
+      }, {
+        text: 'Напомнить о делах',
+        value: 'todo'
+      }, {
+        text: 'Вакансии',
+        value: 'vacancies'
+      }, {
+        text: 'Википедия',
+        value: 'wikipedia'
+      }, {
+        text: 'Скачка видео',
+        value: 'ytdlc'
+      }]
     };
   },
   created: function created() {
@@ -3183,6 +3270,11 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+//
+//
+//
+//
+//
 //
 //
 //
@@ -3612,17 +3704,39 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var core_js_modules_es_array_concat__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.array.concat */ "./node_modules/core-js/modules/es.array.concat.js");
 /* harmony import */ var core_js_modules_es_array_concat__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_concat__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var core_js_modules_es_array_map__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.array.map */ "./node_modules/core-js/modules/es.array.map.js");
-/* harmony import */ var core_js_modules_es_array_map__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_map__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
-/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var core_js_modules_es_array_filter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.array.filter */ "./node_modules/core-js/modules/es.array.filter.js");
+/* harmony import */ var core_js_modules_es_array_filter__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_filter__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var core_js_modules_es_array_map__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core-js/modules/es.array.map */ "./node_modules/core-js/modules/es.array.map.js");
+/* harmony import */ var core_js_modules_es_array_map__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_map__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var core_js_modules_es_array_reduce__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core-js/modules/es.array.reduce */ "./node_modules/core-js/modules/es.array.reduce.js");
+/* harmony import */ var core_js_modules_es_array_reduce__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_reduce__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var core_js_modules_es_array_some__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core-js/modules/es.array.some */ "./node_modules/core-js/modules/es.array.some.js");
+/* harmony import */ var core_js_modules_es_array_some__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_some__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
+/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_7__);
 
 
 
 
+
+
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -3735,7 +3849,7 @@ __webpack_require__.r(__webpack_exports__);
   created: function created() {
     var _this = this;
 
-    return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+    return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_6__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
       return regeneratorRuntime.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
@@ -3761,6 +3875,15 @@ __webpack_require__.r(__webpack_exports__);
               return _this.$store.dispatch('loadCategories');
 
             case 7:
+              if (!_this.useCustomCategories) {
+                _context.next = 10;
+                break;
+              }
+
+              _context.next = 10;
+              return _this.$store.dispatch('loadCustomCategories', _this.customCategoriesBots);
+
+            case 10:
             case "end":
               return _context.stop();
           }
@@ -3790,7 +3913,7 @@ __webpack_require__.r(__webpack_exports__);
     searchCity: function searchCity(val) {
       var _this2 = this;
 
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_6__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
         var response;
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
@@ -3815,7 +3938,7 @@ __webpack_require__.r(__webpack_exports__);
                 _context2.prev = 4;
                 _this2.citiesLoading = true;
                 _context2.next = 8;
-                return axios__WEBPACK_IMPORTED_MODULE_4___default.a.get('https://api.hh.ru/suggests/areas', {
+                return axios__WEBPACK_IMPORTED_MODULE_7___default.a.get('https://api.hh.ru/suggests/areas', {
                   params: {
                     text: val,
                     locale: 'RU'
@@ -3850,7 +3973,7 @@ __webpack_require__.r(__webpack_exports__);
     searchName: function searchName(val) {
       var _this3 = this;
 
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_6__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
         var response;
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
@@ -3875,7 +3998,7 @@ __webpack_require__.r(__webpack_exports__);
                 _context3.prev = 4;
                 _this3.namesLoading = true;
                 _context3.next = 8;
-                return axios__WEBPACK_IMPORTED_MODULE_4___default.a.get('https://api.hh.ru/suggests/positions', {
+                return axios__WEBPACK_IMPORTED_MODULE_7___default.a.get('https://api.hh.ru/suggests/positions', {
                   params: {
                     text: val
                   }
@@ -3905,52 +4028,76 @@ __webpack_require__.r(__webpack_exports__);
           }
         }, _callee3, null, [[4,, 10, 13]]);
       }))();
-    }
-  },
-  methods: {
-    save: function save() {
+    },
+    useCustomCategories: function useCustomCategories() {
       var _this4 = this;
 
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
-        var noBotsSpecified;
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_6__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
               case 0:
-                noBotsSpecified = !_this4.vacancy.bots;
-
-                if (_this4.$store.getters.userHasBotsRestriction && noBotsSpecified) {
-                  _this4.vacancy.bots = _this4.$store.getters.allowedBotNames;
-                }
-
-                if (!_this4.isNew) {
-                  _context4.next = 7;
+                if (!_this4.useCustomCategories) {
+                  _context4.next = 3;
                   break;
                 }
 
-                _context4.next = 5;
-                return _this4.$store.dispatch('newVacancy', _this4.vacancy);
+                _context4.next = 3;
+                return _this4.$store.dispatch('loadCustomCategories', _this4.customCategoriesBots);
 
-              case 5:
-                _context4.next = 9;
-                break;
-
-              case 7:
-                _context4.next = 9;
-                return _this4.$store.dispatch('editVacancy', _this4.vacancy);
-
-              case 9:
-                _context4.next = 11;
-                return _this4.$router.push({
-                  name: 'vacanciesList'
-                });
-
-              case 11:
+              case 3:
               case "end":
                 return _context4.stop();
             }
           }
         }, _callee4);
+      }))();
+    }
+  },
+  methods: {
+    save: function save() {
+      var _this5 = this;
+
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_6__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee5() {
+        var noBotsSpecified;
+        return regeneratorRuntime.wrap(function _callee5$(_context5) {
+          while (1) {
+            switch (_context5.prev = _context5.next) {
+              case 0:
+                noBotsSpecified = !_this5.vacancy.bots;
+
+                if (_this5.$store.getters.userHasBotsRestriction && noBotsSpecified) {
+                  _this5.vacancy.bots = _this5.$store.getters.allowedBotNames;
+                }
+
+                if (!_this5.isNew) {
+                  _context5.next = 7;
+                  break;
+                }
+
+                _context5.next = 5;
+                return _this5.$store.dispatch('newVacancy', _this5.vacancy);
+
+              case 5:
+                _context5.next = 9;
+                break;
+
+              case 7:
+                _context5.next = 9;
+                return _this5.$store.dispatch('editVacancy', _this5.vacancy);
+
+              case 9:
+                _context5.next = 11;
+                return _this5.$router.push({
+                  name: 'vacanciesList'
+                });
+
+              case 11:
+              case "end":
+                return _context5.stop();
+            }
+          }
+        }, _callee5);
       }))();
     }
   },
@@ -3975,6 +4122,20 @@ __webpack_require__.r(__webpack_exports__);
         };
       }) : [];
     },
+    customCategories: function customCategories() {
+      var botCount = this.$store.state.vacancy.customCategories.length || 0;
+      return this.$store.state.vacancy.customCategories ? this.$store.state.vacancy.customCategories.reduce(function (categories, botData) {
+        var botName = botData.bot;
+        var botCategories = botData.categories.map(function (categoryName) {
+          return {
+            text: botCount > 1 ? "".concat(categoryName, " [").concat(botName, "]") : categoryName,
+            value: categoryName
+          };
+        });
+        categories = categories.concat(botCategories);
+        return categories;
+      }, []) : [];
+    },
     botId: function botId() {
       if (this.vacancy.internship) {
         return 'traineeship_bot';
@@ -3988,7 +4149,37 @@ __webpack_require__.r(__webpack_exports__);
       return "https://t.me/".concat(this.botId, "?start=<ref>=").concat(this.vacancyId);
     },
     bots: function bots() {
-      return this.$store.getters.allowedBotListForSelect;
+      var _this6 = this;
+
+      return this.$store.getters.allowedBotList.filter(function (bot) {
+        var settings = _this6.$store.getters.botSettings(bot.botName)[0];
+
+        return settings && settings.botType === 'vacancies';
+      }).map(function (bot) {
+        var settings = _this6.$store.getters.botSettings(bot.botName)[0];
+
+        var text = settings && settings.useCustomCategories ? bot.botName + ' (свои категории)' : bot.botName + ' (категории hh.ru)';
+        return {
+          text: text,
+          value: bot.botName
+        };
+      });
+    },
+    customCategoriesBots: function customCategoriesBots() {
+      var botNames = this.$store.getters.allowedBotNames;
+      return this.$store.getters.botSettings(botNames).filter(function (setting) {
+        return setting.useCustomCategories;
+      }).map(function (setting) {
+        return setting.botName;
+      });
+    },
+    useCustomCategories: function useCustomCategories() {
+      var selectedBots = this.vacancy.bots && this.vacancy.bots.length > 0 ? this.vacancy.bots : this.$store.getters.allowedBotNames;
+      var settings = this.$store.getters.botSettings(selectedBots);
+      var useCustomCategories = settings.some(function (setting) {
+        return setting.useCustomCategories;
+      });
+      return useCustomCategories;
     }
   }
 });
@@ -4004,9 +4195,15 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
-/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var core_js_modules_es_array_every__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.array.every */ "./node_modules/core-js/modules/es.array.every.js");
+/* harmony import */ var core_js_modules_es_array_every__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_every__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_js_modules_es_array_filter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.array.filter */ "./node_modules/core-js/modules/es.array.filter.js");
+/* harmony import */ var core_js_modules_es_array_filter__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_filter__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
+/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+
+
 
 
 //
@@ -4060,6 +4257,9 @@ __webpack_require__.r(__webpack_exports__);
         text: 'Стажировка',
         value: 'internship'
       }, {
+        text: 'Боты',
+        value: 'bots'
+      }, {
         text: 'Действия',
         value: 'actions',
         sortable: false
@@ -4069,7 +4269,7 @@ __webpack_require__.r(__webpack_exports__);
   mounted: function mounted() {
     var _this = this;
 
-    return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+    return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
       return regeneratorRuntime.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
@@ -4092,21 +4292,22 @@ __webpack_require__.r(__webpack_exports__);
     loadVacancies: function loadVacancies() {
       var _this2 = this;
 
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
-        var filter;
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+        var showAllBotsVacancies, filter;
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
                 _this2.isLoading = true;
-                filter = _this2.$store.getters.allowedBotFilter('bots');
-                _context2.next = 4;
+                showAllBotsVacancies = !_this2.ignoreCommonVacancies;
+                filter = _this2.$store.getters.allowedBotFilter('bots', false, showAllBotsVacancies);
+                _context2.next = 5;
                 return _this2.$store.dispatch('loadVacancies', filter);
 
-              case 4:
+              case 5:
                 _this2.isLoading = false;
 
-              case 5:
+              case 6:
               case "end":
                 return _context2.stop();
             }
@@ -4129,6 +4330,16 @@ __webpack_require__.r(__webpack_exports__);
     },
     isEmpty: function isEmpty() {
       return this.vacancies.length === 0 && this.isLoading === false;
+    },
+    ignoreCommonVacancies: function ignoreCommonVacancies() {
+      var allSettings = this.$store.getters.botSettings(this.$store.getters.allowedBotNames);
+      var vacancyBotsSettings = allSettings.filter(function (setting) {
+        return setting.botType === 'vacancies';
+      });
+      var hasRestrictionToBot = vacancyBotsSettings.every(function (bot) {
+        return bot.restrictToBot;
+      });
+      return hasRestrictionToBot;
     }
   }
 });
@@ -6671,7 +6882,51 @@ var render = function() {
                               },
                               expression: "needsSubscription"
                             }
-                          })
+                          }),
+                          _c("v-select", {
+                            staticClass: "mt-4",
+                            attrs: { label: "Тип бота", items: _vm.botTypes },
+                            model: {
+                              value: _vm.settings.botType,
+                              callback: function($$v) {
+                                _vm.$set(_vm.settings, "botType", $$v)
+                              },
+                              expression: "settings.botType"
+                            }
+                          }),
+                          _vm.settings.botType === "vacancies"
+                            ? _c("v-switch", {
+                                attrs: {
+                                  label: "Использовать собственные категории"
+                                },
+                                model: {
+                                  value: _vm.settings.useCustomCategories,
+                                  callback: function($$v) {
+                                    _vm.$set(
+                                      _vm.settings,
+                                      "useCustomCategories",
+                                      $$v
+                                    )
+                                  },
+                                  expression: "settings.useCustomCategories"
+                                }
+                              })
+                            : _vm._e(),
+                          _vm.settings.botType === "vacancies"
+                            ? _c("v-switch", {
+                                attrs: {
+                                  label:
+                                    "Показывать только вакансии этого бота и игнорировать общие"
+                                },
+                                model: {
+                                  value: _vm.settings.restrictToBot,
+                                  callback: function($$v) {
+                                    _vm.$set(_vm.settings, "restrictToBot", $$v)
+                                  },
+                                  expression: "settings.restrictToBot"
+                                }
+                              })
+                            : _vm._e()
                         ],
                         1
                       )
@@ -7017,6 +7272,16 @@ var render = function() {
                               expression: "user.password"
                             }
                           }),
+                          _c("v-text-field", {
+                            attrs: { label: "ID в Telegram" },
+                            model: {
+                              value: _vm.user.telegramId,
+                              callback: function($$v) {
+                                _vm.$set(_vm.user, "telegramId", $$v)
+                              },
+                              expression: "user.telegramId"
+                            }
+                          }),
                           _vm.hasRights("usersList")
                             ? _c("v-switch", {
                                 attrs: { label: "Администратор" },
@@ -7026,6 +7291,24 @@ var render = function() {
                                     _vm.$set(_vm.user, "isAdmin", $$v)
                                   },
                                   expression: "user.isAdmin"
+                                }
+                              })
+                            : _vm._e(),
+                          _vm.hasRights("usersList")
+                            ? _c("v-switch", {
+                                attrs: {
+                                  label: "Может создавать рассылки из бота"
+                                },
+                                model: {
+                                  value: _vm.user.canCreateMailingFromBot,
+                                  callback: function($$v) {
+                                    _vm.$set(
+                                      _vm.user,
+                                      "canCreateMailingFromBot",
+                                      $$v
+                                    )
+                                  },
+                                  expression: "user.canCreateMailingFromBot"
                                 }
                               })
                             : _vm._e(),
@@ -7473,22 +7756,45 @@ var render = function() {
                                 }
                               })
                             : _vm._e(),
-                          _c("v-autocomplete", {
-                            attrs: {
-                              items: _vm.categories,
-                              chips: "",
-                              "deletable-chips": "",
-                              multiple: "",
-                              label: "Категории"
-                            },
-                            model: {
-                              value: _vm.vacancy.categories,
-                              callback: function($$v) {
-                                _vm.$set(_vm.vacancy, "categories", $$v)
-                              },
-                              expression: "vacancy.categories"
-                            }
-                          }),
+                          _vm.useCustomCategories
+                            ? _c("v-combobox", {
+                                attrs: {
+                                  items: _vm.customCategories,
+                                  chips: "",
+                                  "deletable-chips": "",
+                                  multiple: "",
+                                  label: "Категории",
+                                  hint:
+                                    "Используются внутренние категории ботов. Чтобы использовать категории hh.ru выберите только подходящих ботов",
+                                  "persistent-hint": ""
+                                },
+                                model: {
+                                  value: _vm.vacancy.categories,
+                                  callback: function($$v) {
+                                    _vm.$set(_vm.vacancy, "categories", $$v)
+                                  },
+                                  expression: "vacancy.categories"
+                                }
+                              })
+                            : _c("v-autocomplete", {
+                                attrs: {
+                                  items: _vm.categories,
+                                  chips: "",
+                                  "deletable-chips": "",
+                                  multiple: "",
+                                  label: "Категории",
+                                  hint:
+                                    "Используются категории hh.ru. Чтобы использовать внутренние категории ботов, выберите только подходящих ботов",
+                                  "persistent-hint": ""
+                                },
+                                model: {
+                                  value: _vm.vacancy.categories,
+                                  callback: function($$v) {
+                                    _vm.$set(_vm.vacancy, "categories", $$v)
+                                  },
+                                  expression: "vacancy.categories"
+                                }
+                              }),
                           _c("v-textarea", {
                             attrs: { label: "Обязанности" },
                             model: {
@@ -9110,6 +9416,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vuetify_lib_components_VGrid__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! vuetify/lib/components/VGrid */ "./node_modules/vuetify/lib/components/VGrid/index.js");
 /* harmony import */ var vuetify_lib_components_VCombobox__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! vuetify/lib/components/VCombobox */ "./node_modules/vuetify/lib/components/VCombobox/index.js");
 /* harmony import */ var vuetify_lib_components_VForm__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! vuetify/lib/components/VForm */ "./node_modules/vuetify/lib/components/VForm/index.js");
+/* harmony import */ var vuetify_lib_components_VSelect__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! vuetify/lib/components/VSelect */ "./node_modules/vuetify/lib/components/VSelect/index.js");
+/* harmony import */ var vuetify_lib_components_VSwitch__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! vuetify/lib/components/VSwitch */ "./node_modules/vuetify/lib/components/VSwitch/index.js");
 
 
 
@@ -9140,7 +9448,9 @@ var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_
 
 
 
-_node_modules_vuetify_loader_lib_runtime_installComponents_js__WEBPACK_IMPORTED_MODULE_3___default()(component, {VBtn: vuetify_lib_components_VBtn__WEBPACK_IMPORTED_MODULE_4__["VBtn"],VCard: vuetify_lib_components_VCard__WEBPACK_IMPORTED_MODULE_5__["VCard"],VCardActions: vuetify_lib_components_VCard__WEBPACK_IMPORTED_MODULE_5__["VCardActions"],VCardText: vuetify_lib_components_VCard__WEBPACK_IMPORTED_MODULE_5__["VCardText"],VCardTitle: vuetify_lib_components_VCard__WEBPACK_IMPORTED_MODULE_5__["VCardTitle"],VCol: vuetify_lib_components_VGrid__WEBPACK_IMPORTED_MODULE_6__["VCol"],VCombobox: vuetify_lib_components_VCombobox__WEBPACK_IMPORTED_MODULE_7__["VCombobox"],VContainer: vuetify_lib_components_VGrid__WEBPACK_IMPORTED_MODULE_6__["VContainer"],VForm: vuetify_lib_components_VForm__WEBPACK_IMPORTED_MODULE_8__["VForm"],VRow: vuetify_lib_components_VGrid__WEBPACK_IMPORTED_MODULE_6__["VRow"]})
+
+
+_node_modules_vuetify_loader_lib_runtime_installComponents_js__WEBPACK_IMPORTED_MODULE_3___default()(component, {VBtn: vuetify_lib_components_VBtn__WEBPACK_IMPORTED_MODULE_4__["VBtn"],VCard: vuetify_lib_components_VCard__WEBPACK_IMPORTED_MODULE_5__["VCard"],VCardActions: vuetify_lib_components_VCard__WEBPACK_IMPORTED_MODULE_5__["VCardActions"],VCardText: vuetify_lib_components_VCard__WEBPACK_IMPORTED_MODULE_5__["VCardText"],VCardTitle: vuetify_lib_components_VCard__WEBPACK_IMPORTED_MODULE_5__["VCardTitle"],VCol: vuetify_lib_components_VGrid__WEBPACK_IMPORTED_MODULE_6__["VCol"],VCombobox: vuetify_lib_components_VCombobox__WEBPACK_IMPORTED_MODULE_7__["VCombobox"],VContainer: vuetify_lib_components_VGrid__WEBPACK_IMPORTED_MODULE_6__["VContainer"],VForm: vuetify_lib_components_VForm__WEBPACK_IMPORTED_MODULE_8__["VForm"],VRow: vuetify_lib_components_VGrid__WEBPACK_IMPORTED_MODULE_6__["VRow"],VSelect: vuetify_lib_components_VSelect__WEBPACK_IMPORTED_MODULE_9__["VSelect"],VSwitch: vuetify_lib_components_VSwitch__WEBPACK_IMPORTED_MODULE_10__["VSwitch"]})
 
 
 /* hot reload */
@@ -10184,27 +10494,33 @@ vue__WEBPACK_IMPORTED_MODULE_2__["default"].use(vuex__WEBPACK_IMPORTED_MODULE_3_
     routes: [{
       code: 'stats',
       title: 'Боты',
-      icon: 'mdi-robot'
+      icon: 'mdi-robot',
+      componentName: 'Stats'
     }, {
       code: 'adsList',
       title: 'Приписки',
-      icon: 'mdi-cash-usd'
+      icon: 'mdi-cash-usd',
+      componentName: 'AdsList'
     }, {
       code: 'mailingList',
       title: 'Рассылки',
-      icon: 'mdi-email'
+      icon: 'mdi-email',
+      componentName: 'MailingsList'
     }, {
       code: 'refUsersList',
       title: 'Админы каналов',
-      icon: 'mdi-account-multiple'
+      icon: 'mdi-account-multiple',
+      componentName: 'RefUsersList'
     }, {
       code: 'vacanciesList',
       title: 'Вакансии',
-      icon: 'mdi-briefcase'
+      icon: 'mdi-briefcase',
+      componentName: 'VacanciesList'
     }, {
       code: 'usersList',
       title: 'Пользователи админки',
-      icon: 'mdi-account'
+      icon: 'mdi-account',
+      componentName: 'UsersList'
     }]
   },
   getters: {
@@ -10438,11 +10754,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var core_js_modules_es_array_index_of__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_index_of__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var core_js_modules_es_array_map__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core-js/modules/es.array.map */ "./node_modules/core-js/modules/es.array.map.js");
 /* harmony import */ var core_js_modules_es_array_map__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_map__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
-/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var _var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var core_js_modules_es_array_slice__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core-js/modules/es.array.slice */ "./node_modules/core-js/modules/es.array.slice.js");
+/* harmony import */ var core_js_modules_es_array_slice__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_slice__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
+/* harmony import */ var regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(regenerator_runtime_runtime__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_7__);
+
 
 
 
@@ -10453,7 +10772,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ({
   state: {
     list: [],
-    settings: false
+    settings: false,
+    allSettings: []
   },
   getters: {
     botNames: function botNames(state) {
@@ -10492,22 +10812,39 @@ __webpack_require__.r(__webpack_exports__);
     },
     allowedBotFilter: function allowedBotFilter(state, getters) {
       return function (botPropName) {
+        var filterSingle = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+        var allowAll = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
         var filter = {};
-        var allowedBots = getters.allowedBotNames;
+        var allowedBots = getters.allowedBotNames.slice();
+
+        if (allowAll) {
+          allowedBots.push(false);
+          allowedBots.push(null);
+        }
 
         if (allowedBots.length > 0) {
-          filter[botPropName] = {
+          filter[botPropName] = filterSingle ? {
+            $in: allowedBots,
+            $size: 1
+          } : {
             $in: allowedBots
           };
         }
 
         return filter;
       };
+    },
+    botSettings: function botSettings(state) {
+      return function (neededBotNames) {
+        return state.allSettings.filter(function (botSettings) {
+          return neededBotNames.indexOf(botSettings.botName) !== -1;
+        });
+      };
     }
   },
   actions: {
     loadBots: function loadBots(_ref, filter) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_6__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
         var commit, response;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
@@ -10515,15 +10852,21 @@ __webpack_require__.r(__webpack_exports__);
               case 0:
                 commit = _ref.commit;
                 _context.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_6___default.a.post("/api/bots/list", {
+                return axios__WEBPACK_IMPORTED_MODULE_7___default.a.post("/api/bots/list", {
                   filter: filter
                 });
 
               case 3:
                 response = _context.sent;
-                return _context.abrupt("return", commit('setBots', response.data.bots));
+                _context.next = 6;
+                return commit('setBots', response.data.bots);
 
-              case 5:
+              case 6:
+                if (response.data.settings) {
+                  commit('setAllSettings', response.data.settings);
+                }
+
+              case 7:
               case "end":
                 return _context.stop();
             }
@@ -10532,7 +10875,7 @@ __webpack_require__.r(__webpack_exports__);
       }))();
     },
     loadSettings: function loadSettings(_ref2, botName) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_6__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
         var commit, response;
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
@@ -10540,7 +10883,7 @@ __webpack_require__.r(__webpack_exports__);
               case 0:
                 commit = _ref2.commit;
                 _context2.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_6___default.a.post("/api/bots/getSettings", {
+                return axios__WEBPACK_IMPORTED_MODULE_7___default.a.post("/api/bots/getSettings", {
                   botName: botName
                 });
 
@@ -10556,8 +10899,8 @@ __webpack_require__.r(__webpack_exports__);
         }, _callee2);
       }))();
     },
-    saveSettings: function saveSettings(_ref3, settings) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
+    loadAllSettings: function loadAllSettings(_ref3) {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_6__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
         var commit, response;
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
@@ -10565,13 +10908,11 @@ __webpack_require__.r(__webpack_exports__);
               case 0:
                 commit = _ref3.commit;
                 _context3.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_6___default.a.post("/api/bots/saveSettings", {
-                  settings: settings
-                });
+                return axios__WEBPACK_IMPORTED_MODULE_7___default.a.post("/api/bots/getAllSettings");
 
               case 3:
                 response = _context3.sent;
-                return _context3.abrupt("return", commit('setSettings', response.data.settings));
+                return _context3.abrupt("return", commit('setAllSettings', response.data.settings));
 
               case 5:
               case "end":
@@ -10581,24 +10922,25 @@ __webpack_require__.r(__webpack_exports__);
         }, _callee3);
       }))();
     },
-    restartBots: function restartBots(_ref4, botNames) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
-        var getters;
+    saveSettings: function saveSettings(_ref4, settings) {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_6__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
+        var commit, dispatch, response;
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
               case 0:
-                getters = _ref4.getters;
-
-                if (!botNames) {
-                  botNames = getters.botNames;
-                }
-
-                return _context4.abrupt("return", axios__WEBPACK_IMPORTED_MODULE_6___default.a.post("/api/bots/restart", {
-                  botNames: botNames
-                }));
+                commit = _ref4.commit, dispatch = _ref4.dispatch;
+                _context4.next = 3;
+                return axios__WEBPACK_IMPORTED_MODULE_7___default.a.post("/api/bots/saveSettings", {
+                  settings: settings
+                });
 
               case 3:
+                response = _context4.sent;
+                commit('setSettings', response.data.settings);
+                return _context4.abrupt("return", dispatch('loadAllSettings'));
+
+              case 6:
               case "end":
                 return _context4.stop();
             }
@@ -10606,8 +10948,8 @@ __webpack_require__.r(__webpack_exports__);
         }, _callee4);
       }))();
     },
-    reloadBotAds: function reloadBotAds(_ref5, botNames) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee5() {
+    restartBots: function restartBots(_ref5, botNames) {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_6__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee5() {
         var getters;
         return regeneratorRuntime.wrap(function _callee5$(_context5) {
           while (1) {
@@ -10619,7 +10961,7 @@ __webpack_require__.r(__webpack_exports__);
                   botNames = getters.botNames;
                 }
 
-                return _context5.abrupt("return", axios__WEBPACK_IMPORTED_MODULE_6___default.a.post("/api/bots/reloadAds", {
+                return _context5.abrupt("return", axios__WEBPACK_IMPORTED_MODULE_7___default.a.post("/api/bots/restart", {
                   botNames: botNames
                 }));
 
@@ -10631,8 +10973,8 @@ __webpack_require__.r(__webpack_exports__);
         }, _callee5);
       }))();
     },
-    reloadBotMessages: function reloadBotMessages(_ref6, botNames) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_5__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee6() {
+    reloadBotAds: function reloadBotAds(_ref6, botNames) {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_6__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee6() {
         var getters;
         return regeneratorRuntime.wrap(function _callee6$(_context6) {
           while (1) {
@@ -10644,7 +10986,7 @@ __webpack_require__.r(__webpack_exports__);
                   botNames = getters.botNames;
                 }
 
-                return _context6.abrupt("return", axios__WEBPACK_IMPORTED_MODULE_6___default.a.post("/api/bots/reloadMessages", {
+                return _context6.abrupt("return", axios__WEBPACK_IMPORTED_MODULE_7___default.a.post("/api/bots/reloadAds", {
                   botNames: botNames
                 }));
 
@@ -10655,6 +10997,31 @@ __webpack_require__.r(__webpack_exports__);
           }
         }, _callee6);
       }))();
+    },
+    reloadBotMessages: function reloadBotMessages(_ref7, botNames) {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_6__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee7() {
+        var getters;
+        return regeneratorRuntime.wrap(function _callee7$(_context7) {
+          while (1) {
+            switch (_context7.prev = _context7.next) {
+              case 0:
+                getters = _ref7.getters;
+
+                if (!botNames) {
+                  botNames = getters.botNames;
+                }
+
+                return _context7.abrupt("return", axios__WEBPACK_IMPORTED_MODULE_7___default.a.post("/api/bots/reloadMessages", {
+                  botNames: botNames
+                }));
+
+              case 3:
+              case "end":
+                return _context7.stop();
+            }
+          }
+        }, _callee7);
+      }))();
     }
   },
   mutations: {
@@ -10663,6 +11030,9 @@ __webpack_require__.r(__webpack_exports__);
     },
     setSettings: function setSettings(state, settings) {
       state.settings = settings;
+    },
+    setAllSettings: function setAllSettings(state, settings) {
+      state.allSettings = settings;
     }
   }
 });
@@ -12122,6 +12492,7 @@ __webpack_require__.r(__webpack_exports__);
   state: {
     list: [],
     categories: [],
+    customCategories: [],
     current: false,
     currentFilter: {}
   },
@@ -12180,14 +12551,39 @@ __webpack_require__.r(__webpack_exports__);
         }, _callee2);
       }))();
     },
-    setCurrentVacancy: function setCurrentVacancy(_ref3, vacancyId) {
+    loadCustomCategories: function loadCustomCategories(_ref3, botNames) {
       return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
-        var commit, state, vacancy;
+        var commit, response;
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
-                commit = _ref3.commit, state = _ref3.state;
+                commit = _ref3.commit;
+                _context3.next = 3;
+                return axios__WEBPACK_IMPORTED_MODULE_3___default.a.post("/api/vacancy/customCategories", {
+                  botNames: botNames
+                });
+
+              case 3:
+                response = _context3.sent;
+                return _context3.abrupt("return", commit('setCustomCategories', response.data.categories));
+
+              case 5:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3);
+      }))();
+    },
+    setCurrentVacancy: function setCurrentVacancy(_ref4, vacancyId) {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
+        var commit, state, vacancy;
+        return regeneratorRuntime.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                commit = _ref4.commit, state = _ref4.state;
                 vacancy = state.list.find(function (item) {
                   return item.id === vacancyId;
                 });
@@ -12198,55 +12594,31 @@ __webpack_require__.r(__webpack_exports__);
 
               case 3:
               case "end":
-                return _context3.stop();
-            }
-          }
-        }, _callee3);
-      }))();
-    },
-    newVacancy: function newVacancy(_ref4, vacancy) {
-      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
-        var dispatch, state, result;
-        return regeneratorRuntime.wrap(function _callee4$(_context4) {
-          while (1) {
-            switch (_context4.prev = _context4.next) {
-              case 0:
-                dispatch = _ref4.dispatch, state = _ref4.state;
-                _context4.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_3___default.a.post("/api/vacancy/add", {
-                  vacancy: vacancy
-                });
-
-              case 3:
-                result = _context4.sent;
-                dispatch('setCurrentVacancy', result.data.vacancy);
-                return _context4.abrupt("return", dispatch('loadVacancies', state.currentFilter));
-
-              case 6:
-              case "end":
                 return _context4.stop();
             }
           }
         }, _callee4);
       }))();
     },
-    editVacancy: function editVacancy(_ref5, vacancy) {
+    newVacancy: function newVacancy(_ref5, vacancy) {
       return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee5() {
-        var dispatch, state;
+        var dispatch, state, result;
         return regeneratorRuntime.wrap(function _callee5$(_context5) {
           while (1) {
             switch (_context5.prev = _context5.next) {
               case 0:
                 dispatch = _ref5.dispatch, state = _ref5.state;
                 _context5.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_3___default.a.post("/api/vacancy/update", {
+                return axios__WEBPACK_IMPORTED_MODULE_3___default.a.post("/api/vacancy/add", {
                   vacancy: vacancy
                 });
 
               case 3:
+                result = _context5.sent;
+                dispatch('setCurrentVacancy', result.data.vacancy);
                 return _context5.abrupt("return", dispatch('loadVacancies', state.currentFilter));
 
-              case 4:
+              case 6:
               case "end":
                 return _context5.stop();
             }
@@ -12254,7 +12626,7 @@ __webpack_require__.r(__webpack_exports__);
         }, _callee5);
       }))();
     },
-    deleteVacancy: function deleteVacancy(_ref6, vacancy) {
+    editVacancy: function editVacancy(_ref6, vacancy) {
       return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee6() {
         var dispatch, state;
         return regeneratorRuntime.wrap(function _callee6$(_context6) {
@@ -12263,7 +12635,7 @@ __webpack_require__.r(__webpack_exports__);
               case 0:
                 dispatch = _ref6.dispatch, state = _ref6.state;
                 _context6.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_3___default.a.post("/api/vacancy/delete", {
+                return axios__WEBPACK_IMPORTED_MODULE_3___default.a.post("/api/vacancy/update", {
                   vacancy: vacancy
                 });
 
@@ -12277,6 +12649,30 @@ __webpack_require__.r(__webpack_exports__);
           }
         }, _callee6);
       }))();
+    },
+    deleteVacancy: function deleteVacancy(_ref7, vacancy) {
+      return Object(_var_www_spambot_admin_node_modules_babel_runtime_helpers_esm_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__["default"])( /*#__PURE__*/regeneratorRuntime.mark(function _callee7() {
+        var dispatch, state;
+        return regeneratorRuntime.wrap(function _callee7$(_context7) {
+          while (1) {
+            switch (_context7.prev = _context7.next) {
+              case 0:
+                dispatch = _ref7.dispatch, state = _ref7.state;
+                _context7.next = 3;
+                return axios__WEBPACK_IMPORTED_MODULE_3___default.a.post("/api/vacancy/delete", {
+                  vacancy: vacancy
+                });
+
+              case 3:
+                return _context7.abrupt("return", dispatch('loadVacancies', state.currentFilter));
+
+              case 4:
+              case "end":
+                return _context7.stop();
+            }
+          }
+        }, _callee7);
+      }))();
     }
   },
   mutations: {
@@ -12285,6 +12681,9 @@ __webpack_require__.r(__webpack_exports__);
     },
     setCategories: function setCategories(state, categories) {
       state.categories = categories;
+    },
+    setCustomCategories: function setCustomCategories(state, categories) {
+      state.customCategories = categories;
     },
     setCurrentVacancy: function setCurrentVacancy(state, vacancy) {
       state.current = vacancy;

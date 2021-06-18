@@ -4,6 +4,7 @@ export default {
     state: {
         list: [],
         settings: false,
+        allSettings: [],
     },
     getters: {
         botNames(state) {
@@ -33,29 +34,49 @@ export default {
             return getters.allowedBotList.map(bot => bot.botName);
         },
         allowedBotFilter(state, getters) {
-            return botPropName => {
+            return (botPropName, filterSingle = false, allowAll = false) => {
                 let filter = {};
-                let allowedBots = getters.allowedBotNames;
+                let allowedBots = getters.allowedBotNames.slice();
+                if (allowAll) {
+                    allowedBots.push(false);
+                    allowedBots.push(null);
+                }
+
                 if (allowedBots.length > 0) {
-                    filter[botPropName] = {$in: allowedBots};
+                    filter[botPropName] = filterSingle
+                        ? {$in: allowedBots, $size: 1}
+                        : {$in: allowedBots};
                 }
 
                 return filter;
+            }
+        },
+        botSettings(state) {
+            return neededBotNames => {
+                return state.allSettings.filter(botSettings => neededBotNames.indexOf(botSettings.botName) !== -1);
             }
         }
     },
     actions: {
         async loadBots({commit}, filter) {
             let response = await axios.post(`/api/bots/list`, {filter});
-            return commit('setBots', response.data.bots);
+            await commit('setBots', response.data.bots);
+            if (response.data.settings) {
+                commit('setAllSettings', response.data.settings);
+            }
         },
         async loadSettings({commit}, botName) {
             let response = await axios.post(`/api/bots/getSettings`, {botName});
             return commit('setSettings', response.data.settings);
         },
-        async saveSettings({commit}, settings) {
+        async loadAllSettings({commit}) {
+            let response = await axios.post(`/api/bots/getAllSettings`);
+            return commit('setAllSettings', response.data.settings);
+        },
+        async saveSettings({commit, dispatch}, settings) {
             let response = await axios.post(`/api/bots/saveSettings`, {settings});
-            return commit('setSettings', response.data.settings);
+            commit('setSettings', response.data.settings);
+            return dispatch('loadAllSettings');
         },
         async restartBots({getters}, botNames) {
             if (!botNames) {
@@ -82,6 +103,9 @@ export default {
         },
         setSettings(state, settings) {
             state.settings = settings;
+        },
+        setAllSettings(state, settings) {
+            state.allSettings = settings;
         },
     }
 }

@@ -29,12 +29,12 @@ export default new Vuex.Store({
         appError: false,
         appMessage: false,
         routes: [
-            {code: 'stats', title: 'Боты', icon: 'mdi-robot'},
-            {code: 'adsList', title: 'Приписки', icon: 'mdi-cash-usd'},
-            {code: 'mailingList', title: 'Рассылки', icon: 'mdi-email'},
-            {code: 'refUsersList', title: 'Админы каналов', icon: 'mdi-account-multiple'},
-            {code: 'vacanciesList', title: 'Вакансии', icon: 'mdi-briefcase'},
-            {code: 'usersList', title: 'Пользователи админки', icon: 'mdi-account'},
+            {code: 'stats', title: 'Боты', icon: 'mdi-robot', componentName: 'Stats'},
+            {code: 'adsList', title: 'Приписки', icon: 'mdi-cash-usd', componentName: 'AdsList'},
+            {code: 'mailingList', title: 'Рассылки', icon: 'mdi-email', componentName: 'MailingsList'},
+            {code: 'refUsersList', title: 'Админы каналов', icon: 'mdi-account-multiple', componentName: 'RefUsersList'},
+            {code: 'vacanciesList', title: 'Вакансии', icon: 'mdi-briefcase', componentName: 'VacanciesList'},
+            {code: 'usersList', title: 'Пользователи админки', icon: 'mdi-account', componentName: 'UsersList'},
         ]
     },
     getters: {

@@ -42,6 +42,7 @@
                     {text: 'Город', value: 'city'},
                     {text: 'Удаленка', value: 'remote'},
                     {text: 'Стажировка', value: 'internship'},
+                    {text: 'Боты', value: 'bots'},
                     {text: 'Действия', value: 'actions', sortable: false},
                 ]
             }
@@ -55,7 +56,8 @@
             },
             async loadVacancies() {
                 this.isLoading = true;
-                let filter = this.$store.getters.allowedBotFilter('bots');
+                let showAllBotsVacancies = !this.ignoreCommonVacancies;
+                let filter = this.$store.getters.allowedBotFilter('bots', false, showAllBotsVacancies);
                 await this.$store.dispatch('loadVacancies', filter);
                 this.isLoading = false;
             },
@@ -69,6 +71,13 @@
             },
             isEmpty() {
                 return this.vacancies.length === 0 && this.isLoading === false;
+            },
+            ignoreCommonVacancies() {
+                let allSettings = this.$store.getters.botSettings(this.$store.getters.allowedBotNames);
+                let vacancyBotsSettings = allSettings.filter(setting => setting.botType === 'vacancies');
+                let hasRestrictionToBot = vacancyBotsSettings.every(bot => bot.restrictToBot);
+
+                return hasRestrictionToBot;
             }
         }
     }

@@ -70,7 +70,24 @@ module.exports = class Mailer {
         this.activeSenders = [];
     }
 
-    async createMailing(ctx) {
+    checkRights(user) {
+        if (user === false) {
+            return true;
+        }
+
+        if (typeof (user) === 'undefined' || user === null) {
+            return false;
+        }
+
+        let canCreateMailing = user.isAdmin || user.canCreateMailingFromBot;
+        return canCreateMailing;
+    }
+
+    async createMailing(ctx, user = false) {
+        if (!this.checkRights(user)) {
+            return false;
+        }
+
         let db = await getDb(MAILING_DB_NAME);
         let message = ctx.update && ctx.update.message
             ? ctx.update.message
@@ -86,6 +103,14 @@ module.exports = class Mailer {
             created: moment().unix(),
             updated: moment().unix(),
             text: getHTMLFromMessage(message),
+            user
+        }
+
+        let userHasBotRestrictions = user && user.botRights && user.botRights.length > 0;
+        if (userHasBotRestrictions) {
+            mailing.target = [
+                {type: 'bots', cmp: false, value: user.botRights},
+            ];
         }
 
         let photo = false;

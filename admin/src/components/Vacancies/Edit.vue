@@ -40,14 +40,27 @@
                                     label="Город"
                                     :return-object="false"
                             ></v-combobox>
-                            <v-autocomplete
+                            <v-combobox v-if="useCustomCategories"
+                                    :items="customCategories"
+                                    v-model="vacancy.categories"
+                                    chips
+                                    deletable-chips
+                                    multiple
+                                    label="Категории"
+                                    hint="Используются внутренние категории ботов. Чтобы использовать категории hh.ru выберите только подходящих ботов"
+                                    persistent-hint
+                            ></v-combobox>
+                            <v-autocomplete v-else
                                     :items="categories"
                                     v-model="vacancy.categories"
                                     chips
                                     deletable-chips
                                     multiple
                                     label="Категории"
+                                    hint="Используются категории hh.ru. Чтобы использовать внутренние категории ботов, выберите только подходящих ботов"
+                                    persistent-hint
                             ></v-autocomplete>
+
                             <v-textarea
                                     v-model="vacancy.responsibilities"
                                     label="Обязанности"
@@ -116,6 +129,10 @@
                 this.$store.dispatch('setCurrentVacancy', this.vacancyId);
             }
             await this.$store.dispatch('loadCategories');
+
+            if (this.useCustomCategories) {
+                await this.$store.dispatch('loadCustomCategories', this.customCategoriesBots);
+            }
         },
         watch: {
             vacancyId() {
@@ -191,6 +208,11 @@
                 }
 
                 return this.names;
+            },
+            async useCustomCategories() {
+                if (this.useCustomCategories) {
+                    await this.$store.dispatch('loadCustomCategories', this.customCategoriesBots);
+                }
             }
         },
         methods: {
@@ -228,6 +250,23 @@
                     ? this.$store.state.vacancy.categories.map(item => ({text: item.title, value: item.id}))
                     : [];
             },
+            customCategories() {
+                let botCount = this.$store.state.vacancy.customCategories.length || 0;
+
+                return this.$store.state.vacancy.customCategories
+                    ? this.$store.state.vacancy.customCategories
+                        .reduce((categories, botData) => {
+                            let botName = botData.bot;
+                            let botCategories = botData.categories.map(categoryName => ({
+                                text: botCount > 1 ? `${categoryName} [${botName}]` : categoryName,
+                                value: categoryName
+                            }));
+
+                            categories = categories.concat(botCategories);
+                            return categories;
+                        }, [])
+                    : [];
+            },
             botId() {
                 if (this.vacancy.internship) {
                     return 'traineeship_bot';
@@ -243,8 +282,36 @@
                 return `https://t.me/${this.botId}?start=<ref>=${this.vacancyId}`;
             },
             bots() {
-                return this.$store.getters.allowedBotListForSelect;
+                return this.$store.getters.allowedBotList
+                .filter(bot => {
+                    let settings = this.$store.getters.botSettings(bot.botName)[0];
+                    return settings && settings.botType === 'vacancies';
+                })
+                .map(bot => {
+                    let settings = this.$store.getters.botSettings(bot.botName)[0];
+                    let text = settings && settings.useCustomCategories
+                        ? bot.botName + ' (свои категории)'
+                        : bot.botName + ' (категории hh.ru)';
+
+                    return {text, value: bot.botName}
+                });
             },
+            customCategoriesBots() {
+                let botNames = this.$store.getters.allowedBotNames;
+                return this.$store.getters.botSettings(botNames)
+                    .filter(setting => setting.useCustomCategories)
+                    .map(setting => setting.botName);
+            },
+            useCustomCategories() {
+                let selectedBots = this.vacancy.bots && this.vacancy.bots.length > 0
+                    ? this.vacancy.bots
+                    : this.$store.getters.allowedBotNames;
+
+                let settings = this.$store.getters.botSettings(selectedBots);
+                let useCustomCategories = settings.some(setting => setting.useCustomCategories);
+
+                return useCustomCategories;
+            }
         }
     }
 </script>

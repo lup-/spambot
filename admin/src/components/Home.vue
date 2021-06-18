@@ -4,14 +4,19 @@
 
 <script>
     import Stats from "./Stats/Stats";
-    import VacanciesList from "./Vacancies/List";
+    import AdsList from "../components/Ads/List";
+    import MailingsList from "../components/Mailings/List";
+    import RefUsersList from "../components/RefUsers/List";
+    import VacanciesList from "../components/Vacancies/List";
+    import UsersList from '../components/Users/List';
 
     export default {
-        components: {Stats, VacanciesList},
+        components: {Stats, AdsList, MailingsList, RefUsersList, VacanciesList, UsersList},
         computed: {
             defaultComponent() {
-                let hasStatsRights = this.$store.getters.userHasRights('stats');
-                return hasStatsRights ? 'Stats' : 'VacanciesList';
+                let allRoutes = this.$store.state.routes;
+                let defaultRoute = this.$store.getters.allowedRoutes(allRoutes)[0];
+                return defaultRoute.componentName || 'Stats';
             }
         }
     }

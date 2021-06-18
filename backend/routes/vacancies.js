@@ -96,5 +96,21 @@ module.exports = {
         }, []);
 
         ctx.body = {categories};
+    },
+    async customCategories(ctx) {
+        let botNames = ctx.request.body.botNames || [];
+
+        const db = await getDb(VACANCIES_DB);
+        let categories = await db.collection('vacancies').aggregate([
+            {$unwind: "$bots"},
+            {$match: {bots: {$in: botNames}}},
+            {$unwind: "$categories"},
+            {$group: {
+                "_id": "$bots",
+                "bot": {$first: "$bots"},
+                "categories": {$addToSet: "$categories"}
+            }}
+        ]).toArray();
+        ctx.body = {categories};
     }
 }

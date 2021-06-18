@@ -4,7 +4,10 @@ const {publishCommand} = require('../modules/commands');
 
 module.exports = {
     async list(ctx) {
-        ctx.body = {bots: await config.botList()}
+        const db = await getDb();
+        let bots = await config.botList();
+        let settings = await db.collection('botSettings').find().toArray();
+        ctx.body = {bots, settings};
     },
     async restart(ctx) {
         let botNames = ctx.request.body.botNames || [];
@@ -33,6 +36,11 @@ module.exports = {
 
         let settings = await db.collection('botSettings').findOne({botName});
 
+        ctx.body = {settings};
+    },
+    async getAllSettings(ctx) {
+        const db = await getDb();
+        let settings = await db.collection('botSettings').find().toArray();
         ctx.body = {settings};
     },
     async saveSettings(ctx) {

@@ -105,15 +105,19 @@
             archiveMailing(mailing) {
                 this.$store.dispatch('archiveMailing', mailing);
             },
+            getFilter() {
+                let hasBotRestrictions = this.$store.state.user.current && this.$store.state.user.current.botRights && this.$store.state.user.current.botRights.length > 0;
+                let showAllBotsMailings = !hasBotRestrictions;
+                let filterSingleBot = hasBotRestrictions && this.$store.state.user.current.botRights.length === 1;
+                return this.$store.getters.allowedBotFilter('target.value', filterSingleBot, showAllBotsMailings);
+            },
             async loadMailings() {
                 this.isLoading = true;
-                let filter = this.$store.getters.allowedBotFilter('target.value');
-                await this.$store.dispatch('loadMailings', filter);
+                await this.$store.dispatch('loadMailings', this.getFilter());
                 this.isLoading = false;
             },
             async silentLoadMailings() {
-                let filter = this.$store.getters.allowedBotFilter('target.value');
-                await this.$store.dispatch('loadMailings', filter);
+                await this.$store.dispatch('loadMailings', this.getFilter());
             },
             gotoMailingEdit(id) {
                 this.$router.push({name: 'mailingEdit', params: {id}});

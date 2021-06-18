@@ -58,23 +58,25 @@ router
     .post('/api/mailing/preview', mailings.preview);
 
 router
-    .post('/api/bots/list', bots.list)
-    .post('/api/bots/restart', bots.restart)
-    .post('/api/bots/reloadAds', bots.reloadAds)
-    .post('/api/bots/reloadMessages', bots.reloadMessages)
-    .post('/api/bots/getSettings', bots.getSettings)
-    .post('/api/bots/saveSettings', bots.saveSettings)
-    .post('/api/bots/reloadAds', bots.reloadAds);
+    .post('/api/bots/list', bots.list.bind(bots))
+    .post('/api/bots/restart', bots.restart.bind(bots))
+    .post('/api/bots/reloadAds', bots.reloadAds.bind(bots))
+    .post('/api/bots/reloadMessages', bots.reloadMessages.bind(bots))
+    .post('/api/bots/getSettings', bots.getSettings.bind(bots))
+    .post('/api/bots/getAllSettings', bots.getAllSettings.bind(bots))
+    .post('/api/bots/saveSettings', bots.saveSettings.bind(bots))
+    .post('/api/bots/reloadAds', bots.reloadAds.bind(bots));
 
 router
     .post('/api/messages/list', messages.list);
 
 router
-    .post('/api/vacancy/list', vacancies.list)
-    .post('/api/vacancy/add', vacancies.add)
-    .post('/api/vacancy/update', vacancies.update)
-    .post('/api/vacancy/delete', vacancies.delete)
-    .post('/api/vacancy/categories', vacancies.categories);
+    .post('/api/vacancy/list', vacancies.list.bind(vacancies))
+    .post('/api/vacancy/add', vacancies.add.bind(vacancies))
+    .post('/api/vacancy/update', vacancies.update.bind(vacancies))
+    .post('/api/vacancy/delete', vacancies.delete.bind(vacancies))
+    .post('/api/vacancy/categories', vacancies.categories.bind(vacancies))
+    .post('/api/vacancy/customCategories', vacancies.customCategories.bind(vacancies));
 
 router
     .post('/api/user/list', users.list)

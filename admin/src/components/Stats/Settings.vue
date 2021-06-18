@@ -14,6 +14,17 @@
                                 hint="Например: @vcblr"
                                 persistent-hint
                             ></v-combobox>
+                            <v-select v-model="settings.botType"
+                                class="mt-4"
+                                label="Тип бота"
+                                :items="botTypes"
+                            ></v-select>
+                            <v-switch v-model="settings.useCustomCategories" v-if="settings.botType === 'vacancies'"
+                                label="Использовать собственные категории"
+                            ></v-switch>
+                            <v-switch v-model="settings.restrictToBot" v-if="settings.botType === 'vacancies'"
+                                    label="Показывать только вакансии этого бота и игнорировать общие"
+                            ></v-switch>
                         </v-form>
                     </v-card-text>
                     <v-card-actions>
@@ -34,6 +45,28 @@
                 settings: {},
                 needsSubscription: [],
                 defaultSettings: {},
+                botTypes: [
+                    {text: 'Поиск книг', value: 'books'},
+                    {text: 'Стартапы и бизнес-идеи', value: 'business'},
+                    {text: 'Купоны и скидки', value: 'coupons'},
+                    {text: 'Знакомства', value: 'dating'},
+                    {text: 'Энциклопедия болезней', value: 'disease'},
+                    {text: 'Энциклопедия фамилий', value: 'familyname'},
+                    {text: 'Фильмы и сериалы', value: 'film'},
+                    {text: 'Финансовые советы (подписка)', value: 'finance'},
+                    {text: 'Финансовые советы (каталог)', value: 'fincat'},
+                    {text: 'Гороскопы', value: 'horoscope'},
+                    {text: 'Генератор ссылок', value: 'linker'},
+                    {text: 'Проверка текста', value: 'orfo'},
+                    {text: 'ПДД', value: 'pdd'},
+                    {text: 'Подкасты', value: 'podcasts'},
+                    {text: 'Подарки', value: 'present'},
+                    {text: 'Болезнь по симптомам', value: 'symptoms'},
+                    {text: 'Напомнить о делах', value: 'todo'},
+                    {text: 'Вакансии', value: 'vacancies'},
+                    {text: 'Википедия', value: 'wikipedia'},
+                    {text: 'Скачка видео', value: 'ytdlc'},
+                ],
             }
         },
         async created() {

@@ -559,7 +559,7 @@ module.exports = function (proxyMgr) {
             }
 
             if (error) {
-                await this.checkProxyAndThrowError(proxyAgent, mediaUrl, error, 'Books.js:398');
+                //await this.checkProxyAndThrowError(proxyAgent, mediaUrl, error, 'Books.js:398');
             }
 
             return false;

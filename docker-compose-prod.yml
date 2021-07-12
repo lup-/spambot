@@ -902,7 +902,7 @@ services:
     restart: always
     build:
       context: "."
-      dockerfile: "./etc/build/Dockerfile_telethon"
+      dockerfile: "./build/Dockerfile_telethon"
     ports:
       - ${TELETHON_PORT}:3000
     volumes:

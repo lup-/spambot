@@ -718,6 +718,7 @@ services:
     depends_on:
       - mongo
       - redis
+      - telethon_userbot
     volumes:
       - ./bot:/var/www
     working_dir: /var/www
@@ -728,7 +729,7 @@ services:
       - MONGO_DB=linker_bot
       - BOT_TOKEN=${LINKER_BOT_TOKEN}
       - BOT_NAME=linker_bot
-      - USERBOT_URL=http://userbot:3000
+      - USERBOT_URL=http://telethon_userbot:3000
       - SECRET_HASH=${USERBOT_SECRET}
     command: node bots/linker.js
 
@@ -875,6 +876,7 @@ services:
     command: npm run debug
 
   userbot:
+    restart: always
     build:
       context: "."
       dockerfile: "./build/Dockerfile_tdlib"
@@ -895,6 +897,24 @@ services:
       - TDJSONLIB_PATH=${USERBOT_TDJSONLIB_PATH}
       - SECRET_HASH=${USERBOT_SECRET}
     command: npm run start
+
+  telethon_userbot:
+    restart: always
+    build:
+      context: "."
+      dockerfile: "./etc/build/Dockerfile_telethon"
+    ports:
+      - ${TELETHON_PORT}:3000
+    volumes:
+      - ./telethonUserbot:/var/www
+    working_dir: /var/www
+    environment:
+      - API_ID=${USERBOT_API_ID}
+      - API_HASH=${USERBOT_API_HASH}
+      - API_PHONE=${USERBOT_AUTH_PHONE}
+      - SECRET_HASH=${USERBOT_SECRET}
+      - PYTHONUNBUFFERED=1
+    command: python bot.py
 
   tgapi_proxy:
     image: outrigger/https-proxy:1.0

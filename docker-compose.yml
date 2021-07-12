@@ -305,6 +305,24 @@ services:
       - SECRET_HASH=${USERBOT_SECRET}
     command: npm run start
 
+  telethon_userbot:
+    restart: always
+    build:
+      context: "."
+      dockerfile: "./build/Dockerfile_telethon"
+    ports:
+      - ${TELETHON_PORT}:3000
+    volumes:
+      - ./telethonUserbot:/var/www
+    working_dir: /var/www
+    environment:
+      - API_ID=${USERBOT_API_ID}
+      - API_HASH=${USERBOT_API_HASH}
+      - API_PHONE=${USERBOT_AUTH_PHONE}
+      - SECRET_HASH=${USERBOT_SECRET}
+      - PYTHONUNBUFFERED=1
+    command: python bot.py
+
   tgapi_proxy:
     image: outrigger/https-proxy:1.0
     container_name: 'tgapi_proxy'

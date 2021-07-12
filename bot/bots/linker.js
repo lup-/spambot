@@ -72,7 +72,7 @@ let app = setupBot(new Telegraf(BOT_TOKEN))
         let isPrivate = ctx.chat && ctx.chat.type === 'private';
 
         if (isPrivate) {
-            return ctx.scene.enter('menu');
+            return ctx.scene.enter('intro');
         }
         else {
             return next();
@@ -147,7 +147,7 @@ let app = setupBot(new Telegraf(BOT_TOKEN))
         }
     })
     .blockNonPrivate()
-    .addDefaultRoute(ctx => ctx.scene.enter('menu'))
+    .addDefaultRoute(ctx => ctx.scene.enter('intro'))
     .get();
 
 (async () => {

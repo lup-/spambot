@@ -1,0 +1,47 @@
+
+GET http://localhost:3000/me
+Accept: application/json
+
+###
+
+POST http://localhost:3000/code
+Content-Type: text/html
+
+63599
+
+###
+
+POST http://localhost:3000/chatByInvite
+Content-Type: application/json
+
+{"link":  "https://t.me/joinchat/zX9Usr7vsy03ZWEy"}
+
+###
+
+POST http://localhost:3000/chatByUsername
+Content-Type: application/json
+
+{"username":  "https://t.me/hrdigital"}
+
+###
+
+POST http://localhost:3000/chatByChatId
+Content-Type: application/json
+
+{"id":  1114017502}
+
+###
+
+POST http://localhost:3000/initBot
+Content-Type: application/json
+
+{"bot":{"id":1828267822,"is_bot":true,"first_name":"Генератор ссылок","username":"plinkgenbot","can_join_groups":true,"can_read_all_group_messages":false,"supports_inline_queries":true}}
+
+###
+
+POST http://localhost:3000/linksStat
+Content-Type: application/json
+
+{"link":  "https://t.me/joinchat/QY-ESGXQUTE1ZTEy"}
+
+###

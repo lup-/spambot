@@ -2,7 +2,7 @@ const BaseScene = require('telegraf/scenes/base');
 const {getChatsInfo, generateNewLink, replaceMessageLinks, saveChatInfo, addLinkToChat, getChannels} = require('../../actions/linkProcessing');
 const {getDb} = require('../../../modules/Database');
 const {menu} = require('../../helpers/wizard');
-const {wait} = require('../../helpers/common');
+const {clone} = require('../../helpers/common');
 
 function getUniqueChats(chats) {
     return Object.keys(chats)
@@ -11,52 +11,58 @@ function getUniqueChats(chats) {
         .filter((chat, index, all) => all.findIndex(item => item.id === chat.id) === index);
 }
 
+function getLinksToTargetChat(linksChatsMap, targetChat) {
+    let links = Object.keys(linksChatsMap);
+    return links.filter(link => linksChatsMap[link].id === targetChat.id);
+}
+
 module.exports = function () {
     const scene = new BaseScene('post');
 
     scene.enter(async ctx => {
+        let chat = ctx.scene.state.chat;
         let post = ctx.scene.state.post;
         let channels = ctx.scene.state.channels;
         let usersLimit = ctx.scene.state.usersLimit || 0;
-        let chats = getUniqueChats(ctx.scene.state.chats || {});
-        let chatTitles = chats && chats.length > 0
-            ? chats.map(chat => chat.title)
-            : [];
-        let missing = ctx.scene.state.missing;
-
+        let timeLimitInHours = ctx.scene.state.timeLimitInHours || 0;
         let messageText = post ? post.text || post.caption : false;
 
         if (messageText && channels && channels.length > 0) {
             let wordEnd = messageText.indexOf(' ', 50);
             let postBrief = messageText.slice(0, wordEnd);
-            let infoText = `<b>Название</b>:  ${ctx.scene.state.title || 'не задано'}
+            let infoText = `<b>Генерировать посты для проекта</b>:  ${chat.title || 'не задано'}
+
+<b>Название группы постов</b>:  ${ctx.scene.state.title || 'не задано'}
             
 <b>Каналов для публикации</b>: ${channels.length}
 
 <b>Максимум вступлений по новым ссылкам</b>: ${usersLimit > 0 ? usersLimit : 'нет'}
 
+<b>Ограничения жизни новых ссылок в часах</b>: ${timeLimitInHours > 0 ? timeLimitInHours : 'нет'}
+
 <b>Текст</b>: ${postBrief}...
-
-<b>Чаты из поста</b>: ${chatTitles && chatTitles.length > 0 ? chatTitles.join('; ') : 'не обнаружено'}
-
-<b>Нераспознанные ссылки</b>: ${missing && missing.length > 0 ? missing.join('; ') : 'не обнаружено'}`;
+`;
 
             return ctx.replyWithDisposableHTML(infoText, menu([
-                {code: 'makeLinks', text: '🚀 Создать посты'},
-                {code: 'replaceTitle', text: 'Поменять название'},
+                {code: 'replaceTitle', text: 'Поменять название группы'},
                 {code: 'replacePost', text: 'Поменять пост'},
                 {code: 'replaceChannels', text: 'Поменять каналы'},
                 {code: 'usersLimit', text: 'Лимит пользователей'},
-                {code: 'back', text: '⬅ В меню'},
+                {code: 'timeLimitInHours', text: 'Лимит жизни ссылок'},
+                {code: 'makeLinks', text: '🎲 Сгенерировать посты 🎲'},
+                {code: 'back', text: '⬅ В меню ссылок'},
             ], 1));
         }
         else if (post) {
             ctx.scene.state.waiting = 'channels';
-            return ctx.replyWithDisposableHTML('Пришлите список названий каналов разделенных новой строкой или ;');
+            return ctx.replyWithDisposableHTML(`Отправьте мне список названий каналов для группы объявлений.
+            Например: <code>Канал1; Канал2; Канал3;</code> или разделенные новой строкой.
+            
+            Это нужно для того, чтобы отправлять их прямо из чата с собеседником.`);
         }
 
         ctx.scene.state.waiting = 'post';
-        return ctx.replyWithDisposableHTML('Напишите или перешлите пост');
+        return ctx.replyWithDisposableHTML('Напишите или перешлите пост-шаблон');
     });
 
     scene.action('replacePost', ctx => {
@@ -70,7 +76,7 @@ module.exports = function () {
 
     scene.action('replaceTitle', ctx => {
         ctx.scene.state.waiting = 'title';
-        return ctx.replyWithDisposableHTML('Пришлите новое название поста');
+        return ctx.replyWithDisposableHTML('Пришлите новое название группы');
     });
 
     scene.action('replaceChannels', ctx => {
@@ -78,21 +84,23 @@ module.exports = function () {
         return ctx.scene.reenter();
     });
 
-    scene.action('addChannels', ctx => {
-        ctx.scene.state.waiting = 'channels';
-        return ctx.replyWithDisposableHTML('Пришлите список дополнительных каналов');
-    });
-
     scene.action('usersLimit', ctx => {
         ctx.scene.state.waiting = 'usersLimit';
         return ctx.replyWithDisposableHTML('Пришлите максимальное количество вступлений по новым ссылкам');
     });
 
+    scene.action('timeLimitInHours', ctx => {
+        ctx.scene.state.waiting = 'timeLimitInHours';
+        return ctx.replyWithDisposableHTML('Пришлите максимальное количество вступлений по новым ссылкам');
+    });
+
     scene.action('makeLinks', async ctx => {
+        let srcChat = ctx.scene.state.chat;
         let channels = ctx.scene.state.channels;
         let foundChatsAndLinks = ctx.scene.state.chats || {};
-        let chats = getUniqueChats(foundChatsAndLinks);
+        let linksToChat = ctx.scene.state.linksToChat || [];
         let usersLimit = ctx.scene.state.usersLimit || 0;
+        let timeLimitInHours = ctx.scene.state.timeLimitInHours || 0;
         let post = ctx.scene.state.post;
         let title = ctx.scene.state.title;
 
@@ -105,36 +113,28 @@ module.exports = function () {
             let postLinks = {};
             let errors = {};
 
-            for (let chat of chats) {
-                try {
-                    let link = await generateNewLink(chat, usersLimit, ctx.telegram);
-                    await addLinkToChat(chat, link);
-                    postLinks[chat.id] = link;
-                }
-                catch (e) {
-                    errors[chat.id] = e;
-                }
+            let newLink = null;
+            try {
+                newLink = await generateNewLink(srcChat, usersLimit, timeLimitInHours, ctx.telegram);
+                await addLinkToChat(srcChat, newLink);
+            }
+            catch (e) {
+                errors[channel] = e;
             }
 
-            let linkMappings = Object.keys(foundChatsAndLinks)
-                .reduce((mappings, oldLink) => {
-                    let chat = foundChatsAndLinks[oldLink];
-                    let newLink = postLinks[chat.id] || null;
-                    mappings[oldLink] = newLink ? newLink : oldLink;
+            let linkMappings = linksToChat.reduce((mappings, oldLink) => {
+                    mappings[oldLink] = newLink;
                     return mappings;
                 }, {});
 
-            let hasNoErrors = Object.keys(errors).length === 0;
+            let hasNoErrors = Object.keys(errors).length === 0 && newLink;
 
             if (hasNoErrors) {
                 let newPost = replaceMessageLinks(post, linkMappings);
                 let linkMappingsForDb = Object.keys(linkMappings).map(old => ({oldLink: old, newLink: linkMappings[old]}));
-                let postLinksForDb = Object.keys(postLinks).map(chatId => ({chatId, link: postLinks[chatId]}));
-                let generatedLinks = Object.keys(postLinks).map(chatId => postLinks[chatId]);
-                let chatsNoExtraFields = chats.map(chat => {
-                    delete chat.invite_links;
-                    return chat;
-                });
+                let chatNoExtraFields = clone(srcChat);
+                delete chatNoExtraFields.invite_links;
+
                 let userId = ctx.from.id;
 
                 let linkRecord = {
@@ -142,11 +142,12 @@ module.exports = function () {
                     userId,
                     title,
                     channel,
-                    chats: chatsNoExtraFields,
-                    generatedLinks,
+                    usersLimit,
+                    timeLimitInHours,
+                    chat: chatNoExtraFields,
+                    newLink,
                     srcPost: post,
                     post: newPost,
-                    postLinks: postLinksForDb,
                     linkMappings: linkMappingsForDb,
                 }
                 
@@ -163,13 +164,19 @@ module.exports = function () {
             }
         }
 
-        await ctx.replyWithDisposableHTML(`Обработка закончена\n\nУспешно: ${results.success}\nОшибок: ${results.errors}`);
-        return ctx.scene.enter('menu');
+        let extra = menu([
+            {code: 'back', text: 'В меню проекта'},
+            {code: 'reset', text: 'Сгенерировать еще'}
+        ], 1);
+
+        return ctx.replyWithDisposableHTML(`<b>Обработка закончена</b>\n\nУспешно: ${results.success}\nОшибок: ${results.errors}`, extra);
     });
 
-    scene.action('back', ctx => ctx.scene.enter('menu'));
+    scene.action('back', ctx => ctx.scene.enter('menu', {chat: ctx.scene.state.chat}));
+    scene.action('backLinks', ctx => ctx.scene.enter('linksMenu', {chat: ctx.scene.state.chat}));
 
     scene.on('message', async (ctx, next) => {
+        let targetChat = ctx.scene.state.chat;
         let post = ctx && ctx.update && ctx.update.message
             ? ctx.update.message
             : null;
@@ -184,10 +191,20 @@ module.exports = function () {
             if (post) {
                 ctx.replyWithDisposableHTML('Обработка...');
                 let {found: chats, missing} = await getChatsInfo(post, ctx);
-                let links = Object.keys(chats);
+                let linksToChat = getLinksToTargetChat(chats, targetChat);
+
+                if (linksToChat.length === 0) {
+                    return ctx.replyWithDisposableHTML(
+                        'В этом посте не найдены ссылки на выбранный чат. Попробуйте другой пост или вернитесь в меню проекта',
+                        menu([{code: 'backLinks', text: '⬅ В меню проекта'}])
+                    );
+                }
+
+                ctx.scene.state.linksToChat = linksToChat;
                 ctx.scene.state.chats = chats;
                 ctx.scene.state.missing = missing;
 
+                let links = Object.keys(chats);
                 if (chats && links && links.length > 0) {
                     await saveChatInfo(chats);
 
@@ -218,6 +235,15 @@ module.exports = function () {
             }
             catch (e) {
                 ctx.scene.state.usersLimit = 0
+            }
+        }
+
+        if (ctx.scene.state.waiting === 'timeLimitInHours') {
+            try {
+                ctx.scene.state.timeLimitInHours = parseInt(post.text);
+            }
+            catch (e) {
+                ctx.scene.state.timeLimitInHours = 0;
             }
         }
 

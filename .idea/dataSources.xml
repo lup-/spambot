@@ -31,5 +31,12 @@
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
       <jdbc-url>jdbc:postgresql://db-postgresql-fra1-27804-do-user-7199787-0.a.db.ondigitalocean.com:25060/music_bot</jdbc-url>
     </data-source>
+    <data-source source="LOCAL" name="+380975184695" uuid="04b4ffbe-8e15-493c-afea-344e0f8ebef7">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/telethonUserbot/+380975184695.session</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>
